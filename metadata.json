@@ -1,0 +1,6 @@
+{
+  "name": "SkillVerse",
+  "description": "AI-powered Education & Certificate Platform for interactive learning, exam execution, and verifiable certifications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

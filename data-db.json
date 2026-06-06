@@ -1,0 +1,1941 @@
+{
+  "courses": [
+    {
+      "id": "course-1",
+      "title": "AI & Machine Learning",
+      "category": "Tech",
+      "description": "Learn foundations of Neural Networks, Supervised & Unsupervised learning, and Transformers. Work with industry-standard Python deep learning libraries to design, train, and deploy advanced artificial intelligence algorithms.",
+      "examPrice": 299,
+      "lectures": [
+        {
+          "title": "Lecture 1: Introduction to Neural Networks",
+          "videoId": "aircAruvnKk"
+        },
+        {
+          "title": "Lecture 2: Linear Regression & Gradient Descent",
+          "videoId": "vsWrXDxO564"
+        },
+        {
+          "title": "Lecture 3: Deep Convolutional Neural Networks",
+          "videoId": "YRhxdVk_sIs"
+        },
+        {
+          "title": "Lecture 4: Large Language Models & Self-Attention",
+          "videoId": "zxQyFrgLYrY"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-2",
+      "title": "Full Stack Web Development",
+      "category": "Tech",
+      "description": "Build enterprise-grade full-stack web applications. Covers modern frontend frameworks, scalable backends, database integrations, responsive user-interface designs, security protocols, and state management systems.",
+      "examPrice": 249,
+      "lectures": [
+        {
+          "title": "Lecture 1: React Foundations & Virtual DOM",
+          "videoId": "Ke90Tje7VS0"
+        },
+        {
+          "title": "Lecture 2: Express Node Backends & Core Routing",
+          "videoId": "SccSCuHhOw0"
+        },
+        {
+          "title": "Lecture 3: Relational vs Non-Relational Databases",
+          "videoId": "Tk1skSgzIig"
+        },
+        {
+          "title": "Lecture 4: Web Sockets, Realtime Bridges & Security",
+          "videoId": "UUYg7G4UorY"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-3",
+      "title": "Data Science & Analytics",
+      "category": "Tech",
+      "description": "Uncover business insights from data. Master statistical analysis, data mining, visual dashboards, data pipelines, predictive operations, and data cleansing architectures using Pandas, Jupyter, and D3.",
+      "examPrice": 299,
+      "lectures": [
+        {
+          "title": "Lecture 1: Structured Pandas DataFrames",
+          "videoId": "F6kmIpWWEdU"
+        },
+        {
+          "title": "Lecture 2: Statistical Inference & Hypothesis Testing",
+          "videoId": "GPVsHO7VqI8"
+        },
+        {
+          "title": "Lecture 3: Data Visualizations with Seaborn & Plotly",
+          "videoId": "q7oD_NPco-s"
+        },
+        {
+          "title": "Lecture 4: Feature Selection & Predictive Workflows",
+          "videoId": "h8L_0H_7y9g"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-4",
+      "title": "Cybersecurity & Eth Hacking",
+      "category": "Tech",
+      "description": "Defend organizational assets against digital intrusions. Learn modern penetration testing, vulnerability assessment, networking security architecture, encryption algorithms, and incident mitigation plans.",
+      "examPrice": 249,
+      "lectures": [
+        {
+          "title": "Lecture 1: Cybersecurity Fundamentals & Terminology",
+          "videoId": "3Kq1MmMv_Rk"
+        },
+        {
+          "title": "Lecture 2: Network Vulnerability Scanning & Port Analysis",
+          "videoId": "V_HqDOnZ_H4"
+        },
+        {
+          "title": "Lecture 3: Cryptography Protocols (AES, RSA, ECC)",
+          "videoId": "G0v0n7XreF4"
+        },
+        {
+          "title": "Lecture 4: Web Application Hacking & SQL Injections",
+          "videoId": "i_D_H9YgPZc"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-5",
+      "title": "Cloud Computing (AWS/Azure)",
+      "category": "Tech",
+      "description": "Deploy resilient scale infrastructure across cloud environments. Focuses on AWS IAM, EC2 orchestration, S3 static assets, lambda serverless, VPC networks, and autoscaling policy designs.",
+      "examPrice": 199,
+      "lectures": [
+        {
+          "title": "Lecture 1: Cloud Principles & Virtualization Fundamentals",
+          "videoId": "3HNyY1_mGtg"
+        },
+        {
+          "title": "Lecture 2: AWS Core Components (EC2, S3, RDS)",
+          "videoId": "Z3S_e_Nf_9I"
+        },
+        {
+          "title": "Lecture 3: Serverless Lambda Pipelines & Containers",
+          "videoId": "mX_kS0rFpU8"
+        },
+        {
+          "title": "Lecture 4: Multi-region Availability & Cloud Security Scale",
+          "videoId": "X9tQYpS6hW4"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-6",
+      "title": "App Development (Flutter)",
+      "category": "Tech",
+      "description": "Create gorgeous native cross-platform applications from single codebases. Master interactive state widgets, navigation routes, async REST integrations, local caches, and build optimizations.",
+      "examPrice": 199,
+      "lectures": [
+        {
+          "title": "Lecture 1: Dart Programming Core Syntax",
+          "videoId": "pT68_v1-b9k"
+        },
+        {
+          "title": "Lecture 2: Flutter Layout Widgets & Interactive Trees",
+          "videoId": "H_pW6_tF_gE"
+        },
+        {
+          "title": "Lecture 3: Provider State Management & Stream Bridges",
+          "videoId": "gR9_E-WjU94"
+        },
+        {
+          "title": "Lecture 4: Storing Data Locally & Triggering Native APIs",
+          "videoId": "Z9tZ_p_6h_4"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-7",
+      "title": "DevOps & Automation",
+      "category": "Tech",
+      "description": "Architect modern continuous integration and delivery loops. Master Docker containerizations, Kubernetes deployments, GitHub Action automation, and declarative server states via Ansible.",
+      "examPrice": 199,
+      "lectures": [
+        {
+          "title": "Lecture 1: CI/CD Continuous Loops & Jenkins Intro",
+          "videoId": "h8L-9m5YqP0"
+        },
+        {
+          "title": "Lecture 2: Docker Container Isolation & Orchestration Basics",
+          "videoId": "K9O8HdgD_9M"
+        },
+        {
+          "title": "Lecture 3: Kubernetes Scaled Deployment Pods & Nodes",
+          "videoId": "X48VuV_V70o"
+        },
+        {
+          "title": "Lecture 4: Declarative Infrastructure & Ansible Plays",
+          "videoId": "P7oW-zC18hA"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-8",
+      "title": "UI/UX Design",
+      "category": "Tech",
+      "description": "Design software screens that satisfy users. Master customer empathy mappings, Figma wireframings, digital design libraries, typography grids, spatial hierarchies, and high-fidelity clickable mockups.",
+      "examPrice": 149,
+      "lectures": [
+        {
+          "title": "Lecture 1: User Empathy & Designing Layout Hierarchies",
+          "videoId": "c8_yP5Y7kM0"
+        },
+        {
+          "title": "Lecture 2: Figma Layout Grids, Vectors & Typography Rules",
+          "videoId": "K-pW7g_hZpU"
+        },
+        {
+          "title": "Lecture 3: Wireframes, Components & Prototyping Interactions",
+          "videoId": "x7vD-p8hOWg"
+        },
+        {
+          "title": "Lecture 4: Usability Tests, Metrics & Development Hand-offs",
+          "videoId": "k7X-Y9_MhP8"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-9",
+      "title": "Digital Marketing & SEO",
+      "category": "Business",
+      "description": "Grow business visibility across digital tracks. Learn organic search optimization, pay-per-click engines, social campaign builders, demographic targeting, conversions audit, and performance stats calculations.",
+      "examPrice": 149,
+      "lectures": [
+        {
+          "title": "Lecture 1: Technical SEO, Crawlability & Indexing Essentials",
+          "videoId": "yP5Y6_LhW_g"
+        },
+        {
+          "title": "Lecture 2: Google Search Ads & Demographic Campaign Budgets",
+          "videoId": "X4H9V-LpW_U"
+        },
+        {
+          "title": "Lecture 3: Content Marketing Funnels & Social Campaign Scales",
+          "videoId": "k7oW-p3Y7_Y"
+        },
+        {
+          "title": "Lecture 4: Conversion Optimizations & Customer Analytics",
+          "videoId": "z7Y-Y8pXW6W"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-10",
+      "title": "Stock Market & Trading",
+      "category": "Business",
+      "description": "Analyze capital markets systematically. Focus on candlestick patterns, support/resistance lines, economic indicators, derivatives option hedges, risk management equations, and emotion restraints.",
+      "examPrice": 199,
+      "lectures": [
+        {
+          "title": "Lecture 1: Fundamentals of Equities & Market Mechanics",
+          "videoId": "GPVsI_8h6M4"
+        },
+        {
+          "title": "Lecture 2: Advanced Candlestick Charts & Technical Patterns",
+          "videoId": "k7Y-t8hpW_0"
+        },
+        {
+          "title": "Lecture 3: Options Derivatives, Calls/Puts & Risk Hedges",
+          "videoId": "yPoW-Y9hO8M"
+        },
+        {
+          "title": "Lecture 4: Capital Preservations & Portfolio Allocation Theory",
+          "videoId": "x9tW_p8Zh9M"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-11",
+      "title": "Freelancing Mastery",
+      "category": "Business",
+      "description": "Establish a resilient global solo service agency. Master portfolio creation, client pitch scripts, contract drafting, profile pricing, Upwork integrations, client conversion skills, and recurring agreements.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Defining Profitable Niches & Setting Hourly Rates",
+          "videoId": "pT68_o8hZ_k"
+        },
+        {
+          "title": "Lecture 2: Pitching Frameworks & Winning Upwork Proposals",
+          "videoId": "y7W_Y9hO9gM"
+        },
+        {
+          "title": "Lecture 3: Retainer Agreements & Safe Global Billing Channels",
+          "videoId": "z9Y-K8hO8_M"
+        },
+        {
+          "title": "Lecture 4: Client Relationship Escalation & Referrals Engine",
+          "videoId": "x7tZ_p9hW_I"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-12",
+      "title": "Content Creation & Branding",
+      "category": "Business",
+      "description": "Construct a loyal public audience. Master message definitions, multi-channel editorial schedules, organic reach algorithms, script structures, visual styling systems, and branding frameworks.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Personal Brand Core Pillars & Visual Identities",
+          "videoId": "k7O8_p9YZ_I"
+        },
+        {
+          "title": "Lecture 2: Formulating Captivating Content Calendars & Hooks",
+          "videoId": "z9O_p9hOW-g"
+        },
+        {
+          "title": "Lecture 3: Organic Algorithms of LinkedIn, Twitter & YouTube",
+          "videoId": "y7pW-v-000W"
+        },
+        {
+          "title": "Lecture 4: Monetization Models: Sponsorships & Info-products",
+          "videoId": "x7P_Y9hO-0w"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-13",
+      "title": "Entrepreneurship & Startup",
+      "category": "Business",
+      "description": "Transform innovative ideas into scalable business organizations. Master product-market fit parameters, fast prototyping mechanics, business canvas maps, pitch deck designs, and series seeds structures.",
+      "examPrice": 149,
+      "lectures": [
+        {
+          "title": "Lecture 1: Business Hypotheses & Customer Validation Audits",
+          "videoId": "v8P-Lp9hZ9M"
+        },
+        {
+          "title": "Lecture 2: Minimum Viable Product (MVP) Fast-Tuning Loops",
+          "videoId": "y7O_p9hZ8_k"
+        },
+        {
+          "title": "Lecture 3: Cap Tables, Funding Instruments & Pitch Methods",
+          "videoId": "z9O_Y9p_6h_U"
+        },
+        {
+          "title": "Lecture 4: Team-Scaling Mechanics, Equity Plans & Growth Sagas",
+          "videoId": "x7W_Y9hO8_Y"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-14",
+      "title": "Communication & Soft Skills",
+      "category": "Business",
+      "description": "Unleash career progression via powerful verbal abilities. Master assertive speaking configurations, active listening cycles, collaborative conflict mitigations, business email patterns, and presentation mastery.",
+      "examPrice": 79,
+      "lectures": [
+        {
+          "title": "Lecture 1: Overcoming Stage Apprehensions & Vocal Modulations",
+          "videoId": "pT5Y8_Lh0-0"
+        },
+        {
+          "title": "Lecture 2: Corporate Communication Styles & Active Listening",
+          "videoId": "z9P_Y9hO9WM"
+        },
+        {
+          "title": "Lecture 3: Negotiation Tactics & Resolution of Group Clashes",
+          "videoId": "y7W_K8hp_0M"
+        },
+        {
+          "title": "Lecture 4: Leading Inspired Collaborative All-Hands Assemblies",
+          "videoId": "x7O_p9hO7mW"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-15",
+      "title": "Video Editing (AI-Powered)",
+      "category": "Business",
+      "description": "Produce highly viral reels and documentaries using innovative AI workflows. Master video editing pacing, dynamic caption animations, audio soundscape designs, and cloud AI cutouts.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Narrative Storyboarding & Pacing Edit Patterns",
+          "videoId": "k7P-t8hO9mW"
+        },
+        {
+          "title": "Lecture 2: Modern Captions, Kinetic Typography & Pop Graphics",
+          "videoId": "z9O_p9Y_Y8w"
+        },
+        {
+          "title": "Lecture 3: AI-powered Rotoscoping, Audio Enhancers & Cuts",
+          "videoId": "y7K_P8hp0wW"
+        },
+        {
+          "title": "Lecture 4: Export Deliverables Optimization & Client Hand-off",
+          "videoId": "x7K_p9hYZ_M"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-16",
+      "title": "Advanced System Design",
+      "category": "Tech",
+      "description": "Architect distributed microservices that scale to millions of users. Master load balancers, caching strategies, database sharding, message queues, and high-availability protocols.",
+      "examPrice": 399,
+      "lectures": [
+        {
+          "title": "Lecture 1: Horizontal Scaling & Load Balancing",
+          "videoId": "bBTPPsqq"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 90,
+      "passPercentage": 75
+    },
+    {
+      "id": "course-17",
+      "title": "Corporate Finance & Accounting",
+      "category": "Business",
+      "description": "Understand financial modeling, balance sheets, P&L statements, and cash flows. Crucial for business analysts, founders, and future CFOs.",
+      "examPrice": 299,
+      "lectures": [
+        {
+          "title": "Lecture 1: Intro to Balance Sheets",
+          "videoId": "bBTPPsqw"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 60,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-18",
+      "title": "YouTube Masterclass 2026",
+      "category": "Content Creator",
+      "description": "Master YouTube algorithms, click-through rates (CTR), thumbnail psychology, audience retention hacking, and monetization streams for modern creators.",
+      "examPrice": 199,
+      "lectures": [
+        {
+          "title": "Lecture 1: The First 30 Seconds",
+          "videoId": "bBTPPsqe"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 45,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-19",
+      "title": "C++ Fast Track (Crash Course)",
+      "category": "Crash Course",
+      "description": "A rapid crash course on C++ memory management, pointers, OOP paradigms, and standard template libraries (STL). Perfect for competitive programmers.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Pointers & Memory",
+          "videoId": "bBTPPsqr"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 30,
+      "passPercentage": 60
+    },
+    {
+      "id": "course-20",
+      "title": "Python for Beginners (Crash Course)",
+      "category": "Crash Course",
+      "description": "Start coding in 2 hours! Learn Python syntax, loops, data structures, dictionaries, and functional basics. No prior programming experience required.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Variables & Loops",
+          "videoId": "bBTPPsqt"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 30,
+      "passPercentage": 60
+    },
+    {
+      "id": "course-21",
+      "title": "Instagram Reels Virality",
+      "category": "Content Creator",
+      "description": "Crack the Instagram algorithm. Master short-form vertical videos, hook templates, engaging captions, trending audios, and monetization funnels for creators.",
+      "examPrice": 149,
+      "lectures": [
+        {
+          "title": "Lecture 1: Anatomy of a Viral Reel",
+          "videoId": "kPTPPsqq"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 45,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-22",
+      "title": "Podcasting 101",
+      "category": "Content Creator",
+      "description": "Launch your own successful podcast. Learn audio recording, microphone setups, interview skills, RSS distribution, and finding your niche audience.",
+      "examPrice": 129,
+      "lectures": [
+        {
+          "title": "Lecture 1: Audio Gear & Setup",
+          "videoId": "kPTPPsqw"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 50,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-23",
+      "title": "Java in 3 Hours (Crash Course)",
+      "category": "Crash Course",
+      "description": "Learn the most robust enterprise language. A rapid dive into Java syntax, Object-Oriented design (classes, interfaces, inheritance), and basic JVM memory handling.",
+      "examPrice": 99,
+      "lectures": [
+        {
+          "title": "Lecture 1: Introduction to OOP in Java",
+          "videoId": "kPTPPsqe"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 35,
+      "passPercentage": 65
+    },
+    {
+      "id": "course-24",
+      "title": "Rust Essentials (Crash Course)",
+      "category": "Crash Course",
+      "description": "Understand memory safety without a garbage collector! A fast-track course covering Rust ownership, borrowing, lifetimes, and safe concurrency.",
+      "examPrice": 129,
+      "lectures": [
+        {
+          "title": "Lecture 1: Ownership & Borrowing",
+          "videoId": "kPTPPsqr"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 40,
+      "passPercentage": 70
+    },
+    {
+      "id": "course-25",
+      "title": "Next.js Quickstart (Crash Course)",
+      "category": "Crash Course",
+      "description": "Build fast, SEO-friendly React apps. Learn Server-Side Rendering (SSR), App Router, API endpoints, and Vercel deployment in under 2 hours.",
+      "examPrice": 149,
+      "lectures": [
+        {
+          "title": "Lecture 1: App Router Basics",
+          "videoId": "kPTPPsqt"
+        }
+      ],
+      "notesUrl": "#",
+      "questionsUrl": "#",
+      "active": true,
+      "questionsCount": 5,
+      "durationMins": 45,
+      "passPercentage": 70
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-1-1",
+      "courseId": "course-1",
+      "question": "Which algorithm is typically used for optimizing Neural Network weights by propagating the gradient of the loss function?",
+      "options": [
+        "Backpropagation",
+        "Genetic Selection",
+        "Fourier Expansion",
+        "K-Nearest Neighbors"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "id": "q-1-2",
+      "courseId": "course-1",
+      "question": "What activation function outputs values in the strict range of [0, 1] and is ideal for final binary classification layers?",
+      "options": [
+        "ReLU",
+        "GELU",
+        "Sigmoid",
+        "Leaky ReLU"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-1-3",
+      "courseId": "course-1",
+      "question": "Which structural innovation allows Large Language Models (like GPT series) to process word relations in parallel rather than sequentially?",
+      "options": [
+        "Recurrent LSTMs",
+        "Self-Attention Mechanism",
+        "Dendrograms",
+        "B-Trees"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-1-4",
+      "courseId": "course-1",
+      "question": "What is underfitting primarily caused by?",
+      "options": [
+        "An overly complex and deep model architecture",
+        "Excessive training epochs on high-variance records",
+        "An overly simple model incapable of capturing underlying data trends",
+        "Applying high L2 regularization penalties"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-1-5",
+      "courseId": "course-1",
+      "question": "What does the term \"Epoch\" denote in deep learning?",
+      "options": [
+        "One training iteration over a single mini-batch of data",
+        "One complete forward and backward sweep of the entire training dataset",
+        "The total duration in seconds of model convergence",
+        "Adjusting learning rate systematically on loss stagnation"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-2-1",
+      "courseId": "course-2",
+      "question": "In React, what custom hook would you employ to memoize expensive computations between subsequent re-renders?",
+      "options": [
+        "useEffect",
+        "useMemo",
+        "useCompute",
+        "useState"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-2-2",
+      "courseId": "course-2",
+      "question": "Which Express middleware parsing configuration processes standard content bodies sent in application/json formats?",
+      "options": [
+        "express.urlencoded()",
+        "express.static()",
+        "express.json()",
+        "express.raw()"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-2-3",
+      "courseId": "course-2",
+      "question": "What is a major characteristic of NoSQL databases like MongoDB?",
+      "options": [
+        "Enforcement of strict schemas and foreign key constraints",
+        "Flexible, schema-less document storage using JSON-like formats",
+        "Inability to store unstructured textual data",
+        "Requires compiling queries into static transactional views"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-2-4",
+      "courseId": "course-2",
+      "question": "Which protocol enables active bi-directional full-duplex communication between browsers and web servers without HTTP request overhead?",
+      "options": [
+        "gRPC",
+        "SSE",
+        "HTTPS",
+        "WebSockets"
+      ],
+      "correctOptionIndex": 3
+    },
+    {
+      "id": "q-2-5",
+      "courseId": "course-2",
+      "question": "What is the absolute primary purpose of CORS headers on an Express backend?",
+      "options": [
+        "Compressing asset packages for faster browser paint times",
+        "Restricting resource requests made by web browsers from foreign origins",
+        "Enforcing HTTPS encryption on static routes",
+        "Translating SQL strings to document formats"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-3-1",
+      "courseId": "course-3",
+      "question": "Which standard Python library provides vectorized arrays and linear algebra operations?",
+      "options": [
+        "Django",
+        "NumPy",
+        "Flask",
+        "BeautifulSoup"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-3-2",
+      "courseId": "course-3",
+      "question": "What statistical metric represents the spread of data points from their arithmetic mean?",
+      "options": [
+        "Median",
+        "Correlation Coefficient",
+        "Standard Deviation",
+        "Confidence Interval"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-3-3",
+      "courseId": "course-3",
+      "question": "In predictive analytics, what does r-squared (R²) represent?",
+      "options": [
+        "The fraction of variant response explained by the statistical model",
+        "The probability margin of random errors in coefficients",
+        "The standard deviation of prediction outliers",
+        "The threshold limit of categorical classifications"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "id": "q-3-4",
+      "courseId": "course-3",
+      "question": "Which pandas function is used to load and parse a CSV file into a memory DataFrame?",
+      "options": [
+        "pd.load_csv()",
+        "pd.read_csv()",
+        "pd.open_csv()",
+        "pd.create_dataframe()"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-3-5",
+      "courseId": "course-3",
+      "question": "What is the purpose of imputation in data pre-processing?",
+      "options": [
+        "Removing outlier data records to prevent skewing",
+        "Substituting missing values with derived metrics like mean or median",
+        "Compacting feature sizes via PCA transformations",
+        "Splitting data systematically into training and testing blocks"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-4-1",
+      "courseId": "course-4",
+      "question": "What encryption architecture uses two distinct keys (public and private) for security processes?",
+      "options": [
+        "Symmetric Cryptography",
+        "Asymmetric Cryptography",
+        "Stream Shuffling",
+        "ROT-13 Obfuscation"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-4-2",
+      "courseId": "course-4",
+      "question": "Which port scanning utility is widely used in network reconnaissance to detect live hosts, open ports, and operating system properties?",
+      "options": [
+        "Wireshark",
+        "Metasploit",
+        "Nmap",
+        "Burp Suite"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-4-3",
+      "courseId": "course-4",
+      "question": "How can developers primarily prevent SQL Injection vulnerabilities in database-driven applications?",
+      "options": [
+        "Using client-side input length filters",
+        "Encrypting structural string constants in memory",
+        "Deploying parameterized queries / prepared statements",
+        "Increasing Express timeout durations"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": "q-4-4",
+      "courseId": "course-4",
+      "question": "What does XSS stand for in web security?",
+      "options": [
+        "Cross-Site Scripting",
+        "Extensible System Security",
+        "XML Spatial Shuflling",
+        "X-axis Secure System"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "id": "q-4-5",
+      "courseId": "course-4",
+      "question": "What are Ransomware attacks primarily designed to execute?",
+      "options": [
+        "Extracting CPU resources silently for background crypto mining",
+        "Encrypting file vaults and requesting cryptocurrency payments to unlock them",
+        "Drowning service relays in fake web requests to trigger down times",
+        "Manipulating search ranking profiles dynamically"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-5-1",
+      "courseId": "course-5",
+      "question": "Which foundational design principle is most critical to master in Cloud Computing (AWS/Azure)?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-5-2",
+      "courseId": "course-5",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-5-3",
+      "courseId": "course-5",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-5-4",
+      "courseId": "course-5",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-5-5",
+      "courseId": "course-5",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-6-1",
+      "courseId": "course-6",
+      "question": "Which foundational design principle is most critical to master in App Development (Flutter)?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-6-2",
+      "courseId": "course-6",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-6-3",
+      "courseId": "course-6",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-6-4",
+      "courseId": "course-6",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-6-5",
+      "courseId": "course-6",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-7-1",
+      "courseId": "course-7",
+      "question": "Which foundational design principle is most critical to master in DevOps & Automation?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-7-2",
+      "courseId": "course-7",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-7-3",
+      "courseId": "course-7",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-7-4",
+      "courseId": "course-7",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-7-5",
+      "courseId": "course-7",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-8-1",
+      "courseId": "course-8",
+      "question": "Which foundational design principle is most critical to master in UI/UX Design?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-8-2",
+      "courseId": "course-8",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-8-3",
+      "courseId": "course-8",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-8-4",
+      "courseId": "course-8",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-8-5",
+      "courseId": "course-8",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-9-1",
+      "courseId": "course-9",
+      "question": "Which foundational design principle is most critical to master in Digital Marketing & SEO?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-9-2",
+      "courseId": "course-9",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-9-3",
+      "courseId": "course-9",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-9-4",
+      "courseId": "course-9",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-9-5",
+      "courseId": "course-9",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-10-1",
+      "courseId": "course-10",
+      "question": "Which foundational design principle is most critical to master in Stock Market & Trading?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-10-2",
+      "courseId": "course-10",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-10-3",
+      "courseId": "course-10",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-10-4",
+      "courseId": "course-10",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-10-5",
+      "courseId": "course-10",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-11-1",
+      "courseId": "course-11",
+      "question": "Which foundational design principle is most critical to master in Freelancing Mastery?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-11-2",
+      "courseId": "course-11",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-11-3",
+      "courseId": "course-11",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-11-4",
+      "courseId": "course-11",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-11-5",
+      "courseId": "course-11",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-12-1",
+      "courseId": "course-12",
+      "question": "Which foundational design principle is most critical to master in Content Creation & Branding?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-12-2",
+      "courseId": "course-12",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-12-3",
+      "courseId": "course-12",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-12-4",
+      "courseId": "course-12",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-12-5",
+      "courseId": "course-12",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-13-1",
+      "courseId": "course-13",
+      "question": "Which foundational design principle is most critical to master in Entrepreneurship & Startup?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-13-2",
+      "courseId": "course-13",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-13-3",
+      "courseId": "course-13",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-13-4",
+      "courseId": "course-13",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-13-5",
+      "courseId": "course-13",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-14-1",
+      "courseId": "course-14",
+      "question": "Which foundational design principle is most critical to master in Communication & Soft Skills?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-14-2",
+      "courseId": "course-14",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-14-3",
+      "courseId": "course-14",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-14-4",
+      "courseId": "course-14",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-14-5",
+      "courseId": "course-14",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-15-1",
+      "courseId": "course-15",
+      "question": "Which foundational design principle is most critical to master in Video Editing (AI-Powered)?",
+      "options": [
+        "Minimizing operational scale and capacity limits",
+        "Utilizing structured configurations, modular pipelines and best practice workflows",
+        "Ignoring modern cloud scaling or design framework practices",
+        "Re-compiling raw machine codes manually"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-15-2",
+      "courseId": "course-15",
+      "question": "What is the primary benefit of automation in this specific domain?",
+      "options": [
+        "Reducing operational speeds and multiplying potential mistakes",
+        "Eliminating repeatable manual tasks, accelerating speeds, and ensuring reproducibility",
+        "Enforcing severe strict system down times",
+        "Compacting visual font sizes across layouts"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-15-3",
+      "courseId": "course-15",
+      "question": "Which metric is best suited to monitor performance in this field?",
+      "options": [
+        "Raw storage allocation directories count",
+        "Task throughput rates, error frequencies and customer satisfaction scores",
+        "The total count of text files inside server folders",
+        "The physical density of server components"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-15-4",
+      "courseId": "course-15",
+      "question": "What helper tool is most commonly adopted by active practitioners in this industry?",
+      "options": [
+        "An ancient text command console from 1980",
+        "Modern collaborative software suites, cloud dashboards, and version control integrations",
+        "A simple standard counting spreadsheet",
+        "Manual physical calculation instruments"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "id": "q-15-5",
+      "courseId": "course-15",
+      "question": "What is a typical sign of an optimization failure or weak setup?",
+      "options": [
+        "High system stability, robust throughput margins, and quick cycles",
+        "Unstable operations, high latency delays, error loops, and manual bottlenecks",
+        "Encountering a clean responsive interface",
+        "Completing tasks on or ahead of scheduled dates"
+      ],
+      "correctOptionIndex": 1
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-1",
+      "name": "Academic Admin",
+      "email": "aarsh@skillverse.in",
+      "role": "super_admin",
+      "plan": "pro",
+      "billingCycle": "yearly",
+      "joinedDate": "2026-01-10",
+      "phone": "+919876543210"
+    },
+    {
+      "id": "usr-2",
+      "name": "Faculty Coordinator",
+      "email": "ankit@skillverse.in",
+      "role": "admin",
+      "plan": "pro",
+      "billingCycle": "yearly",
+      "joinedDate": "2026-01-15",
+      "phone": "+919999999999"
+    },
+    {
+      "id": "usr-3",
+      "name": "Student Profile",
+      "email": "student@skillverse.in",
+      "role": "student",
+      "plan": "popular",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-05-01",
+      "phone": "+919123456789"
+    },
+    {
+      "id": "usr-sa-test",
+      "name": "Master Super Admin",
+      "email": "superadmin@edtech.com",
+      "role": "super_admin",
+      "plan": "pro",
+      "billingCycle": "yearly",
+      "joinedDate": "2026-06-02",
+      "phone": "+918888888888",
+      "password": "SuperAdmin@123"
+    },
+    {
+      "id": "usr-ad-test",
+      "name": "Expert Admin Coordinator",
+      "email": "admin@edtech.com",
+      "role": "admin",
+      "plan": "pro",
+      "billingCycle": "yearly",
+      "joinedDate": "2026-06-02",
+      "phone": "+917777777777",
+      "password": "Admin@123",
+      "permissions": [
+        "courses",
+        "students",
+        "exams",
+        "certificates",
+        "coupons"
+      ]
+    },
+    {
+      "id": "usr-st-test",
+      "name": "Elite Scholar Student",
+      "email": "student@edtech.com",
+      "role": "student",
+      "plan": "popular",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-02",
+      "phone": "+919999999999",
+      "password": "Student@123"
+    },
+    {
+      "id": "usr-1780597984973",
+      "name": "sdfghjkl",
+      "email": "jatintootika72@gmail.com",
+      "phone": "23456787654324567",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780611947015",
+      "name": "jatoin",
+      "email": "jatintootikaaa0@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780612016241",
+      "name": "qaswdefrghj",
+      "email": "fashil@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780612617201",
+      "name": "rahul bhai",
+      "email": "rohitsharma@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780613522027",
+      "name": "rahul bhai",
+      "email": "jatinftu@gamil.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780614100398",
+      "name": "rahul bhai",
+      "email": "sharma@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780614127292",
+      "name": "rahul bhai",
+      "email": "eandia72@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780615035722",
+      "name": "cdf",
+      "email": "jatin2@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780615076765",
+      "name": "cdf",
+      "email": "gjatin72@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-04"
+    },
+    {
+      "id": "usr-1780680275303",
+      "name": "cdf",
+      "email": "huhuhh@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-05",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1780695448277",
+      "name": "cdf",
+      "email": "nuhu@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-05",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    }
+  ],
+  "coupons": [
+    {
+      "id": "cpn-1",
+      "code": "WELCOME79",
+      "discount": 20,
+      "type": "percentage",
+      "maxUses": 500,
+      "usedCount": 142,
+      "expiry": "2026-12-31",
+      "active": true
+    },
+    {
+      "id": "cpn-2",
+      "code": "IITMADRAS",
+      "discount": 40,
+      "type": "percentage",
+      "maxUses": 1000,
+      "usedCount": 382,
+      "expiry": "2026-12-31",
+      "active": true
+    },
+    {
+      "id": "cpn-3",
+      "code": "PRO99",
+      "discount": 99,
+      "type": "flat",
+      "maxUses": 100,
+      "usedCount": 12,
+      "expiry": "2026-08-15",
+      "active": true
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert-1",
+      "certificateId": "SV-2026-AI-01438",
+      "userId": "usr-3",
+      "userName": "Student Profile",
+      "courseId": "course-1",
+      "courseName": "AI & Machine Learning",
+      "score": 92,
+      "issuedAt": "2026-05-18T14:30:00Z",
+      "valid": true
+    },
+    {
+      "id": "cert-2",
+      "certificateId": "SV-2026-FSD-00210",
+      "userName": "Karan Sharma",
+      "userId": "usr-dummy-1",
+      "courseId": "course-2",
+      "courseName": "Full Stack Web Development",
+      "score": 86,
+      "issuedAt": "2026-04-12T10:00:00Z",
+      "valid": true
+    },
+    {
+      "id": "cert-3",
+      "certificateId": "SV-2026-DS-00452",
+      "userName": "Priya Iyer",
+      "userId": "usr-dummy-2",
+      "courseId": "course-3",
+      "courseName": "Data Science & Analytics",
+      "score": 78,
+      "issuedAt": "2026-05-02T16:15:00Z",
+      "valid": true
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay-1",
+      "userId": "usr-3",
+      "type": "subscription",
+      "details": "Popular Bundle Subscription",
+      "amount": 199,
+      "status": "success",
+      "gatewayRef": "pay_razor_0019238",
+      "createdAt": "2026-05-01T09:12:00Z"
+    },
+    {
+      "id": "pay-2",
+      "userId": "usr-3",
+      "type": "exam",
+      "details": "AI & ML Certificate Exam Access",
+      "amount": 239,
+      "status": "success",
+      "gatewayRef": "pay_razor_9201938",
+      "createdAt": "2026-05-16T11:42:00Z"
+    },
+    {
+      "id": "pay-3",
+      "userId": "usr-dummy-1",
+      "type": "subscription",
+      "details": "Starter Bundle Subscription",
+      "amount": 79,
+      "status": "success",
+      "gatewayRef": "pay_razor_9210982",
+      "createdAt": "2026-04-05T14:20:00Z"
+    },
+    {
+      "id": "pay-1780694591597",
+      "userId": "usr-1780680275303",
+      "type": "exam",
+      "details": "AI & Machine Learning Certificate Exam Access",
+      "amount": 299,
+      "status": "success",
+      "gatewayRef": "pay_rzr_6119853",
+      "createdAt": "2026-06-05T21:23:11.597Z"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "att-1",
+      "userId": "usr-3",
+      "courseId": "course-1",
+      "score": 92,
+      "totalQuestions": 5,
+      "status": "passed",
+      "startedAt": "2026-05-18T13:30:00Z",
+      "completedAt": "2026-05-18T14:28:00Z",
+      "answers": {
+        "q-1-1": 0,
+        "q-1-2": 2,
+        "q-1-3": 1,
+        "q-1-4": 2,
+        "q-1-5": 1
+      }
+    },
+    {
+      "id": "att-1780604991004",
+      "userId": "usr-ad-test",
+      "courseId": "course-1",
+      "score": 0,
+      "totalQuestions": 5,
+      "status": "failed",
+      "startedAt": "2026-06-04T19:59:51.004Z",
+      "completedAt": "2026-06-04T20:29:51.004Z",
+      "answers": {}
+    },
+    {
+      "id": "att-1780694608944",
+      "userId": "usr-1780680275303",
+      "courseId": "course-1",
+      "score": 1,
+      "totalQuestions": 5,
+      "status": "failed",
+      "startedAt": "2026-06-05T20:53:28.944Z",
+      "completedAt": "2026-06-05T21:23:28.944Z",
+      "answers": {
+        "q-1-1": 0
+      }
+    }
+  ],
+  "adminLogs": [
+    {
+      "id": "log-1",
+      "adminId": "usr-2",
+      "adminName": "Faculty Coordinator",
+      "action": "Approved Certificate Re-issue",
+      "details": "Re-issued SV-2026-AI-01438 to usr-3",
+      "ipAddress": "103.45.12.92",
+      "timestamp": "2026-05-18T15:00:00Z"
+    },
+    {
+      "id": "log-2",
+      "adminId": "usr-1",
+      "adminName": "Academic Admin",
+      "action": "Created Global Coupon",
+      "details": "Added IITMADRAS 40% discount coupon",
+      "ipAddress": "109.12.5.42",
+      "timestamp": "2026-05-10T11:22:00Z"
+    }
+  ],
+  "settings": {
+    "platformName": "SkillVerse",
+    "logoText": "SkillVerse",
+    "tagline": "Learn. Prove. Get Hired.",
+    "maintenanceMode": false,
+    "razorpayKey": "rzp_test_eG0g8UjH0sDw9R",
+    "stripeKey": "pk_test_51Ng8H9C09U8JHG09",
+    "aiProvider": "Gemini",
+    "termsOfService": "These are the Terms of Service of SkillVerse. All certification exams must be completed independently within the allocated 60 minutes. Sharing answers or utilizing external materials will count as academic dishonesty and result in immediate revocation of any credentials without refund.",
+    "privacyPolicy": "SkillVerse takes student privacy seriously. Your profile and exam response histories are safely locked under standard credentials and are only accessible by authorized platform administrators and verification audits when recruiters query your credentials.",
+    "refundPolicy": "If you do not pass an exam attempt, you may select a single retake or purchase additional attempts. Once an exam is launched, we cannot offer any refund for individual exam purchases or premium subscription packages.",
+    "disclaimer": "SkillVerse is an independent skill verification vendor. While founded by graduates of IIT Madras, we are not an official academic department of the Indian Institute of Technology Madras. Passing certificates verify skills, but direct job placement is subject to partner interviews and placement procedures.",
+    "verificationPolicy": "Credentials printed with verified unique SV IDs can be securely verified at verify.skillverse.in by authorized candidates, institutions, or prospective recruiters. Unofficial modifications or tampering with unique QR vectors renders the credentials invalid."
+  }
+}
