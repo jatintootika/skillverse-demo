@@ -3,7 +3,7 @@ import { User } from '../types';
 export interface TokenPayload {
   userId: string;
   email: string;
-  role: 'student' | 'admin' | 'super_admin';
+  role: 'student' | 'admin' | 'super_admin' | 'faculty';
   permissions: string[];
   expiresAt: number;
 }
@@ -50,7 +50,7 @@ export function isLoggedIn(): boolean {
   return getAuthToken() !== null;
 }
 
-export function getUserRole(): 'student' | 'admin' | 'super_admin' | '' {
+export function getUserRole(): 'student' | 'admin' | 'super_admin' | 'faculty' | '' {
   const token = getAuthToken();
   return token ? token.role : '';
 }

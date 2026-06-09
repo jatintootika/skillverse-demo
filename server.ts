@@ -9,8 +9,17 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import QRCode from 'qrcode';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} from '@simplewebauthn/server';
 
 const PORT = 3000;
+const rpName = 'SkillVerse';
+const rpID = 'localhost';
+const origin = `http://${rpID}:${PORT}`;
 const DB_FILE = path.join(process.cwd(), 'data-db.json');
 
 // --- DATABASE STRUCTS & INTIAL SEED (Updated) ---
@@ -640,6 +649,132 @@ async function startServer() {
 
     saveDatabase(db);
     res.json({ message: 'Profile updated successfully!', user: db.users[uIdx] });
+  });
+
+  // --- WEBAUTHN (PASSKEYS) ENDPOINTS ---
+  app.post('/api/auth/passkey/register-options', async (req, res) => {
+    const { email } = req.body;
+    const db = loadDatabase();
+    const user = db.users.find((u: any) => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const options = await generateRegistrationOptions({
+      rpName,
+      rpID,
+      userID: Buffer.from(user.id),
+      userName: user.email,
+      attestationType: 'none',
+      authenticatorSelection: {
+        residentKey: 'preferred',
+        userVerification: 'preferred',
+      },
+    });
+
+    user.currentChallenge = options.challenge;
+    saveDatabase(db);
+
+    res.json(options);
+  });
+
+  app.post('/api/auth/passkey/register-verify', async (req, res) => {
+    const { email, response } = req.body;
+    const db = loadDatabase();
+    const user = db.users.find((u: any) => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const expectedChallenge = user.currentChallenge;
+    let verification;
+    try {
+      verification = await verifyRegistrationResponse({
+        response,
+        expectedChallenge,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
+      });
+    } catch (error: any) {
+      console.error(error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (verification.verified && verification.registrationInfo) {
+      if (!user.passkeys) user.passkeys = [];
+      const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
+      user.passkeys.push({
+        id: Buffer.from(credentialID).toString('base64url'),
+        publicKey: Buffer.from(credentialPublicKey).toString('base64url'),
+        counter,
+      });
+      user.currentChallenge = undefined;
+      saveDatabase(db);
+      res.json({ verified: true });
+    } else {
+      res.status(400).json({ error: 'Verification failed' });
+    }
+  });
+
+  app.post('/api/auth/passkey/auth-options', async (req, res) => {
+    const { email } = req.body;
+    const db = loadDatabase();
+    const user = db.users.find((u: any) => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user.passkeys || user.passkeys.length === 0) {
+      return res.status(400).json({ message: 'No passkeys registered for this user' });
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID,
+      allowCredentials: user.passkeys.map((pk: any) => ({
+        id: pk.id,
+        type: 'public-key',
+      })),
+      userVerification: 'preferred',
+    });
+
+    user.currentChallenge = options.challenge;
+    saveDatabase(db);
+
+    res.json(options);
+  });
+
+  app.post('/api/auth/passkey/auth-verify', async (req, res) => {
+    const { email, response } = req.body;
+    const db = loadDatabase();
+    const user = db.users.find((u: any) => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const expectedChallenge = user.currentChallenge;
+    const passkey = user.passkeys.find((pk: any) => pk.id === response.id);
+    
+    if (!passkey) {
+      return res.status(400).json({ message: 'Could not find matching passkey for this user' });
+    }
+
+    let verification;
+    try {
+      verification = await verifyAuthenticationResponse({
+        response,
+        expectedChallenge,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
+        credential: {
+          id: passkey.id,
+          publicKey: new Uint8Array(Buffer.from(passkey.publicKey, 'base64url')),
+          counter: passkey.counter,
+        },
+      });
+    } catch (error: any) {
+      console.error(error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (verification.verified) {
+      passkey.counter = verification.authenticationInfo.newCounter;
+      user.currentChallenge = undefined;
+      saveDatabase(db);
+      res.json({ verified: true, user });
+    } else {
+      res.status(400).json({ error: 'Verification failed' });
+    }
   });
 
   // --- COURSE ENDPOINTS ---

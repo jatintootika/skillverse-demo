@@ -1,0 +1,148 @@
+              {/* ═══ BILLING ═══ */}
+              {activeTab === 'payments' && (
+                <motion.div key="billing" className="max-w-6xl mx-auto animate-in fade-in duration-500">
+                  <div className="mb-8">
+                    <h1 className={`text-2xl font-bold tracking-tight ${textPrimary}`}>Billing &amp; Payments</h1>
+                    <p className={`text-sm mt-1 ${textSecondary}`}>Manage your subscriptions, payment methods, and billing history.</p>
+                  </div>
+
+                  {/* Top Stats & Cards Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    
+                    {/* Active Plan Card */}
+                    <div className={`p-6 rounded-[2rem] border relative overflow-hidden group ${
+                      dm ? 'bg-gradient-to-br from-[#0d1117] to-[#161b22] border-[#30363d]' : 'bg-gradient-to-br from-white to-blue-50/50 border-slate-200'
+                    }`}>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dm ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                            <Crown className="w-5 h-5" />
+                          </div>
+                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${dm ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>Active</span>
+                        </div>
+                        <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Current Plan</p>
+                        <h3 className={`text-2xl font-black capitalize mb-4 ${textPrimary}`}>{currentUser.plan} Tier</h3>
+                        <button onClick={onUpgradePlan} className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20">
+                          Manage Subscription
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Payment Method Card */}
+                    <div className={`p-6 rounded-[2rem] border relative overflow-hidden group ${
+                      dm ? 'bg-gradient-to-br from-[#0d1117] to-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'
+                    }`}>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dm ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>
+                            <CreditCard className="w-5 h-5" />
+                          </div>
+                        </div>
+                        <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Primary Method</p>
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-12 h-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700">
+                            <span className="text-white font-bold text-[10px] italic">VISA</span>
+                          </div>
+                          <div>
+                            <p className={`text-sm font-bold font-mono ${textPrimary}`}>•••• •••• •••• 4242</p>
+                            <p className={`text-[10px] ${textSecondary}`}>Expires 12/28</p>
+                          </div>
+                        </div>
+                        <button className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all border ${
+                          dm ? 'border-[#30363d] text-slate-300 hover:bg-[#161b22]' : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}>
+                          Update Payment Method
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Total Spent / Billing Cycle */}
+                    <div className={`p-6 rounded-[2rem] border relative overflow-hidden group ${
+                      dm ? 'bg-gradient-to-br from-[#0d1117] to-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'
+                    }`}>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+                      <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dm ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>
+                            <FileSpreadsheet className="w-5 h-5" />
+                          </div>
+                        </div>
+                        <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Total Spent</p>
+                        <h3 className={`text-3xl font-black mb-1 ${textPrimary}`}>
+                          ₹{stats.payments.filter(p => p.status === 'success').reduce((acc, p) => acc + p.amount, 0).toLocaleString('en-IN')}
+                        </h3>
+                        <p className={`text-[10px] ${textSecondary} mt-auto`}>Across {stats.payments.filter(p => p.status === 'success').length} successful transactions</p>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Transaction History Table */}
+                  <div className={`rounded-[2rem] border overflow-hidden ${dm ? 'bg-[#0d1117] border-[#30363d]' : 'bg-white border-slate-200'} shadow-sm`}>
+                    <div className={`px-6 py-5 border-b flex items-center justify-between ${dm ? 'border-[#30363d]' : 'border-slate-100'}`}>
+                      <h3 className={`text-base font-bold ${textPrimary}`}>Transaction History</h3>
+                      <button className={`flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors ${
+                        dm ? 'border-[#30363d] text-slate-300 hover:bg-[#161b22]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}>
+                        <Download className="w-3.5 h-3.5" /> Download Invoice
+                      </button>
+                    </div>
+
+                    {stats.payments.length === 0 ? (
+                      <div className="p-16 text-center">
+                        <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${dm ? 'bg-[#161b22]' : 'bg-slate-50'}`}>
+                          <CreditCard className={`w-6 h-6 ${textMuted}`} />
+                        </div>
+                        <p className={`text-base font-semibold mb-1 ${textPrimary}`}>No transactions yet</p>
+                        <p className={`text-sm ${textSecondary}`}>Your billing history will appear here once you make a purchase.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className={`text-[10px] font-bold uppercase tracking-widest ${dm ? 'text-slate-500 bg-[#161b22]/50' : 'text-slate-400 bg-slate-50'}`}>
+                              <th className="px-6 py-4 border-b border-transparent">Description</th>
+                              <th className="px-6 py-4 border-b border-transparent">Reference ID</th>
+                              <th className="px-6 py-4 border-b border-transparent">Date</th>
+                              <th className="px-6 py-4 border-b border-transparent">Status</th>
+                              <th className="px-6 py-4 border-b border-transparent text-right">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody className={`divide-y ${dm ? 'divide-[#30363d]' : 'divide-slate-100'}`}>
+                            {stats.payments.map(p => (
+                              <tr key={p.id} className={`group transition-colors ${dm ? 'hover:bg-[#161b22]/50' : 'hover:bg-slate-50/50'}`}>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                                      dm ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
+                                    }`}>
+                                      <FileSpreadsheet className="w-4 h-4" />
+                                    </div>
+                                    <span className={`text-sm font-semibold ${textPrimary}`}>{p.details}</span>
+                                  </div>
+                                </td>
+                                <td className={`px-6 py-4 text-xs font-mono ${textMuted}`}>{p.gatewayRef}</td>
+                                <td className={`px-6 py-4 text-xs font-medium ${textSecondary}`}>{new Date(p.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                                <td className="px-6 py-4">
+                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    p.status === 'success' 
+                                      ? (dm ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border border-emerald-100') 
+                                      : (dm ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-100')
+                                  }`}>
+                                    {p.status === 'success' ? <><CheckCircle2 className="w-3 h-3" /> Paid</> : <><XCircle className="w-3 h-3" /> Failed</>}
+                                  </span>
+                                </td>
+                                <td className={`px-6 py-4 text-sm font-bold text-right ${textPrimary}`}>
+                                  ₹{p.amount.toLocaleString('en-IN')}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}

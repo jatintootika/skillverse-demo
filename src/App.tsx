@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,9 +20,9 @@ import { Footer } from './components/Footer';
 import { AIChatBot } from './components/AIChatBot';
 import { VerifyCertificate } from './components/VerifyCertificate';
 import { ExamEngine } from './components/ExamEngine';
-import { StudentDashboard } from './components/StudentDashboard';
-import { AdminPortal } from './components/AdminPortal';
-import { SuperAdminPortal } from './components/SuperAdminPortal';
+import { StudentDashboard } from './components/student/StudentDashboard';
+import { AdminPortal } from './components/admin/AdminPortal';
+import { SuperAdminPortal } from './components/super-admin/SuperAdminPortal';
 import { PolicyPage } from './components/PolicyPage';
 import { StudentLoginSection, AdminLoginSection, SuperAdminLoginSection } from './components/LoginSections';
 
@@ -253,7 +253,9 @@ function AdminDashboardWrapper({ darkMode, courses, onRefreshCourses, onToast }:
   const path = location.pathname;
   if (path.endsWith('/courses')) initialTab = 'courses';
   else if (path.endsWith('/students')) initialTab = 'students';
+  else if (path.endsWith('/exams')) initialTab = 'exams';
   else if (path.endsWith('/certificates')) initialTab = 'certificates';
+  else if (path.endsWith('/coupons')) initialTab = 'coupons';
   else if (path.endsWith('/notifications')) initialTab = 'notifications';
   else if (path.endsWith('/profile')) initialTab = 'profile';
   else if (path.endsWith('/dashboard')) initialTab = 'overview';
@@ -263,9 +265,9 @@ function AdminDashboardWrapper({ darkMode, courses, onRefreshCourses, onToast }:
       overview: '/admin/dashboard',
       courses: '/admin/courses',
       students: '/admin/students',
-      exams: '/admin/courses',
+      exams: '/admin/exams',
       certificates: '/admin/certificates',
-      coupons: '/admin/courses',
+      coupons: '/admin/coupons',
       notifications: '/admin/notifications',
       profile: '/admin/profile'
     };
@@ -330,6 +332,7 @@ function StudentDashboardWrapper({ darkMode, courses, onStartExam, onToast, onUp
     />
   );
 }
+
 
 function VerifyPageWrapper({ darkMode, onToast }: { darkMode: boolean; onToast: (m: string, t: 'success'|'ref') => void }) {
   const { id } = useParams();
@@ -613,7 +616,8 @@ function AppContent() {
   const showNavAndFooter = !isLoginPage && !isDashboardPage;
 
   return (
-    <div className={`min-h-screen font-sans transition-all duration-300 relative overflow-x-hidden ${darkMode ? 'bg-[#0E1726] text-slate-100' : 'bg-[#F0F9FF] text-slate-800'}`}>
+    <MotionConfig transition={{ duration: 0 }}>
+      <div className={`min-h-screen font-sans transition-all duration-0 relative overflow-x-hidden ${darkMode ? 'bg-[#0E1726] text-slate-100' : 'bg-[#F0F9FF] text-slate-800'}`}>
       
       {/* Onboarding Modal for New Users */}
       {currentUser && currentUser.hasCompletedOnboarding === false && (
@@ -656,14 +660,6 @@ function AppContent() {
 
       {/* Primary router container window */}
       <main className={`${showNavAndFooter ? 'pb-12 pt-4' : ''}`}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-          >
             <Routes location={location}>
               {/* PUBLIC ROUTES */}
           <Route path="/" element={
@@ -747,7 +743,9 @@ function AppContent() {
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
           <Route path="/admin/courses" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
           <Route path="/admin/students" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
+          <Route path="/admin/exams" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
           <Route path="/admin/certificates" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
+          <Route path="/admin/coupons" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
           <Route path="/admin/notifications" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
           <Route path="/admin/profile" element={<AdminRoute><AdminDashboardWrapper darkMode={darkMode} courses={courses} onRefreshCourses={loadCourses} onToast={triggerToast} /></AdminRoute>} />
 
@@ -779,8 +777,6 @@ function AppContent() {
             </div>
           } />
             </Routes>
-          </motion.div>
-        </AnimatePresence>
       </main>
 
       {showNavAndFooter && (
@@ -1066,6 +1062,7 @@ function AppContent() {
       )}
 
     </div>
+    </MotionConfig>
   );
 }
 

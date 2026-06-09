@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type UserRole = 'student' | 'admin' | 'super_admin';
+export type UserRole = 'student' | 'admin' | 'super_admin' | 'faculty';
 export type SubscriptionPlan = 'free' | 'starter' | 'popular' | 'pro';
 
 export interface User {

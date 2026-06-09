@@ -31,8 +31,8 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import { User, PlatformSettings, AdminActivityLog, Course } from '../types';
-import { PremiumCertificate } from './PremiumCertificate';
+import { User, PlatformSettings, AdminActivityLog, Course } from '../../types';
+import { PremiumCertificate } from '../PremiumCertificate';
 
 interface SuperAdminPortalProps {
   currentUser: User;

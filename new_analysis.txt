@@ -1,0 +1,333 @@
+    <div className="w-full h-full animate-in zoom-in-95 duration-500 py-6 space-y-6 overflow-y-auto px-4 md:px-8 relative z-10"
+         style={{ color: darkMode ? '#e1e2ec' : '#1b1b1d' }}>
+      
+      {/* ── Header Card: Score Overview ── */}
+      <div className="rounded-[2rem] overflow-hidden relative p-8 sm:p-12 flex flex-col md:flex-row items-center gap-10"
+           style={{
+             background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.9)',
+             backdropFilter: 'blur(24px)',
+             border: `1px solid ${darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+             boxShadow: darkMode ? '0 0 80px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 25px 60px -12px rgba(0,0,0,0.15)',
+           }}>
+        
+        {/* Ambient glow */}
+        <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${scoreGradient}`} />
+        <div className={`absolute -top-20 -right-20 w-60 h-60 rounded-full blur-[100px] pointer-events-none opacity-20 bg-gradient-to-br ${scoreGradient}`} />
+        
+        {/* Radial Score Gauge */}
+        <div className="relative shrink-0">
+          <svg width="180" height="180" className="transform -rotate-90">
+            <circle cx="90" cy="90" r="75" fill="none" strokeWidth="12" className={`${darkMode ? 'stroke-[#1e293b]' : 'stroke-slate-100'}`} />
+            <circle
+              cx="90" cy="90" r="75" fill="none" strokeWidth="12"
+              className={`${scoreColor} transition-all duration-1000 ease-out`}
+              style={{ stroke: 'currentColor', strokeDasharray: 2 * Math.PI * 75, strokeDashoffset: 2 * Math.PI * 75 * (1 - animatedScore / 100), strokeLinecap: 'round' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className={`text-5xl font-black font-mono ${scoreColor}`}>{animatedScore}%</span>
+            <span className={`text-xs font-bold uppercase tracking-[0.2em] mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Score</span>
+          </div>
+        </div>
+        
+        {/* Score Summary */}
+        <div className="flex-1 text-center md:text-left space-y-4">
+          <div>
+            <span className={`px-4 py-1.5 text-[10px] rounded-xl font-bold uppercase tracking-widest border ${
+              scorePct >= 80
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : scorePct >= 60
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+            }`}>{scoreLabel}</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Exam Analysis Report
+          </h2>
+          <p className={`text-sm sm:text-base leading-relaxed max-w-lg ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {courseTitle} • Detailed performance breakdown across {topicAnalysis.length} topic{topicAnalysis.length !== 1 ? 's' : ''} identified.
+          </p>
+          
+          {/* Quick Stats Row */}
+          <div className="flex flex-wrap gap-3 pt-3 justify-center md:justify-start">
+            <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold ${
+              darkMode ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'
+            }`}>
+              <CheckCircle className="w-4 h-4" /> {totalCorrect} Correct
+            </div>
+            <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold ${
+              darkMode ? 'bg-red-500/5 border-red-500/20 text-red-400' : 'bg-red-50 border-red-100 text-red-600'
+            }`}>
+              <XCircle className="w-4 h-4" /> {totalWrong} Wrong
+            </div>
+            {totalSkipped > 0 && (
+              <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold ${
+                darkMode ? 'bg-slate-500/5 border-slate-500/20 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+              }`}>
+                <HelpCircle className="w-4 h-4" /> {totalSkipped} Skipped
+              </div>
+            )}
+            <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold ${
+              darkMode ? 'bg-blue-500/5 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'
+            }`}>
+              <BookOpen className="w-4 h-4" /> {questions.length} Total
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Weak & Strong Topic Highlights ── */}
+      {showTopics && (weakTopics.length > 0 || strongTopics.length > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-bottom-5 duration-500">
+          
+          {/* Weak Topics */}
+          {weakTopics.length > 0 && (
+            <div className={`rounded-[2rem] p-8 border ${darkMode ? 'bg-red-500/5 border-red-500/10' : 'bg-red-50/50 border-red-100'}`}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className={`p-2 rounded-xl ${darkMode ? 'bg-red-500/15' : 'bg-red-100'}`}>
+                  <TrendingDown className="w-5 h-5 text-red-500" />
+                </div>
+                <h3 className="font-bold text-base text-red-600 dark:text-red-400" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Needs Improvement
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {weakTopics.map(t => (
+                  <div key={t.topic} className={`flex items-center justify-between p-4 rounded-2xl border text-sm font-medium ${
+                    darkMode ? 'bg-[#0b0e15]/50 border-red-500/10 text-slate-300' : 'bg-white border-red-100 text-slate-700'
+                  }`}>
+                    <span className="flex items-center gap-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                      {t.topic}
+                    </span>
+                    <span className="text-red-500 font-bold">{t.percentage}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Strong Topics */}
+          {strongTopics.length > 0 && (
+            <div className={`rounded-[2rem] p-8 border ${darkMode ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-emerald-50/50 border-emerald-100'}`}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className={`p-2 rounded-xl ${darkMode ? 'bg-emerald-500/15' : 'bg-emerald-100'}`}>
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="font-bold text-base text-emerald-600 dark:text-emerald-400" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Strong Performance
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {strongTopics.map(t => (
+                  <div key={t.topic} className={`flex items-center justify-between p-4 rounded-2xl border text-sm font-medium ${
+                    darkMode ? 'bg-[#0b0e15]/50 border-emerald-500/10 text-slate-300' : 'bg-white border-emerald-100 text-slate-700'
+                  }`}>
+                    <span className="flex items-center gap-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                      {t.topic}
+                    </span>
+                    <span className="text-emerald-500 font-bold">{t.percentage}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Topic-wise Detailed Breakdown ── */}
+      {showTopics && (
+        <div className="rounded-[2rem] overflow-hidden"
+             style={{
+               background: darkMode ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.8)',
+               border: `1px solid ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+               backdropFilter: 'blur(24px)'
+             }}>
+          <div className={`px-8 py-6 border-b flex items-center justify-between ${
+            darkMode ? 'border-[rgba(255,255,255,0.06)]' : 'border-[rgba(0,0,0,0.06)]'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className={`p-2.5 rounded-2xl ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                <BarChart3 className="w-6 h-6 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base" style={{ fontFamily: 'Outfit, sans-serif' }}>Topic-wise Breakdown</h3>
+                <p className={`text-[10px] uppercase tracking-widest font-bold mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Click any topic to expand details</p>
+              </div>
+            </div>
+            <span className={`text-xs font-bold px-4 py-2 rounded-xl ${darkMode ? 'bg-[rgba(255,255,255,0.05)] text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+              {topicAnalysis.length} Topics
+            </span>
+          </div>
+          
+          <div className="divide-y" style={{ borderColor: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}>
+            {topicAnalysis.map((topic, idx) => {
+              const isExpanded = expandedTopic === topic.topic;
+              const topicColor = topic.percentage >= 80 ? 'emerald' : topic.percentage >= 50 ? 'amber' : 'red';
+              
+              return (
+                <div key={topic.topic} className="animate-in slide-in-from-left-3" style={{ animationDelay: `${idx * 80}ms` }}>
+                  
+                  {/* Topic Header Row */}
+                  <button
+                    onClick={() => setExpandedTopic(isExpanded ? null : topic.topic)}
+                    className={`w-full px-8 py-6 flex items-center gap-6 text-left transition-colors ${
+                      darkMode ? 'hover:bg-[rgba(255,255,255,0.02)]' : 'hover:bg-slate-50/80'
+                    }`}
+                  >
+                    {/* Topic Icon */}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
+                      topicColor === 'emerald'
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                        : topicColor === 'amber'
+                        ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
+                        : 'bg-red-500/10 border-red-500/20 text-red-500'
+                    }`}>
+                      {topicColor === 'emerald' ? <Zap className="w-6 h-6" /> : topicColor === 'amber' ? <Target className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+                    </div>
+                    
+                    {/* Topic Name + Progress */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-bold text-base truncate pr-4">{topic.topic}</span>
+                        <span className={`text-sm font-bold shrink-0 ${
+                          topicColor === 'emerald' ? 'text-emerald-500' : topicColor === 'amber' ? 'text-amber-500' : 'text-red-500'
+                        }`}>
+                          {topic.correct}/{topic.total} ({topic.percentage}%)
+                        </span>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className={`w-full h-2.5 rounded-full overflow-hidden ${darkMode ? 'bg-[#0b0e15]' : 'bg-slate-100'}`}>
+                        <div
+                          className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                            topicColor === 'emerald' ? 'bg-emerald-500' : topicColor === 'amber' ? 'bg-amber-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${topic.percentage}%`, transitionDelay: `${idx * 100}ms` }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Expand icon */}
+                    <ChevronRight className={`w-5 h-5 transition-transform duration-200 shrink-0 ${
+                      darkMode ? 'text-slate-500' : 'text-slate-400'
+                    } ${isExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+                  
+                  {/* Expanded Question Details */}
+                  {isExpanded && (
+                    <div className={`px-8 pb-8 space-y-4 animate-in slide-in-from-top-2 duration-300 ${
+                      darkMode ? 'bg-[rgba(0,0,0,0.1)]' : 'bg-slate-50/50'
+                    }`}>
+                      {topic.questions.map((qItem, qIdx) => (
+                        <div
+                          key={qIdx}
+                          className={`p-5 rounded-2xl border text-sm leading-relaxed ${
+                            qItem.isCorrect
+                              ? darkMode ? 'bg-emerald-500/5 border-emerald-500/15' : 'bg-emerald-50 border-emerald-100'
+                              : darkMode ? 'bg-red-500/5 border-red-500/15' : 'bg-red-50 border-red-100'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            {qItem.isCorrect
+                              ? <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                              : <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            }
+                            <p className={`font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{qItem.question}</p>
+                          </div>
+                          
+                          {!qItem.isCorrect && (
+                            <div className="pl-8 space-y-2 mt-3">
+                              <p className="text-red-500 dark:text-red-400 bg-red-500/10 p-2 rounded-lg">
+                                <span className="font-bold uppercase tracking-wider text-[10px] block mb-1">Your Answer: </span>
+                                <span className="line-through opacity-80">{qItem.userAnswer}</span>
+                              </p>
+                              <p className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 p-2 rounded-lg">
+                                <span className="font-bold uppercase tracking-wider text-[10px] block mb-1">Correct Answer: </span>
+                                {qItem.correctAnswer}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Action Buttons ── */}
+      <div className="rounded-[2rem] p-6 sm:p-10 mb-10"
+           style={{
+             background: darkMode ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.6)',
+             border: `1px solid ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+             backdropFilter: 'blur(24px)'
+           }}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          
+          {/* Get Certificate Button - Only if score >= 80% */}
+          {scorePct >= 80 && (
+            <button
+              onClick={onViewCertificate}
+              className="group relative px-8 py-4 font-bold text-white rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 hover:-translate-y-0.5 transition-all shadow-[0_8px_30px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2.5 text-sm overflow-hidden"
+            >
+              <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+              <Award className="w-5 h-5" />
+              Get Certificate
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
+          
+          {/* Retake Exam */}
+          {scorePct < 80 && (
+            <button
+              onClick={onRetakeExam}
+              className="px-8 py-4 font-bold text-white rounded-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2.5 text-sm"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', boxShadow: '0 8px 30px -5px rgba(59,130,246,0.4)' }}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Retake Exam
+            </button>
+          )}
+
+          {/* View Certificate (lower score, still passed >= 70) */}
+          {scorePct >= 70 && scorePct < 80 && (
+            <button
+              onClick={onViewCertificate}
+              className="px-8 py-4 font-bold rounded-2xl text-sm transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              style={{
+                background: darkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                color: darkMode ? '#e1e2ec' : '#1e293b'
+              }}
+            >
+              <Award className="w-4 h-4" />
+              View Result Details
+            </button>
+          )}
+          
+          {/* Exit */}
+          <button
+            onClick={onClose}
+            className="px-8 py-4 text-sm rounded-2xl font-bold transition-all hover:-translate-y-0.5"
+            style={{ color: darkMode ? '#8c909f' : '#64748b' }}
+          >
+            Exit to Dashboard
+          </button>
+        </div>
+        
+        {/* Encouragement message */}
+        {scorePct < 80 && (
+          <p className={`text-center text-xs mt-6 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {scorePct >= 70
+              ? '💡 You passed! Score 80% or above to unlock the premium "Get Certificate" option.'
+              : `📚 You need at least 70% to pass. Focus on improving: ${weakTopics.map(t => t.topic).join(', ')}.`
+            }
+          </p>
+        )}
+      </div>
+    </div>

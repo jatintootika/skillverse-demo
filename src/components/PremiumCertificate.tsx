@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Download, Share2, Clipboard, Printer, ExternalLink, Linkedin, Award, ShieldCheck } from 'lucide-react';
+import { Download, Share2, Clipboard, Printer, ExternalLink, Linkedin, Award, ShieldCheck, Lock, ArrowRight, Shield } from 'lucide-react';
 
 interface PremiumCertificateProps {
   certificate: any; // Supports both legacy and rich Certificate schemas
@@ -17,6 +17,7 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
   const [logoFailedLeft, setLogoFailedLeft] = useState(false);
   const [logoFailedRight, setLogoFailedRight] = useState(false);
   const [signatureFailed, setSignatureFailed] = useState(false);
+  const [isCertificateUnlocked, setIsCertificateUnlocked] = useState(false);
 
   // Safely extract parameters from either legacy or rich schema
   const certId = certificate?.certificateId || certificate?.id || '';
@@ -607,12 +608,65 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-6 w-full relative">
       
+      {/* Paywall Overlay */}
+      {!isCertificateUnlocked && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-slate-900/60 dark:bg-[#0a0a0a]/80 backdrop-blur-[12px] rounded-[2rem] border border-white/10 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]">
+          <div className="p-10 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] max-w-sm w-full text-center space-y-6 border border-white/10 relative overflow-hidden animate-in zoom-in-95 bg-[#0d1117]/95 backdrop-blur-xl">
+            {/* Premium Gold Glow background */}
+            <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/20 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-orange-600/20 rounded-full blur-[80px] pointer-events-none" />
+            
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500" />
+            
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center bg-gradient-to-br from-amber-400/20 to-orange-600/20 border border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.2)] mb-2">
+                <Lock className="w-8 h-8 text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+              </div>
+            </div>
+            
+            <div className="space-y-2 relative z-10">
+              <h4 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-md" style={{ fontFamily: 'Outfit, sans-serif' }}>Unlock Premium</h4>
+              <p className="text-sm text-slate-300 leading-relaxed font-medium">Secure your officially verified credentials and showcase your expertise to top recruiters.</p>
+            </div>
+
+            <div className="relative z-10 p-5 rounded-2xl border border-white/10 flex items-center justify-center gap-4 bg-black/40 shadow-inner">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] text-amber-500/70 font-bold tracking-widest uppercase mb-0.5">Original</span>
+                <span className="text-sm text-slate-500 line-through decoration-red-500/50 decoration-2 font-mono">₹1,999</span>
+              </div>
+              <div className="h-8 w-px bg-white/10" />
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] text-emerald-400 font-bold tracking-widest uppercase mb-0.5">Special Offer</span>
+                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-lg">₹499</span>
+              </div>
+            </div>
+
+            <ul className="text-xs text-left space-y-3.5 mb-6 font-medium text-slate-200 relative z-10">
+              <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-emerald-500/20"><Shield className="w-3.5 h-3.5 text-emerald-400" /></div> Lifetime Validity & Verification</li>
+              <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-blue-500/20"><Download className="w-3.5 h-3.5 text-blue-400" /></div> High-Resolution PDF Export</li>
+              <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-sky-500/20"><Linkedin className="w-3.5 h-3.5 text-sky-400" /></div> 1-Click LinkedIn Integration</li>
+            </ul>
+
+            <button
+              onClick={() => {
+                alert('Payment Mock Successful! Certificate Unlocked.');
+                setIsCertificateUnlocked(true);
+              }}
+              className="w-full relative group/btn overflow-hidden px-6 py-4 font-bold text-white rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_10px_30px_-10px_rgba(245,158,11,0.6)] flex items-center justify-center gap-2 uppercase tracking-[0.15em] text-xs z-10"
+            >
+              <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover/btn:animate-[shimmer_1.5s_infinite]" />
+              Secure Payment <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. SCALED SCREEN VIEWWRAPPER CONTAINER */}
       <div 
         ref={containerRef}
-        className="w-full flex justify-center items-start overflow-hidden rounded-3xl"
+        className={`w-full flex justify-center items-start overflow-hidden rounded-3xl transition-all duration-700 ${!isCertificateUnlocked ? 'filter blur-md grayscale-[0.3] pointer-events-none select-none' : ''}`}
         style={{
           height: `${794 * scale}px`,
           position: 'relative' as const,
@@ -762,35 +816,37 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
       </div>
 
       {/* 2. PREMIUM ACTION TOOLBAR */}
-      <div className="flex flex-wrap justify-center items-center gap-3 pt-2">
-        <button
-          onClick={downloadRegistryPdf}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#1a3a5c] text-white hover:bg-[#102a43] active:scale-95 transition-all text-xs font-extrabold uppercase tracking-wider shadow-lg hover:shadow-cyan-500/10 cursor-pointer"
-        >
-          <Download className="w-4 h-4 text-amber-400" /> Download Registry PDF
-        </button>
+      {isCertificateUnlocked && (
+        <div className="flex flex-wrap justify-center items-center gap-3 pt-2 animate-in slide-in-from-top-4">
+          <button
+            onClick={downloadRegistryPdf}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#1a3a5c] text-white hover:bg-[#102a43] active:scale-95 transition-all text-xs font-extrabold uppercase tracking-wider shadow-lg hover:shadow-cyan-500/10 cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-amber-400" /> Download Registry PDF
+          </button>
 
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#fffef9] border border-slate-200 text-slate-800 hover:bg-slate-50 hover:scale-[1.01] active:scale-95 transition-all text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
-        >
-          <Printer className="w-4 h-4 text-blue-500" /> Landscape print / view
-        </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#fffef9] border border-slate-200 text-slate-800 hover:bg-slate-50 hover:scale-[1.01] active:scale-95 transition-all text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-blue-500" /> Landscape print / view
+          </button>
 
-        <button
-          onClick={copyVerifyLink}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
-        >
-          <Clipboard className="w-4 h-4 text-green-600" /> Copy Verification Link
-        </button>
+          <button
+            onClick={copyVerifyLink}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
+          >
+            <Clipboard className="w-4 h-4 text-green-600" /> Copy Verification Link
+          </button>
 
-        <button
-          onClick={handleLinkedInShare}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#0077b5] text-white hover:bg-[#006297] active:scale-95 transition-all text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg"
-        >
-          <Linkedin className="w-4 h-4" /> Share on LinkedIn
-        </button>
-      </div>
+          <button
+            onClick={handleLinkedInShare}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#0077b5] text-white hover:bg-[#006297] active:scale-95 transition-all text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg"
+          >
+            <Linkedin className="w-4 h-4" /> Share on LinkedIn
+          </button>
+        </div>
+      )}
 
     </div>
   );

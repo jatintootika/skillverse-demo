@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, Sparkles, User as UserIcon, Phone, AlertCircle } from 'lucide-react';
 import { User } from '../types';
 import { isLoggedIn, getUserRole, saveAuth } from '../lib/auth';
+import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 
 interface LoginSectionProps {
   darkMode: boolean;
@@ -58,6 +59,83 @@ export function SuperAdminLoginSection({ darkMode, onToast, onSuccess }: LoginSe
     }
   };
 
+  const handlePasskeyLogin = async () => {
+    if (!email) {
+      setErrorMsg('Please enter your email to use Passkey.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const resp = await fetch('/api/auth/passkey/auth-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!resp.ok) throw new Error('Passkey not found for this email.');
+      const options = await resp.json();
+      
+      const asseResp = await startAuthentication({ optionsJSON: options });
+      
+      const verificationResp = await fetch('/api/auth/passkey/auth-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, response: asseResp })
+      });
+      const verification = await verificationResp.json();
+      if (verification.verified && verification.user) {
+        saveAuth(verification.user);
+        onToast('Biometric Login Successful!', 'success');
+        onSuccess(verification.user);
+        window.location.href = '/super-admin/dashboard';
+      } else {
+        throw new Error('Biometric verification failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Passkey login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterPasskey = async () => {
+    if (!email) {
+      setErrorMsg('Please enter your email to register Passkey.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const resp = await fetch('/api/auth/passkey/register-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!resp.ok) throw new Error('Cannot register passkey. User not found.');
+      const options = await resp.json();
+      
+      const attResp = await startRegistration({ optionsJSON: options });
+      
+      const verificationResp = await fetch('/api/auth/passkey/register-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, response: attResp })
+      });
+      const verification = await verificationResp.json();
+      if (verification.verified) {
+        onToast('Passkey registered successfully! You can now log in using biometrics.', 'success');
+      } else {
+        throw new Error('Registration verification failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Passkey registration failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#070b13] px-4 py-12">
       <div className="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -70,7 +148,7 @@ export function SuperAdminLoginSection({ darkMode, onToast, onSuccess }: LoginSe
           </div>
           <span className="text-[10px] uppercase font-mono tracking-widest text-red-500 font-extrabold block">Root Console</span>
           <h1 className="text-2xl font-extrabold tracking-tight mt-1">Super Admin Login</h1>
-          <p className="text-xs text-slate-400 mt-2">Restricted Access Only</p>
+          <p className="text-xs text-slate-400 mt-2">For CEO, Co-Founders & Core Developers</p>
         </div>
 
         {errorMsg && (
@@ -127,6 +205,23 @@ export function SuperAdminLoginSection({ darkMode, onToast, onSuccess }: LoginSe
             {loading ? 'Initializing Interface...' : 'OVERRIDE DECRYPTION & ENTER'}
           </button>
         </form>
+
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <button
+            type="button"
+            onClick={handlePasskeyLogin}
+            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold rounded-xl border border-slate-700 transition-all shadow"
+          >
+            🧬 Biometric Login
+          </button>
+          <button
+            type="button"
+            onClick={handleRegisterPasskey}
+            className="w-full py-2.5 bg-slate-800/50 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-xl border border-slate-700 transition-all"
+          >
+            Register Passkey
+          </button>
+        </div>
 
         <div className="mt-5 pt-4 border-t border-slate-800/40 text-center space-y-3">
           <button
@@ -229,6 +324,83 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
     }
   };
 
+  const handlePasskeyLogin = async () => {
+    if (!email) {
+      setErrorMsg('Please enter your email to use Passkey.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const resp = await fetch('/api/auth/passkey/auth-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!resp.ok) throw new Error('Passkey not found for this email.');
+      const options = await resp.json();
+      
+      const asseResp = await startAuthentication({ optionsJSON: options });
+      
+      const verificationResp = await fetch('/api/auth/passkey/auth-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, response: asseResp })
+      });
+      const verification = await verificationResp.json();
+      if (verification.verified && verification.user) {
+        saveAuth(verification.user);
+        onToast('Faculty Biometric Login Successful!', 'success');
+        onSuccess(verification.user);
+        window.location.href = '/admin/dashboard';
+      } else {
+        throw new Error('Biometric verification failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Passkey login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterPasskey = async () => {
+    if (!email) {
+      setErrorMsg('Please enter your email to register Passkey.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const resp = await fetch('/api/auth/passkey/register-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!resp.ok) throw new Error('Cannot register passkey. User not found.');
+      const options = await resp.json();
+      
+      const attResp = await startRegistration({ optionsJSON: options });
+      
+      const verificationResp = await fetch('/api/auth/passkey/register-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, response: attResp })
+      });
+      const verification = await verificationResp.json();
+      if (verification.verified) {
+        onToast('Passkey registered successfully! You can now log in using biometrics.', 'success');
+      } else {
+        throw new Error('Registration verification failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Passkey registration failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={`min-h-screen flex items-center justify-center px-4 py-12 transition-colors duration-300 ${
       darkMode ? 'bg-slate-950' : 'bg-[#eef2f6]'
@@ -245,9 +417,9 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
           }`}>
             <Sparkles className="w-6 h-6" />
           </div>
-          <span className="text-[10px] uppercase font-mono tracking-widest text-blue-500 font-extrabold block">Management Desk</span>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-1">Admin Login</h1>
-          <p className="text-xs text-slate-400 mt-2">EdTech Platform Administration</p>
+          <span className="text-[10px] uppercase font-mono tracking-widest text-blue-500 font-extrabold block">Faculty & Admin Desk</span>
+          <h1 className="text-2xl font-extrabold tracking-tight mt-1">Faculty Portal Login</h1>
+          <p className="text-xs text-slate-400 mt-2">For Educators and Administration</p>
         </div>
 
         {errorMsg && (
@@ -308,6 +480,23 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
             {loading ? 'Authenticating Personnel...' : 'Authorize Workspace Entry'}
           </button>
         </form>
+
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <button
+            type="button"
+            onClick={handlePasskeyLogin}
+            className={`w-full py-2.5 text-[10px] font-bold rounded-xl border transition-all shadow ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'}`}
+          >
+            🧬 Biometric Login
+          </button>
+          <button
+            type="button"
+            onClick={handleRegisterPasskey}
+            className={`w-full py-2.5 text-[10px] font-bold rounded-xl border transition-all ${darkMode ? 'bg-slate-800/50 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'}`}
+          >
+            Register Passkey
+          </button>
+        </div>
 
         <div className="mt-5 pt-4 border-t border-slate-800/20 text-center space-y-3">
           <button

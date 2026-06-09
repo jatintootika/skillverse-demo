@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar } from 'lucide-react';
-import { Course, User, Certificate, Coupon } from '../types';
+import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar, TrendingUp, Sparkles, Activity, AlertTriangle, CheckCircle, Info, BookOpen, Upload, BarChart3, UserCog } from 'lucide-react';
+import { Course, User, Certificate, Coupon } from '../../types';
 
 interface AdminPortalProps {
   currentUser: User;
@@ -434,165 +434,313 @@ export function AdminPortal({
   );
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row gap-8 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+    <div className={`w-full px-4 sm:px-6 lg:px-10 py-10 flex flex-col md:flex-row gap-8 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
       
       {/* 1. ADMIN PANEL MENU */}
-      <div className="w-full md:w-[220px] shrink-0 space-y-2">
-        <div className="p-4 rounded-2xl border text-center border-blue-500/10 bg-blue-500/5 col-span-1">
-          <span className="text-[9px] uppercase font-mono tracking-widest block text-blue-500 font-extrabold mb-1">Administrative Console</span>
-          <h4 className="font-extrabold text-xs truncate text-slate-300">{currentUser.name}</h4>
+      <div className="w-full md:w-[260px] shrink-0 space-y-6">
+        {/* Brand/User Card */}
+        <div className={`p-5 rounded-3xl border backdrop-blur-xl flex flex-col items-center justify-center relative overflow-hidden transition-colors ${
+          darkMode 
+            ? 'bg-white/[0.03] border-white/[0.08]' 
+            : 'bg-white/90 border-slate-200 shadow-xl'
+        }`}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-purple-500 mb-2 relative z-10">Administrative Console</span>
+          <h4 className="font-extrabold text-sm truncate bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent relative z-10" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {currentUser.name}
+          </h4>
         </div>
 
-        <div className="flex flex-col space-y-1">
-          <MenuBtn active={activeTab === 'overview'} icon={<LayoutDashboard />} label="Consolidated Overview" onClick={() => setActiveTab('overview')} />
+        {/* Menu Buttons */}
+        <div className="flex flex-col space-y-2">
+          <MenuBtn darkMode={darkMode} active={activeTab === 'overview'} icon={<LayoutDashboard />} label="Consolidated Overview" onClick={() => setActiveTab('overview')} />
           {hasPermission('courses') && (
-            <MenuBtn active={activeTab === 'courses'} icon={<GraduationCap />} label="Course Management" onClick={() => setActiveTab('courses')} />
+            <MenuBtn darkMode={darkMode} active={activeTab === 'courses'} icon={<GraduationCap />} label="Course Management" onClick={() => setActiveTab('courses')} />
           )}
           {hasPermission('students') && (
-            <MenuBtn active={activeTab === 'students'} icon={<Users />} label="Manage Students" onClick={() => setActiveTab('students')} />
+            <MenuBtn darkMode={darkMode} active={activeTab === 'students'} icon={<Users />} label="Manage Students" onClick={() => setActiveTab('students')} />
           )}
           {hasPermission('exams') && (
-            <MenuBtn active={activeTab === 'exams'} icon={<FileSpreadsheet />} label="Exams & Questions" onClick={() => setActiveTab('exams')} />
+            <MenuBtn darkMode={darkMode} active={activeTab === 'exams'} icon={<FileSpreadsheet />} label="Exams & Questions" onClick={() => setActiveTab('exams')} />
           )}
           {hasPermission('certificates') && (
-            <MenuBtn active={activeTab === 'certificates'} icon={<Award />} label="Audit Certificates" onClick={() => setActiveTab('certificates')} />
+            <MenuBtn darkMode={darkMode} active={activeTab === 'certificates'} icon={<Award />} label="Audit Certificates" onClick={() => setActiveTab('certificates')} />
           )}
           {hasPermission('coupons') && (
-            <MenuBtn active={activeTab === 'coupons'} icon={<Tag />} label="Discounts & Coupons" onClick={() => setActiveTab('coupons')} />
+            <MenuBtn darkMode={darkMode} active={activeTab === 'coupons'} icon={<Tag />} label="Discounts & Coupons" onClick={() => setActiveTab('coupons')} />
           )}
-          <MenuBtn active={activeTab === 'notifications'} icon={<AlertOctagon />} label="Notifications" onClick={() => setActiveTab('notifications')} />
-          <MenuBtn active={activeTab === 'profile'} icon={<Lock />} label="Profile Settings" onClick={() => setActiveTab('profile')} />
+          <MenuBtn darkMode={darkMode} active={activeTab === 'notifications'} icon={<AlertOctagon />} label="Notifications" onClick={() => setActiveTab('notifications')} />
+          <MenuBtn darkMode={darkMode} active={activeTab === 'profile'} icon={<Lock />} label="Profile Settings" onClick={() => setActiveTab('profile')} />
         </div>
       </div>
 
       {/* 2. ADMIN PORTALS WORKSPACE */}
-      <div className="flex-grow space-y-8 min-w-0">
+      <div className="flex-grow min-w-0">
         
         {/* VIEW 1: OVERVIEW */}
         {activeTab === 'overview' && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Console Overview</h1>
-              <p className="text-xs text-slate-400 mt-1">Grooming India&apos;s most affordable certification gateway. Sync trends dynamically.</p>
-            </div>
-
-            {/* Admin Stats widgets */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatItem label="Seeded Students" val={stats.studentsCount} icon={<Users className="text-blue-500" />} />
-              <StatItem label="Total Revenue Audits" val={`₹${stats.totalRevenue}`} icon={<CreditCard className="text-green-500" />} />
-              <StatItem label="Certificates Issued" val={stats.certificatesCount} icon={<Award className="text-sky-500" />} />
-              <StatItem label="Daily Payments" val={`₹${stats.todayRevenue}`} icon={<RefreshCw className="text-orange-500" />} />
-            </div>
-
-            {/* Custom Interactive SVG Line Plot represent charts */}
-            <div className={`p-6 rounded-3xl border space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-extrabold text-sm">Monthly Platform Revenue Scale</h3>
-                  <p className="text-[10px] text-slate-400">Interactive path analysis of transactional billing catalogs</p>
-                </div>
-                <span className="text-[10px] font-bold text-green-500 bg-green-500/15 p-1 px-2.5 rounded-full">
-                  +42.5% Growth
+          <div className="space-y-8">
+            {/* ─── Greeting ─── */}
+            <section>
+              <h1 className="text-4xl font-extrabold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 bg-clip-text text-transparent">
+                  Welcome back, {currentUser.name.split(' ')[0]}
                 </span>
-              </div>
+              </h1>
+              <p className={`text-base mt-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Here is what's happening with your courses today.
+              </p>
+            </section>
 
-              {/* Pure SVG Line Chart */}
-              <div className="relative h-44 w-full pt-4">
-                <svg viewBox="0 0 500 150" className="w-full h-full overflow-visible">
+            {/* ─── Stat Cards ─── */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <GlassStatCard
+                darkMode={darkMode}
+                title="Total Students"
+                value={stats.studentsCount.toString()}
+                icon={<Users className="w-5 h-5" />}
+                iconColor="text-purple-400"
+                glowColor="bg-purple-500"
+                badge="+12%"
+                badgeColor="text-emerald-400 bg-emerald-400/10"
+              />
+              <GlassStatCard
+                darkMode={darkMode}
+                title="Monthly Revenue"
+                value={`₹${stats.totalRevenue.toLocaleString()}`}
+                icon={<CreditCard className="w-5 h-5" />}
+                iconColor="text-emerald-400"
+                glowColor="bg-emerald-500"
+                badge="+8.4%"
+                badgeColor="text-emerald-400 bg-emerald-400/10"
+              />
+              <GlassStatCard
+                darkMode={darkMode}
+                title="Active Courses"
+                value={courses.length.toString()}
+                icon={<Award className="w-5 h-5" />}
+                iconColor="text-pink-400"
+                glowColor="bg-pink-500"
+                badge="Stable"
+                badgeColor={darkMode ? 'text-slate-400 bg-slate-700' : 'text-slate-500 bg-slate-200'}
+              />
+              <GlassStatCard
+                darkMode={darkMode}
+                title="Avg Pass Rate"
+                value="78%"
+                icon={<TrendingUp className="w-5 h-5" />}
+                iconColor="text-sky-400"
+                glowColor="bg-sky-500"
+                badge="-2.1%"
+                badgeColor="text-red-400 bg-red-400/10"
+              />
+            </section>
+
+            {/* ─── Revenue Chart + AI Insights ─── */}
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Revenue Growth */}
+              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
+                darkMode 
+                  ? 'bg-white/[0.03] border-white/[0.08]' 
+                  : 'bg-white/90 border-slate-200 shadow-xl'
+              }`}>
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
+                  <h2 className="text-xl font-bold tracking-tight flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    <TrendingUp className="w-5 h-5 text-purple-400" />
+                    Revenue Growth
+                  </h2>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full">
+                    +12.5% Growth
+                  </span>
+                </div>
+                
+                <div className="relative min-h-[280px] flex items-end justify-around gap-3 pt-4">
                   {/* Grid Lines */}
-                  <line x1="0" y1="120" x2="500" y2="120" stroke="#334155" strokeWidth="1" strokeDasharray="3" className="opacity-20" />
-                  <line x1="0" y1="80" x2="500" y2="80" stroke="#334155" strokeWidth="1" strokeDasharray="3" className="opacity-20" />
-                  <line x1="0" y1="40" x2="500" y2="40" stroke="#334155" strokeWidth="1" strokeDasharray="3" className="opacity-20" />
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    {[0,1,2,3].map(i => (
+                      <div key={i} className={`w-full h-0 border-t ${darkMode ? 'border-white/[0.04]' : 'border-slate-100'}`} />
+                    ))}
+                  </div>
 
-                  {/* Gradient Area under the path */}
-                  <path
-                    d="M 10 120 L 90 90 L 170 70 L 250 50 L 330 30 L 415 15 L 490 10 L 490 120 Z"
-                    fill="url(#blueGrad)"
-                    className="opacity-15"
-                  />
-
-                  {/* Gradient definition */}
-                  <defs>
-                    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563EB" />
-                      <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Line Path */}
-                  <path
-                    d="M 10 120 Q 90 90, 170 80 T 250 55 T 330 35 T 415 15 T 490 10"
-                    fill="none"
-                    stroke="#2563EB"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                  />
-
-                  {/* Axis indicators */}
-                  <text x="10" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight text-center">Jan</text>
-                  <text x="90" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight">Feb</text>
-                  <text x="170" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight">Mar</text>
-                  <text x="250" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight">Apr</text>
-                  <text x="330" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight">May</text>
-                  <text x="415" y="140" fill="#64748B" className="text-[9px] font-mono tracking-tight">Today</text>
-
-                  {/* Data Point Dots */}
-                  <circle cx="490" cy="10" r="5" fill="#38BDF8" stroke="#ffffff" strokeWidth="2" className="animate-ping" />
-                  <circle cx="490" cy="10" r="4.5" fill="#2563EB" stroke="#ffffff" strokeWidth="1.5" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Split feeds: Recent signups and recent payments */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Recent signups table */}
-              <div className={`p-5 rounded-2xl border space-y-3.5 leading-relaxed text-xs overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-                <h3 className="font-extrabold text-sm flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Recent Signups Audit
-                </h3>
-                <div className="divide-y divide-slate-800 max-h-[220px] overflow-y-auto pr-1">
-                  {stats.recentSignups.map((usr: any) => (
-                    <div key={usr.id} className="py-2.5 flex justify-between items-center gap-3">
-                      <div className="truncate">
-                        <strong className="block text-slate-100 dark:text-white truncate">{usr.name}</strong>
-                        <span className="text-[10px] text-slate-400 truncate block">{usr.email}</span>
+                  {/* Bars */}
+                  {[
+                    { month: 'Jan', height: 40, value: 8000 },
+                    { month: 'Feb', height: 55, value: 11000 },
+                    { month: 'Mar', height: 30, value: 6000 },
+                    { month: 'Apr', height: 70, value: 14000 },
+                    { month: 'May', height: 85, value: 17000 },
+                    { month: 'Jun', height: 60, value: 12000 }
+                  ].map((bar, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2 relative z-10 group">
+                      <div className="relative w-full max-w-[48px]">
+                        {/* Tooltip */}
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl z-20">
+                          ₹{bar.value.toLocaleString()}
+                        </div>
+                        <div 
+                          style={{ height: `${bar.height * 2.8}px` }}
+                          className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer ${
+                            i === 4 
+                              ? 'bg-gradient-to-t from-pink-600/30 to-pink-500 shadow-[0_8px_24px_rgba(236,72,153,0.3)]' 
+                              : 'bg-gradient-to-t from-purple-600/20 to-purple-500/80 hover:from-purple-500/40 hover:to-purple-400'
+                          }`}
+                        />
                       </div>
-                      <span className="text-[8px] font-mono capitalize p-1 px-2.5 rounded-lg bg-slate-500/10 font-bold border border-slate-500/15">
-                        {usr.plan}
-                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* X-axis labels */}
+                <div className="flex justify-around mt-4">
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, i) => (
+                    <span key={i} className={`text-xs font-semibold ${
+                      i === 4 ? 'text-pink-400' : darkMode ? 'text-slate-500' : 'text-slate-400'
+                    }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      {month}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Insights */}
+              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors flex flex-col justify-between ${
+                darkMode 
+                  ? 'bg-white/[0.03] border-white/[0.08]' 
+                  : 'bg-white/90 border-slate-200 shadow-xl'
+              }`}>
+                <div>
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/5">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <h2 className="text-xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      AI Insights
+                    </h2>
+                  </div>
+                  <div className="space-y-4">
+                    <InsightCard
+                      darkMode={darkMode}
+                      icon={<AlertTriangle className="w-5 h-5" />}
+                      iconColor="text-amber-400"
+                      bgColor="bg-amber-400/5"
+                      borderColor="border-amber-400/10"
+                      title="Engagement Drop"
+                      desc="70% of students failed MCQ in Lecture 3 of AI & ML course."
+                    />
+                    <InsightCard
+                      darkMode={darkMode}
+                      icon={<CheckCircle className="w-5 h-5" />}
+                      iconColor="text-emerald-400"
+                      bgColor="bg-emerald-400/5"
+                      borderColor="border-emerald-400/10"
+                      title="High Retention"
+                      desc="Your latest video 'Linear Regression' has 95% retention rate."
+                    />
+                    <InsightCard
+                      darkMode={darkMode}
+                      icon={<Info className="w-5 h-5" />}
+                      iconColor="text-sky-400"
+                      bgColor="bg-sky-400/5"
+                      borderColor="border-sky-400/10"
+                      title="Q&A Backlog"
+                      desc="You have 12 unanswered doubts from students this week."
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* ─── Recent Activity + Quick Actions ─── */}
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Student Activity */}
+              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
+                darkMode 
+                  ? 'bg-white/[0.03] border-white/[0.08]' 
+                  : 'bg-white/90 border-slate-200 shadow-xl'
+              }`}>
+                <h2 className="text-xl font-bold tracking-tight mb-6 pb-4 border-b border-white/5 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  <Activity className="w-5 h-5 text-purple-400" />
+                  Recent Signups
+                </h2>
+                
+                {/* Table Header */}
+                <div className={`grid grid-cols-4 gap-4 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                  darkMode ? 'bg-white/[0.03] text-slate-500' : 'bg-slate-50 text-slate-400'
+                }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  <span>Student</span>
+                  <span>Email</span>
+                  <span>Plan</span>
+                  <span className="text-right">Action</span>
+                </div>
+
+                {/* Table Rows */}
+                <div className="mt-2 space-y-1">
+                  {stats.recentSignups.map((usr: any, idx: number) => (
+                    <div 
+                      key={idx} 
+                      className={`grid grid-cols-4 gap-4 px-4 py-3.5 rounded-xl text-sm transition-colors cursor-pointer ${
+                        darkMode 
+                          ? 'hover:bg-white/[0.03] text-slate-300' 
+                          : 'hover:bg-slate-50 text-slate-700'
+                      }`}
+                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                    >
+                      <span className="font-semibold truncate">{usr.name}</span>
+                      <span className={`truncate ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{usr.email}</span>
+                      <span className={`font-semibold capitalize text-emerald-400`}>{usr.plan}</span>
+                      <span className={`text-right text-xs font-semibold ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Joined recently</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Recent ledger events */}
-              <div className={`p-5 rounded-2xl border space-y-3.5 leading-relaxed text-xs overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-                <h3 className="font-extrabold text-sm flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500" /> Recent Platform Payments
-                </h3>
-                <div className="divide-y divide-slate-800 max-h-[220px] overflow-y-auto pr-1">
-                  {stats.recentPayments.map((pay: any) => (
-                    <div key={pay.id} className="py-2.5 flex justify-between items-center gap-3">
-                      <div className="truncate">
-                        <strong className="block text-slate-100 dark:text-white truncate">{pay.details}</strong>
-                        <span className="text-[10px] text-slate-400 truncate block">{pay.gatewayRef}</span>
-                      </div>
-                      <span className="font-mono font-bold text-green-500">
-                        ₹{pay.amount}
-                      </span>
-                    </div>
-                  ))}
+              {/* Quick Actions */}
+              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
+                darkMode 
+                  ? 'bg-white/[0.03] border-white/[0.08]' 
+                  : 'bg-white/90 border-slate-200 shadow-xl'
+              }`}>
+                <h2 className="text-xl font-bold tracking-tight mb-6 pb-4 border-b border-white/5" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Quick Actions
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <QuickActionBtn
+                    darkMode={darkMode}
+                    icon={<BookOpen className="w-5 h-5" />}
+                    label="Create Course"
+                    gradient="from-purple-600 to-pink-500"
+                    onClick={() => setActiveTab('courses')}
+                  />
+                  <QuickActionBtn
+                    darkMode={darkMode}
+                    icon={<Upload className="w-5 h-5" />}
+                    label="Questions"
+                    gradient="from-blue-600 to-cyan-500"
+                    onClick={() => setActiveTab('exams')}
+                  />
+                  <QuickActionBtn
+                    darkMode={darkMode}
+                    icon={<BarChart3 className="w-5 h-5" />}
+                    label="Certificates"
+                    gradient="from-emerald-600 to-teal-500"
+                    onClick={() => setActiveTab('certificates')}
+                  />
+                  <QuickActionBtn
+                    darkMode={darkMode}
+                    icon={<UserCog className="w-5 h-5" />}
+                    label="Students"
+                    gradient="from-amber-600 to-orange-500"
+                    onClick={() => setActiveTab('students')}
+                  />
                 </div>
               </div>
-
-            </div>
+            </section>
           </div>
         )}
 
         {/* VIEW 2: MANAGE STUDENTS */}
         {activeTab === 'students' && hasPermission('students') && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Manage Student Profiles</h1>
               <p className="text-xs text-slate-400 mt-1">Audit student plans, Joined dates and apply administrative parameter overrides.</p>
@@ -655,7 +803,7 @@ export function AdminPortal({
 
         {/* VIEW 3: MANAGE EXAMS AND QUESTIONS */}
         {activeTab === 'exams' && hasPermission('exams') && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Curriculum MCQ Builder</h1>
               <p className="text-xs text-slate-400 mt-1">Audit, modify, and append interactive MCQ question matrices for each test catalog.</p>
@@ -816,7 +964,7 @@ export function AdminPortal({
 
         {/* VIEW 4: AUDIT CERTIFICATES */}
         {activeTab === 'certificates' && hasPermission('certificates') && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">System Ledger Certificates</h1>
               <p className="text-xs text-slate-400 mt-1">Audit active credentials issued. Disable or renew status parameters on the system.</p>
@@ -880,7 +1028,7 @@ export function AdminPortal({
 
         {/* VIEW 5: DISCOUNTS AND COUPONS */}
         {activeTab === 'coupons' && hasPermission('coupons') && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Active Coupons & Discounts</h1>
               <p className="text-xs text-slate-400 mt-1">Design promotional coupons to motivate candidates to buy certified tests.</p>
@@ -990,7 +1138,7 @@ export function AdminPortal({
 
         {/* VIEW 6: COURSE MANAGEMENT */}
         {activeTab === 'courses' && hasPermission('courses') && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight col-span-1">Active Curriculum & Course Management</h1>
@@ -1350,33 +1498,71 @@ export function AdminPortal({
             {!editingCourse && !showAddCourse && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {courses.map((c) => (
-                  <div key={c.id} className={`p-5 rounded-3xl border flex flex-col justify-between ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <span className="text-[9px] font-mono font-extrabold uppercase bg-blue-500/10 text-blue-500 p-1 px-2.5 rounded-full">{c.category}</span>
-                        <span className={`text-[9px] font-mono tracking-widest font-extrabold p-1 px-2 rounded-full ${c.active ? 'bg-green-500/10 text-green-500': 'bg-red-500/10 text-red-500'}`}>
-                          {c.active ? 'PUBLICLY ACTIVE' : 'DRAFT INACTIVE'}
+                  <div key={c.id} className={`group p-6 rounded-[2rem] border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between relative overflow-hidden ${
+                    darkMode 
+                      ? 'bg-slate-900/40 border-slate-800/60 hover:bg-slate-900/80 hover:border-blue-500/30' 
+                      : 'bg-white/60 backdrop-blur-md border-slate-200/60 hover:bg-white hover:border-blue-500/20 hover:shadow-blue-500/5'
+                  }`}>
+                    {/* Decorative Background Blob */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-500 pointer-events-none" />
+
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-start mb-4">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl flex items-center gap-1.5 ${
+                          darkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
+                        }`}>
+                          <BookOpen className="w-3 h-3" /> {c.category}
                         </span>
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold ${
+                          c.active 
+                            ? (darkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
+                            : (darkMode ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-600')
+                        }`}>
+                          {c.active ? <><CheckCircle2 className="w-3 h-3" /> ACTIVE</> : <><AlertOctagon className="w-3 h-3" /> DRAFT</>}
+                        </div>
                       </div>
-                      <h3 className="font-extrabold text-sm mt-3">{c.title}</h3>
-                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed truncate-2-lines">{c.description}</p>
-                      <div className="my-4 divide-y border-t border-b border-inherit space-y-2 py-2">
-                        <div className="flex justify-between text-[10px] text-slate-400 pt-1">
-                          <span>Instructor:</span>
-                          <span className="font-bold text-slate-200">{c.instructorName}</span>
+                      
+                      <h3 className="font-extrabold text-lg tracking-tight mb-2 group-hover:text-blue-500 transition-colors" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                        {c.title}
+                      </h3>
+                      <p className={`text-xs leading-relaxed line-clamp-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {c.description}
+                      </p>
+
+                      <div className={`mt-5 pt-4 pb-2 border-t flex flex-col gap-3 ${darkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <Users className="w-3.5 h-3.5" /> Instructor
+                          </span>
+                          <span className={`font-bold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{c.instructorName}</span>
                         </div>
-                        <div className="flex justify-between text-[10px] text-slate-400 pt-1">
-                          <span>Exam price / discount:</span>
-                          <span className="font-bold font-mono text-blue-500">₹{c.examPrice} / ₹{c.discountPrice || 'none'}</span>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <CreditCard className="w-3.5 h-3.5" /> Pricing
+                          </span>
+                          <div className="flex items-center gap-2 font-mono">
+                            {c.discountPrice ? (
+                              <>
+                                <span className="line-through opacity-50 text-[10px]">₹{c.examPrice}</span>
+                                <span className="text-emerald-500 font-extrabold">₹{c.discountPrice}</span>
+                              </>
+                            ) : (
+                              <span className={`font-extrabold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>₹{c.examPrice}</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex justify-between text-[10px] text-slate-400 pt-1">
-                          <span>Curriculum elements:</span>
-                          <span className="font-bold text-slate-300">{(c.lectures || []).length} lectures, {(c.assignments || []).length} assignments</span>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <BookOpen className="w-3.5 h-3.5" /> Curriculum
+                          </span>
+                          <span className="font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-md">
+                            {(c.lectures || []).length} L • {(c.assignments || []).length} A
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 mt-5 relative z-10">
                       <button
                         onClick={() => {
                           setEditingCourse(c);
@@ -1384,9 +1570,13 @@ export function AdminPortal({
                           setEditingCourseAssignmentsText(JSON.stringify(c.assignments || [], null, 2));
                           setEditingCourseQuizzesText(JSON.stringify(c.quizzes || [], null, 2));
                         }}
-                        className="flex-grow py-2 text-[11px] bg-slate-500/10 hover:bg-slate-500/20 text-slate-200 rounded-lg font-bold"
+                        className={`flex-1 py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${
+                          darkMode 
+                            ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' 
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
                       >
-                        Configure Course Details
+                        <UserCog className="w-4 h-4" /> Config Details
                       </button>
                       <button
                         type="button"
@@ -1405,9 +1595,14 @@ export function AdminPortal({
                             console.error(err);
                           }
                         }}
-                        className={`px-3 py-2 text-[11px] font-bold rounded-lg ${c.active ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                        className={`py-2.5 px-4 text-xs font-bold rounded-xl flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95 shadow-md ${
+                          c.active 
+                            ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20' 
+                            : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
+                        }`}
+                        title={c.active ? "Unpublish Course" : "Publish Course"}
                       >
-                        {c.active ? 'Unpublish' : 'Publish'}
+                        {c.active ? <ShieldCheck className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -1419,7 +1614,7 @@ export function AdminPortal({
 
         {/* VIEW 7: BROADCAST NOTIFICATIONS SYSTEM */}
         {activeTab === 'notifications' && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight col-span-1">Broadcast System Alerts</h1>
               <p className="text-xs text-slate-400 mt-1">Send global service briefs, maintenance alerts, or placement announcements to all students.</p>
@@ -1492,7 +1687,7 @@ export function AdminPortal({
 
         {/* VIEW 8: ADMIN PROFILE SETTINGS */}
         {activeTab === 'profile' && (
-          <div className="space-y-6 animate-in fade-in duration-200 col-span-1">
+          <div className="space-y-6 col-span-1">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Profile & Security Credentials</h1>
               <p className="text-xs text-slate-400 mt-1">Configure your administrative screen name and change security passwords.</p>
@@ -1568,32 +1763,119 @@ export function AdminPortal({
 }
 
 // Subcomponents helper
-function MenuBtn({ active, icon, label, onClick }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void }) {
+function MenuBtn({ active, icon, label, onClick, darkMode }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void; darkMode?: boolean }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left py-2.5 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all ${
+      className={`w-full text-left py-3.5 px-4 rounded-2xl text-[13px] font-bold flex items-center gap-3.5 transition-all duration-300 relative overflow-hidden group ${
         active
-          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
-          : 'hover:bg-slate-500/5 text-slate-400 hover:text-slate-100'
+          ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
+          : darkMode 
+            ? 'hover:bg-white/[0.04] text-slate-400 hover:text-white border border-transparent' 
+            : 'hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 border border-transparent'
       }`}
+      style={{ fontFamily: 'Outfit, sans-serif' }}
     >
-      <span className="w-4 h-4">{icon}</span>
-      <span>{label}</span>
+      {active && <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />}
+      <span className={`w-5 h-5 flex items-center justify-center transition-transform duration-300 z-10 ${active ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-3'}`}>
+        {icon}
+      </span>
+      <span className="tracking-wide z-10">{label}</span>
     </button>
   );
 }
 
 function StatItem({ label, val, icon }: { label: string; val: string | number; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3.5 p-4 rounded-2xl border border-slate-500/10 bg-slate-505/5 bg-slate-500/5 col-span-1">
-      <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center shrink-0">
-        {icon}
-      </div>
+    <div className="p-4 rounded-2xl border border-slate-800/50 bg-slate-900/30 flex justify-between items-start transition-all hover:bg-slate-800/50 hover:border-slate-700 hover:-translate-y-1">
       <div>
-        <span className="text-[10px] text-slate-400 block font-light">{label}</span>
-        <strong className="text-base font-extrabold font-mono text-blue-500">{val}</strong>
+        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">{label}</p>
+        <p className="text-xl font-extrabold mt-1 text-slate-100">{val}</p>
+      </div>
+      <div className="p-2.5 rounded-xl bg-slate-800 shadow-inner">{icon}</div>
+    </div>
+  );
+}
+
+/* ─── Premium UI Components ─── */
+function GlassStatCard({ darkMode, title, value, icon, iconColor, glowColor, badge, badgeColor }: {
+  darkMode: boolean;
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  iconColor: string;
+  glowColor: string;
+  badge: string;
+  badgeColor: string;
+}) {
+  return (
+    <div className={`relative overflow-hidden p-6 rounded-3xl border backdrop-blur-xl transition-all duration-300 group cursor-default ${
+      darkMode 
+        ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15]' 
+        : 'bg-white/90 border-slate-200 shadow-lg hover:shadow-xl'
+    }`}>
+      <div className={`absolute -right-4 -top-4 w-24 h-24 ${glowColor}/10 rounded-full blur-2xl group-hover:${glowColor}/25 transition-all duration-500 pointer-events-none`} />
+      <div className="flex justify-between items-start relative z-10">
+        <span className={`text-[11px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+          {title}
+        </span>
+        <div className={`w-10 h-10 rounded-full ${iconColor} flex items-center justify-center ${
+          darkMode ? 'bg-white/[0.06]' : 'bg-slate-100'
+        }`}>
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-end gap-3 mt-4 relative z-10">
+        <span className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          {value}
+        </span>
+        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full mb-1 ${badgeColor}`}>
+          {badge}
+        </span>
       </div>
     </div>
+  );
+}
+
+function InsightCard({ darkMode, icon, iconColor, bgColor, borderColor, title, desc }: {
+  darkMode: boolean;
+  icon: React.ReactNode;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className={`flex gap-4 items-start p-4 rounded-2xl border transition-colors ${bgColor} ${borderColor}`}>
+      <div className={`mt-0.5 ${iconColor}`}>{icon}</div>
+      <div>
+        <h4 className="text-sm font-bold mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>{title}</h4>
+        <p className={`text-[13px] leading-snug ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+          {desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionBtn({ darkMode, icon, label, gradient, onClick }: {
+  darkMode: boolean;
+  icon: React.ReactNode;
+  label: string;
+  gradient: string;
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border transition-all duration-300 group cursor-pointer ${
+      darkMode 
+        ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.06]' 
+        : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'
+    }`}>
+      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+        {icon}
+      </div>
+      <span className="text-xs font-bold" style={{ fontFamily: 'Outfit, sans-serif' }}>{label}</span>
+    </button>
   );
 }
