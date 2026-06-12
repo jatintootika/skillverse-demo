@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import express from 'express';
-import path from 'path';
-import fs from 'fs';
+import * as express from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
-import QRCode from 'qrcode';
+import * as QRCode from 'qrcode';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
