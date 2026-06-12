@@ -6,7 +6,6 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import QRCode from 'qrcode';
 import {
@@ -16,7 +15,7 @@ import {
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const rpName = 'SkillVerse';
 const rpID = 'localhost';
 const origin = `http://${rpID}:${PORT}`;
@@ -1873,6 +1872,8 @@ Be highly clear, professional, motivating, concise, and structured. Use Markdown
 
   // --- VITE MIDDLEWARE / ASSET PIPELINE ---
   if (process.env.NODE_ENV !== 'production') {
+    // Dynamically import Vite only in dev mode so it doesn't break production bundles
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'
@@ -1880,8 +1881,8 @@ Be highly clear, professional, motivating, concise, and structured. Use Markdown
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.use(express.static(distPath, { index: false }));
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
