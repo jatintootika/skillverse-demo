@@ -25,6 +25,7 @@ import { AdminPortal } from './components/admin/AdminPortal';
 import { SuperAdminPortal } from './components/super-admin/SuperAdminPortal';
 import { PolicyPage } from './components/PolicyPage';
 import { StudentLoginSection, AdminLoginSection, SuperAdminLoginSection } from './components/LoginSections';
+import { CommandPalette } from './components/CommandPalette';
 
 import {
   Sparkles,
@@ -294,22 +295,24 @@ function StudentDashboardWrapper({ darkMode, courses, onStartExam, onToast, onUp
   const navigate = useNavigate();
   const location = useLocation();
 
-  let initialTab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' = 'home';
+  let initialTab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals' = 'home';
   const path = location.pathname;
   if (path.endsWith('/courses')) initialTab = 'resources';
   else if (path.endsWith('/certificates')) initialTab = 'certificates';
   else if (path.endsWith('/payments')) initialTab = 'payments';
   else if (path.endsWith('/profile')) initialTab = 'profile';
+  else if (path.endsWith('/referrals')) initialTab = 'referrals';
   else if (path.endsWith('/dashboard')) initialTab = 'home';
 
-  const handleTabChange = (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile') => {
+  const handleTabChange = (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals') => {
     const tabToPathMap: Record<string, string> = {
       home: '/student/dashboard',
       resources: '/student/courses',
       exams: '/student/courses',
       certificates: '/student/certificates',
       payments: '/student/payments',
-      profile: '/student/profile'
+      profile: '/student/profile',
+      referrals: '/student/referrals'
     };
     navigate(tabToPathMap[tab] || '/student/dashboard');
   };
@@ -589,19 +592,32 @@ function AppContent() {
     }
   };
 
+  const handlePublicCourseClick = (courseId: string, courseTitle: string) => {
+    if (!currentUser) {
+      setAuthModal({ isOpen: true, mode: 'login' });
+      triggerToast('Please sign in to access courses and assessments.', 'ref');
+    } else {
+      navigate('/student/courses');
+    }
+  };
+
   const handleLogout = () => {
     const role = getUserRole();
-    clearAuth();
-    setCurrentUser(null);
     triggerToast('Securely logged out. See you soon!', 'success');
 
     if (role === 'super_admin') {
-      navigate('/super-admin/login');
+      navigate('/super-admin/login', { replace: true });
     } else if (role === 'admin') {
-      navigate('/admin/login');
+      navigate('/admin/login', { replace: true });
     } else {
-      navigate('/');
+      navigate('/', { replace: true });
     }
+
+    // Delay state clearing slightly so the router navigation finishes first without the RouteGuard overriding it
+    setTimeout(() => {
+      clearAuth();
+      setCurrentUser(null);
+    }, 10);
   };
 
   const handleRefreshUser = (updatedUser: User) => {
@@ -635,6 +651,9 @@ function AppContent() {
         />
       )}
 
+      {/* Global Keyboard Command Menu */}
+      <CommandPalette darkMode={darkMode} />
+
       {/* Ambient Blur Background Accents */}
       <div className="absolute top-[-150px] right-[-150px] w-[500px] h-[500px] bg-gradient-to-br from-blue-600/10 to-sky-400/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[20%] left-[-100px] w-[450px] h-[450px] bg-gradient-to-tr from-sky-400/10 to-blue-500/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
@@ -665,7 +684,7 @@ function AppContent() {
           <Route path="/" element={
             <LandingPage
               courses={courses}
-              onStartExam={handleStartExam}
+              onStartExam={handlePublicCourseClick}
               onNavigate={(view) => {
                 if (view === 'home') navigate('/');
                 else if (view === 'super_admin_dashboard') navigate('/super-admin/dashboard');
@@ -683,7 +702,7 @@ function AppContent() {
             <CoursesPage
               courses={courses}
               coursesLoading={coursesLoading}
-              onStartExam={handleStartExam}
+              onStartExam={handlePublicCourseClick}
               darkMode={darkMode}
             />
           } />
@@ -757,6 +776,7 @@ function AppContent() {
           <Route path="/student/certificates" element={<StudentRoute><StudentDashboardWrapper darkMode={darkMode} courses={courses} onStartExam={handleStartExam} onUpgradePlan={() => navigate('/pricing')} onToast={triggerToast} onRefreshUser={handleRefreshUser} onLogout={handleLogout} /></StudentRoute>} />
           <Route path="/student/payments" element={<StudentRoute><StudentDashboardWrapper darkMode={darkMode} courses={courses} onStartExam={handleStartExam} onUpgradePlan={() => navigate('/pricing')} onToast={triggerToast} onRefreshUser={handleRefreshUser} onLogout={handleLogout} /></StudentRoute>} />
           <Route path="/student/profile" element={<StudentRoute><StudentDashboardWrapper darkMode={darkMode} courses={courses} onStartExam={handleStartExam} onUpgradePlan={() => navigate('/pricing')} onToast={triggerToast} onRefreshUser={handleRefreshUser} onLogout={handleLogout} /></StudentRoute>} />
+          <Route path="/student/referrals" element={<StudentRoute><StudentDashboardWrapper darkMode={darkMode} courses={courses} onStartExam={handleStartExam} onUpgradePlan={() => navigate('/pricing')} onToast={triggerToast} onRefreshUser={handleRefreshUser} onLogout={handleLogout} /></StudentRoute>} />
 
           {/* NOT FOUND ROUTE - 404 CRAWLERS */}
           <Route path="*" element={
@@ -1200,36 +1220,26 @@ function LandingPage({
             transition={{ delay: 0.8, duration: 0.5 }}
             className="flex flex-wrap justify-center gap-3 pt-2"
           >
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate('courses')}
-              className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 cursor-pointer"
             >
               Start Assessing Now <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate('certificates_showcase')}
-              className={`px-6 py-3 rounded-xl font-bold text-xs hover:scale-105 active:scale-95 transition-all border ${
+              className={`px-6 py-3 rounded-xl font-bold text-xs transition-all border ${
                 darkMode ? 'border-slate-800 hover:bg-slate-900 text-white' : 'border-slate-200 hover:bg-slate-50 text-slate-750'
               }`}
             >
               Verify Registry Credentials
-            </button>
+            </motion.button>
           </motion.div>
 
-          {/* Quick links to role special portals */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="pt-6 flex flex-wrap justify-center gap-4 text-[10px] font-mono tracking-wider text-slate-400 uppercase"
-          >
-            <span>Special ports:</span>
-            <button onClick={() => onNavigate('student/login')} className="text-blue-500 font-bold hover:underline">Student portal</button>
-            <span>•</span>
-            <button onClick={() => onNavigate('admin/login')} className="text-blue-500 font-bold hover:underline">Faculty portal</button>
-            <span>•</span>
-            <button onClick={() => onNavigate('super-admin/login')} className="text-red-500 font-bold hover:underline">Root admin</button>
-          </motion.div>
         </motion.div>
       </section>
 
@@ -1333,7 +1343,9 @@ function LandingPage({
                   <span className="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Criteria</span>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{c.passPercentage}% Pass</span>
                 </div>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => onStartExam(c.id, c.title)}
                   className="px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs hover:text-white transition-colors shadow-md group/btn flex items-center gap-2 overflow-hidden relative"
                 >
@@ -1341,7 +1353,7 @@ function LandingPage({
                     Start <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                   </span>
                   <span className="absolute inset-0 bg-blue-600 translate-y-[101%] group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           ))}
@@ -1377,13 +1389,15 @@ function LandingPage({
               Each certified candidate gets recorded in public cryptographic ledger indices. Recruiters can index certificate passport coordinates instantly.
             </p>
             <div className="pt-2">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('certificates_showcase')}
                 className="group relative px-6 py-3 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all shadow-md shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 overflow-hidden"
               >
                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer-slide_1.5s_infinite]" />
                 <span className="relative">Access Active design templates</span>
-              </button>
+              </motion.button>
             </div>
           </div>
 
@@ -1610,7 +1624,9 @@ function PlanCard({
         </ul>
       </div>
 
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onSelect}
         className={`relative w-full mt-4 py-3.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer overflow-hidden group ${
           highlighted
@@ -1619,7 +1635,7 @@ function PlanCard({
         }`}
       >
         <span className="relative">{btnText}</span>
-      </button>
+      </motion.button>
     </motion.div>
   );
 }
@@ -1630,7 +1646,9 @@ function FaqRow({ q, a }: { q: string; a: string }) {
     <div className={`p-4 rounded-2xl border transition-all duration-300 shadow-sm ${
       open ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-900/50 shadow-md shadow-blue-500/5' : 'bg-white/80 dark:bg-slate-900/50 border-slate-200/80 dark:border-slate-800/80 hover:bg-white dark:hover:bg-slate-800'
     }`}>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(!open)}
         className="w-full text-left flex justify-between items-center gap-4 text-[13px] font-bold text-slate-800 dark:text-slate-200 outline-none"
       >
@@ -1640,7 +1658,7 @@ function FaqRow({ q, a }: { q: string; a: string }) {
         }`}>
           <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
         </div>
-      </button>
+      </motion.button>
       {open && (
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 pt-4 mt-2 border-t border-slate-100 dark:border-slate-800/80 font-medium">
           {a}
@@ -2073,81 +2091,173 @@ function AboutPage({ darkMode }: { darkMode: boolean }) {
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">Providing placement letters and referral networks to candidates nationwide.</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 pt-6 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pt-6 relative z-10">
         
         {/* Animated Connecting Line (visible only on desktop) */}
-        <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-[2px] overflow-hidden">
+        <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[2px] overflow-hidden">
           <div className="w-full h-full bg-slate-200 dark:bg-slate-800 absolute inset-0" />
           <motion.div 
             animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            className="w-1/2 h-full bg-gradient-to-r from-transparent via-blue-500 to-transparent absolute"
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            className="w-1/3 h-full bg-gradient-to-r from-transparent via-blue-500 to-transparent absolute"
           />
         </div>
 
-        {/* Unit 1 */}
+        {/* Card 1: Aarsh Mohan */}
         <motion.div 
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.9, y: 60 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true }}
-          whileHover={{ y: -10, rotateY: 5, rotateX: 5 }}
+          transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
+          whileHover={{ y: -15, rotateY: 8, rotateX: 5, scale: 1.02 }}
           style={{ perspective: 1000 }}
-          className={`group relative p-8 rounded-[2rem] border overflow-hidden flex flex-col space-y-6 transition-all duration-300 ${darkMode ? 'bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] hover:border-blue-500/50' : 'bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl hover:shadow-2xl hover:border-blue-400/40'}`}
+          className={`group relative p-8 rounded-[2.5rem] border overflow-hidden flex flex-col space-y-6 transition-all duration-500 ${darkMode ? 'bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:shadow-[0_20px_80px_rgba(59,130,246,0.25)] hover:border-blue-500/80' : 'bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl hover:shadow-2xl hover:border-blue-400/60'}`}
         >
-          {/* Glass glare effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          {/* Animated Glow Blob */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 dark:bg-blue-500/30 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center font-extrabold text-xl text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] ring-4 ring-blue-500/20 group-hover:scale-110 transition-transform duration-500">
-              IIT
-            </div>
-            {/* Spinning decorative ring */}
+          <div className="relative mx-auto mt-4">
             <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute top-0 left-0 w-16 h-16 rounded-full border border-dashed border-blue-400/60 pointer-events-none"
-            />
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative w-24 h-24"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center font-extrabold text-3xl text-white shadow-[0_0_30px_rgba(59,130,246,0.6)] ring-4 ring-blue-500/30 group-hover:scale-110 transition-transform duration-500 z-10">
+                AM
+              </div>
+              {/* Dual Gyroscope Rings */}
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-4 rounded-full border-2 border-transparent border-t-blue-400 border-l-cyan-400 opacity-50 pointer-events-none"
+              />
+              <motion.div 
+                animate={{ rotate: -360 }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-8 rounded-full border border-dashed border-blue-500/30 opacity-70 pointer-events-none"
+              />
+            </motion.div>
           </div>
           
-          <div className="relative z-10">
-            <h3 className="font-extrabold text-lg sm:text-xl text-slate-800 dark:text-white">Academic Board</h3>
-            <span className="text-[10px] font-mono tracking-widest font-extrabold text-blue-600 dark:text-blue-400 uppercase block mt-1">IIT Madras Graduates Council</span>
+          <div className="relative z-10 text-center pt-8">
+            <h3 className="font-black text-2xl tracking-tight text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">Aarsh Mohan</h3>
+            <span className="text-[10px] font-mono tracking-widest font-extrabold text-blue-600 dark:text-blue-400 uppercase block mt-2 bg-blue-500/10 py-1.5 px-3 rounded-full inline-block border border-blue-500/20">CEO & IIT Madras</span>
           </div>
-          <p className="text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400 relative z-10">
-            Designing curriculum standards, recruiting placement partners, and maintaining the SkillVerse global certificate registry servers.
+          
+          <p className="text-xs sm:text-[13px] leading-relaxed text-slate-600 dark:text-slate-400 relative z-10 text-center font-medium">
+            Driving the core vision, expanding global placement networks, and leading the strategic execution for the SkillVerse platform.
           </p>
+
+          <div className="pt-2 flex flex-wrap justify-center gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Vision</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Strategy</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Scale</span>
+          </div>
         </motion.div>
 
-        {/* Unit 2 */}
+        {/* Card 2: Ankit Jaat */}
         <motion.div 
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.9, y: 60 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true }}
-          whileHover={{ y: -10, rotateY: -5, rotateX: 5 }}
+          transition={{ duration: 0.6, type: 'spring', bounce: 0.4, delay: 0.15 }}
+          whileHover={{ y: -15, rotateY: 0, rotateX: 5, scale: 1.02 }}
           style={{ perspective: 1000 }}
-          className={`group relative p-8 rounded-[2rem] border overflow-hidden flex flex-col space-y-6 transition-all duration-300 ${darkMode ? 'bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:shadow-[0_0_40px_rgba(14,165,233,0.15)] hover:border-sky-500/50' : 'bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl hover:shadow-2xl hover:border-sky-400/40'}`}
+          className={`group relative p-8 rounded-[2.5rem] border overflow-hidden flex flex-col space-y-6 transition-all duration-500 ${darkMode ? 'bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:shadow-[0_20px_80px_rgba(16,185,129,0.25)] hover:border-emerald-500/80' : 'bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl hover:shadow-2xl hover:border-emerald-400/60'}`}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 dark:bg-emerald-500/30 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center font-extrabold text-xl text-white shadow-[0_0_20px_rgba(14,165,233,0.4)] ring-4 ring-sky-500/20 group-hover:scale-110 transition-transform duration-500">
-              SV
-            </div>
+          <div className="relative mx-auto mt-4">
             <motion.div 
-              animate={{ rotate: -360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute top-0 left-0 w-16 h-16 rounded-full border border-dashed border-sky-400/60 pointer-events-none"
-            />
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              className="relative w-24 h-24"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-extrabold text-3xl text-white shadow-[0_0_30px_rgba(16,185,129,0.6)] ring-4 ring-emerald-500/30 group-hover:scale-110 transition-transform duration-500 z-10">
+                AJ
+              </div>
+              <motion.div 
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-4 rounded-full border-2 border-transparent border-b-emerald-400 border-r-teal-400 opacity-50 pointer-events-none"
+              />
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-8 rounded-full border border-dashed border-emerald-500/30 opacity-70 pointer-events-none"
+              />
+            </motion.div>
           </div>
           
-          <div className="relative z-10">
-            <h3 className="font-extrabold text-lg sm:text-xl text-slate-800 dark:text-white">AI Assessment Advisor</h3>
-            <span className="text-[10px] font-mono tracking-widest font-extrabold text-sky-600 dark:text-sky-400 uppercase block mt-1">IIT Madras AI Research Council</span>
+          <div className="relative z-10 text-center pt-8">
+            <h3 className="font-black text-2xl tracking-tight text-slate-800 dark:text-white group-hover:text-emerald-500 transition-colors">Ankit Jaat</h3>
+            <span className="text-[10px] font-mono tracking-widest font-extrabold text-emerald-600 dark:text-emerald-400 uppercase block mt-2 bg-emerald-500/10 py-1.5 px-3 rounded-full inline-block border border-emerald-500/20">Co-Founder & Ops</span>
           </div>
-          <p className="text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400 relative z-10">
-            Formulating machine learning parameters, modeling assessment criteria, and reviewing technical algorithms.
+          
+          <p className="text-xs sm:text-[13px] leading-relaxed text-slate-600 dark:text-slate-400 relative z-10 text-center font-medium">
+            Managing day-to-day business operations, structuring scalable partnerships, and orchestrating sustainable platform growth.
           </p>
+
+          <div className="pt-2 flex flex-wrap justify-center gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Operations</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Partnerships</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Growth</span>
+          </div>
         </motion.div>
+
+        {/* Card 3: Jatin */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 60 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, type: 'spring', bounce: 0.4, delay: 0.3 }}
+          whileHover={{ y: -15, rotateY: -8, rotateX: 5, scale: 1.02 }}
+          style={{ perspective: 1000 }}
+          className={`group relative p-8 rounded-[2.5rem] border overflow-hidden flex flex-col space-y-6 transition-all duration-500 ${darkMode ? 'bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:shadow-[0_20px_80px_rgba(168,85,247,0.25)] hover:border-purple-500/80' : 'bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl hover:shadow-2xl hover:border-purple-400/60'}`}
+        >
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 dark:bg-purple-500/30 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          
+          <div className="relative mx-auto mt-4">
+            <motion.div 
+              animate={{ y: [0, -12, 0] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              className="relative w-24 h-24"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center font-extrabold text-3xl text-white shadow-[0_0_30px_rgba(168,85,247,0.6)] ring-4 ring-purple-500/30 group-hover:scale-110 transition-transform duration-500 z-10">
+                J
+              </div>
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-4 rounded-full border-2 border-transparent border-t-purple-400 border-l-fuchsia-400 opacity-50 pointer-events-none"
+              />
+              <motion.div 
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-8 rounded-full border border-dashed border-purple-500/30 opacity-70 pointer-events-none"
+              />
+            </motion.div>
+          </div>
+          
+          <div className="relative z-10 text-center pt-8">
+            <h3 className="font-black text-2xl tracking-tight text-slate-800 dark:text-white group-hover:text-purple-500 transition-colors">Jatin</h3>
+            <span className="text-[10px] font-mono tracking-widest font-extrabold text-purple-600 dark:text-purple-400 uppercase block mt-2 bg-purple-500/10 py-1.5 px-3 rounded-full inline-block border border-purple-500/20">Main Developer</span>
+          </div>
+          
+          <p className="text-xs sm:text-[13px] leading-relaxed text-slate-600 dark:text-slate-400 relative z-10 text-center font-medium">
+            Architecting the robust tech stack, crafting the premium sexy UI, and ensuring state-of-the-art cybersecurity systems.
+          </p>
+
+          <div className="pt-2 flex flex-wrap justify-center gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Engineering</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">UI/UX</span>
+             <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-md text-slate-500 border border-slate-200 dark:border-slate-700">Security</span>
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );

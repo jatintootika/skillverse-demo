@@ -137,3 +137,11 @@ export interface PlatformSettings {
   verificationPolicy?: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'admin' | 'super_admin';
+  content: string;
+  timestamp: string;
+}

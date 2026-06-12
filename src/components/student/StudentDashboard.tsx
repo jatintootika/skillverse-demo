@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, BookOpen, FileSpreadsheet, Award, User, ShoppingBag,
@@ -11,7 +11,7 @@ import {
   X, Play, TrendingUp, Zap, Clock, Star, ChevronRight, Lock, Unlock,
   BarChart3, Bell, Search, Menu, Crown, Flame, Target, ArrowUpRight, ArrowLeft,
   Calendar, Download, ExternalLink, Settings, LogOut, CreditCard, Shield, XCircle,
-  Bot, Gamepad2, Sparkles, Palette
+  Bot, Gamepad2, Sparkles, Palette, Gift, Users, ChevronDown, UserCog, Headset, LifeBuoy
 } from 'lucide-react';
 import { Course, Certificate, ExamAttempt, Payment, User as UserType } from '../../types';
 import { PremiumCertificate } from '../PremiumCertificate';
@@ -24,8 +24,8 @@ interface StudentDashboardProps {
   onToast: (msg: string, type: 'success' | 'ref') => void;
   onRefreshUser: (updatedUser: UserType) => void;
   darkMode: boolean;
-  initialTab?: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile';
-  onTabChange?: (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile') => void;
+  initialTab?: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals' | 'support';
+  onTabChange?: (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals' | 'support') => void;
   onLogout?: () => void;
 }
 
@@ -44,12 +44,27 @@ export function StudentDashboard({
   
   const [avatarConfig, setAvatarConfig] = useState({ gender: 'male', seed: 'Felix', hair: 'fonze', hairColor: '000000', skinColor: 'ffdbb4', mouth: 'smile', eyes: 'smiling', shirt: 'collared', bg: 'from-blue-500 to-indigo-600' });
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile'>(initialTab || 'home');
+  const [headerMenuOpen, setHeaderMenuOpen] = useState<'none' | 'notifications' | 'profile'>('none');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
+  // Support AI Chat State
+  const [supportChatMsg, setSupportChatMsg] = useState('');
+  const [supportChatHistory, setSupportChatHistory] = useState<{role: 'user' | 'ai', text: string}[]>([]);
+  const [supportChatLoading, setSupportChatLoading] = useState(false);
+  const supportChatRef = useRef<HTMLDivElement>(null);
 
-  const setActiveTab = (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile') => {
+  const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals' | 'support'>(initialTab || 'home');
+
+  const setActiveTab = (tab: 'home' | 'resources' | 'exams' | 'certificates' | 'payments' | 'profile' | 'referrals' | 'support') => {
     setActiveTabState(tab);
     if (onTabChange) onTabChange(tab);
   };
+
+  useEffect(() => {
+    if (supportChatRef.current) {
+      supportChatRef.current.scrollTop = supportChatRef.current.scrollHeight;
+    }
+  }, [supportChatHistory, activeTab]);
 
   useEffect(() => { if (initialTab) setActiveTabState(initialTab); }, [initialTab]);
 
@@ -166,7 +181,9 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
     { id: 'exams', icon: <FileSpreadsheet className="w-[18px] h-[18px]" />, label: 'Exams' },
     { id: 'certificates', icon: <Award className="w-[18px] h-[18px]" />, label: 'Certificates' },
     { id: 'payments', icon: <CreditCard className="w-[18px] h-[18px]" />, label: 'Billing' },
+    { id: 'referrals', icon: <Gift className="w-[18px] h-[18px]" />, label: 'Refer & Earn' },
     { id: 'profile', icon: <Settings className="w-[18px] h-[18px]" />, label: 'Profile' },
+    { id: 'support', icon: <Headset className="w-[18px] h-[18px]" />, label: 'Support' },
   ];
 
   const totalLectures = courses.reduce((s, c) => s + c.lectures.length, 0);
@@ -208,44 +225,140 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
           })}
         </nav>
 
-        {/* Plan info */}
-        <div className={`mx-3 mb-3 p-3 rounded-lg border ${dm ? 'border-[#30363d] bg-[#0d1117]' : 'border-gray-200 bg-gray-50'}`}>
-          <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+        {/* Plan info (Premium & Animated) */}
+        <div className={`mx-3 mb-4 p-4 rounded-2xl border relative overflow-hidden transition-all duration-300 group ${dm ? 'border-[#30363d] bg-gradient-to-br from-[#161b22] to-[#0d1117] hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)]' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:border-blue-200 hover:shadow-lg'}`}>
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all duration-500 pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all duration-500 pointer-events-none" />
+          
+          <div className="flex items-center gap-3 mb-4 relative z-10">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-extrabold shadow-md ring-2 ring-transparent group-hover:ring-purple-400/50 transition-all">
               {currentUser.name.slice(0, 2).toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <p className={`text-xs font-semibold truncate ${textPrimary}`}>{currentUser.name}</p>
-              <p className={`text-[10px] capitalize ${textMuted}`}>{currentUser.plan} plan</p>
+            <div className="min-w-0 flex-1">
+              <p className={`text-sm font-bold truncate tracking-tight transition-colors ${dm ? 'text-white group-hover:text-purple-100' : 'text-gray-900 group-hover:text-blue-900'}`}>{currentUser.name}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <p className={`text-[11px] font-semibold uppercase tracking-wider ${dm ? 'text-emerald-400' : 'text-emerald-600'}`}>{currentUser.plan} Plan</p>
+              </div>
             </div>
           </div>
-          {currentUser.plan === 'free' && (
-            <button onClick={onUpgradePlan} className="w-full py-1.5 rounded-md bg-blue-600 text-white text-[11px] font-semibold hover:bg-blue-700 transition-colors mb-2">
-              Upgrade Plan
-            </button>
-          )}
-          {onLogout && (
-            <button onClick={onLogout} className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md border text-[11px] font-semibold transition-colors ${dm ? 'border-[#30363d] text-red-400 hover:bg-red-500/10' : 'border-gray-200 text-red-600 hover:bg-red-50'}`}>
-              <LogOut className="w-3.5 h-3.5" /> Log Out
-            </button>
-          )}
+
+          <div className="space-y-2 relative z-10">
+            {currentUser.plan === 'free' && (
+              <button 
+                onClick={onUpgradePlan} 
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold hover:from-blue-500 hover:to-indigo-500 transition-all shadow-md hover:shadow-blue-500/25 active:scale-95 group/btn"
+              >
+                <Sparkles className="w-3.5 h-3.5 group-hover/btn:animate-spin" />
+                Upgrade to Pro
+              </button>
+            )}
+            {onLogout && (
+              <button 
+                onClick={() => setShowLogoutConfirm(true)} 
+                className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-bold transition-all active:scale-95 group/logout ${dm ? 'border-[#30363d] text-red-400 hover:bg-red-500/10 hover:border-red-500/30' : 'border-gray-200 text-red-600 hover:bg-red-50 hover:border-red-200'}`}
+              >
+                <LogOut className="w-3.5 h-3.5 group-hover/logout:-translate-x-1 transition-transform" /> 
+                Secure Log Out
+              </button>
+            )}
+          </div>
         </div>
       </aside>
 
       {/* ═══════════════════ MAIN ═══════════════════ */}
       <div className="flex-1 min-w-0 flex flex-col">
 
-        {/* Top Bar */}
-        <header className={`h-14 shrink-0 flex items-center justify-between px-6 border-b ${dm ? 'bg-[#161b22]/80 border-[#30363d]' : 'bg-white/80 border-gray-200'} backdrop-blur-sm sticky top-0 z-10`}>
-          <h2 className={`text-sm font-semibold ${textPrimary}`}>
+        {/* Top Bar (Advanced Header) */}
+        <header className={`shrink-0 z-50 flex items-center justify-between px-6 py-3 border-b relative backdrop-blur-sm sticky top-0 ${dm ? 'bg-[#161b22]/90 border-[#30363d]' : 'bg-white/90 border-gray-200'}`}>
+          <h2 className={`text-base font-bold tracking-tight ${textPrimary}`}>
             {navItems.find(n => n.id === activeTab)?.label || 'Dashboard'}
           </h2>
-          <div className="flex items-center gap-2">
-            <button className={`p-2 rounded-lg ${dm ? 'hover:bg-white/5' : 'hover:bg-gray-100'} transition-colors relative`}>
-              <Bell className="w-4 h-4 text-gray-400" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
-            </button>
+
+          <div className="flex items-center gap-4 sm:gap-6 relative z-50">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setHeaderMenuOpen(prev => prev === 'notifications' ? 'none' : 'notifications')}
+                className={`relative p-2.5 rounded-full transition-all focus:outline-none ${dm ? 'text-slate-400 hover:text-white hover:bg-[#30363d]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'} ${headerMenuOpen === 'notifications' ? (dm ? 'bg-[#30363d] text-white' : 'bg-slate-100 text-slate-900') : ''}`}
+              >
+                <Bell className="w-5 h-5" />
+                <span className={`absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 ${dm ? 'border-[#161b22]' : 'border-white'}`}></span>
+              </button>
+
+              {/* Notifications Floating Panel */}
+              <div className={`absolute top-full right-0 mt-3 w-80 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-5 transition-all duration-300 origin-top-right z-50 ${dm ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'notifications' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className={`font-extrabold text-sm tracking-tight ${dm ? 'text-white' : 'text-slate-900'}`}>Notifications</h4>
+                  <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-md">2 New</span>
+                </div>
+                <div className="space-y-3">
+                  <div className={`p-3.5 rounded-2xl border transition-all hover:-translate-y-0.5 cursor-pointer ${dm ? 'bg-[#0d1117]/80 border-[#30363d] hover:border-blue-500/30' : 'bg-slate-50/50 border-slate-100 hover:border-blue-200'}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                      <p className={`text-xs font-bold ${dm ? 'text-slate-200' : 'text-slate-800'}`}>Welcome to SkillVerse!</p>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">Explore premium courses and start your learning journey today.</p>
+                  </div>
+                  <div className={`p-3.5 rounded-2xl border transition-all hover:-translate-y-0.5 cursor-pointer ${dm ? 'bg-[#0d1117]/80 border-[#30363d] hover:border-blue-500/30' : 'bg-slate-50/50 border-slate-100 hover:border-blue-200'}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className={`text-xs font-bold ${dm ? 'text-slate-200' : 'text-slate-800'}`}>Profile Setup</p>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">Don't forget to customize your avatar and update your profile details.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Element */}
+            <div className="relative">
+              <div
+                onClick={() => setHeaderMenuOpen(prev => prev === 'profile' ? 'none' : 'profile')}
+                className={`flex items-center gap-3 pl-4 sm:pl-6 border-l cursor-pointer group transition-all ${dm ? 'border-[#30363d]' : 'border-slate-200'}`}
+              >
+                <div className="text-right hidden sm:block">
+                  <p className={`text-sm font-bold leading-none transition-colors ${dm ? 'text-white' : 'text-slate-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{currentUser.name}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-blue-500 mt-1 capitalize">{currentUser.plan} Plan</p>
+                </div>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-transparent group-hover:ring-blue-400/50 transition-all">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${headerMenuOpen === 'profile' ? 'rotate-180 text-blue-500' : (dm ? 'text-slate-500 group-hover:translate-y-0.5' : 'text-slate-400 group-hover:translate-y-0.5')}`} />
+              </div>
+
+              {/* Profile Floating Panel */}
+              <div className={`absolute top-full right-0 mt-3 w-64 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-2 transition-all duration-300 origin-top-right z-50 ${dm ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'profile' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                <div className={`px-4 py-3 border-b mb-2 ${dm ? 'border-white/5' : 'border-slate-100'}`}>
+                  <p className={`text-sm font-extrabold ${dm ? 'text-white' : 'text-slate-900'}`}>{currentUser.name}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email}</p>
+                </div>
+                <div className="space-y-1">
+                  <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('profile'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${dm ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <UserCog className="w-4 h-4 text-blue-500" /> Account Settings
+                  </button>
+                  <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('payments'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${dm ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <CreditCard className="w-4 h-4 text-purple-500" /> Subscription & Billing
+                  </button>
+                  <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('certificates'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${dm ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <Award className="w-4 h-4 text-emerald-500" /> My Certificates
+                  </button>
+                </div>
+                {onLogout && (
+                  <div className={`mt-2 pt-2 border-t ${dm ? 'border-white/5' : 'border-slate-100'}`}>
+                    <button onClick={() => { setHeaderMenuOpen('none'); setShowLogoutConfirm(true); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${dm ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}>
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* Click-outside overlay */}
+          {headerMenuOpen !== 'none' && (
+            <div className="fixed inset-0 z-40 cursor-default" onClick={() => setHeaderMenuOpen('none')} />
+          )}
         </header>
 
         {/* Content */}
@@ -1058,7 +1171,254 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
                 </motion.div>
               )}
 
-                        </AnimatePresence>
+              {/* ═══ REFERRALS ═══ */}
+              {activeTab === 'referrals' && (
+                <motion.div key="referrals" initial="hidden" animate="visible" exit="exit" variants={tabAnim}>
+                  <div className="mb-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <h1 className={`text-2xl font-black ${textPrimary}`}>Refer & Earn</h1>
+                    <p className={`text-sm mt-1 ${textSecondary}`}>Invite your friends to SkillVerse and unlock premium rewards!</p>
+                  </div>
+
+                  {/* Main Banner */}
+                  <div className="relative overflow-hidden rounded-[2rem] p-8 sm:p-12 mb-8 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 shadow-2xl shadow-blue-500/20 animate-in zoom-in-95 fade-in duration-700 fill-mode-both" style={{ animationDelay: '100ms' }}>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400/20 rounded-full blur-2xl transform -translate-x-1/2 translate-y-1/2 pointer-events-none" />
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
+                      <div className="text-white max-w-lg">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md mb-6 border border-white/30 text-xs font-bold uppercase tracking-widest shadow-sm">
+                          <Gift className="w-4 h-4 text-yellow-300" /> Unlock Pro Access
+                        </div>
+                        <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4 leading-tight">
+                          Get 1 Month <span className="text-yellow-400">FREE</span> for every friend!
+                        </h2>
+                        <p className="text-blue-100 font-medium text-sm sm:text-base mb-8 leading-relaxed">
+                          Share your unique referral code. When a friend subscribes to any premium plan, both of you instantly get a free month of Pro access added to your account!
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                          <div className="flex-1 flex items-center justify-between px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-inner">
+                            <span className="font-mono text-lg font-bold tracking-wider text-yellow-300 select-all">SKILL-{currentUser.id.slice(0, 6).toUpperCase()}</span>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(`https://skillverse.app/join?ref=SKILL-${currentUser.id.slice(0, 6).toUpperCase()}`);
+                              onToast('Referral link copied to clipboard!', 'success');
+                            }}
+                            className="px-6 py-3 bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 whitespace-nowrap"
+                          >
+                            <ExternalLink className="w-4 h-4" /> Copy Link
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0 flex items-center justify-center">
+                        <motion.div 
+                          animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
+                          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                          className="w-full h-full relative"
+                        >
+                          <div className="absolute inset-0 bg-yellow-400 rounded-full blur-[60px] opacity-40 mix-blend-screen animate-pulse" />
+                          <div className="w-full h-full bg-gradient-to-tr from-yellow-300 to-yellow-500 rounded-3xl shadow-2xl rotate-12 flex items-center justify-center border-4 border-yellow-200">
+                             <Gift className="w-24 h-24 text-white drop-shadow-md" />
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats & Steps */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className={`col-span-1 p-6 rounded-2xl border ${cardCls} animate-in slide-in-from-bottom-6 fade-in duration-700 fill-mode-both`} style={{ animationDelay: '200ms' }}>
+                      <h3 className={`text-sm font-bold uppercase tracking-widest mb-4 ${textSecondary}`}>Your Earnings</h3>
+                      <div className="flex items-end gap-3 mb-6">
+                        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">0</span>
+                        <span className={`text-sm font-bold pb-1.5 ${textMuted}`}>months earned</span>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-slate-800">
+                          <span className={`text-sm font-medium ${textPrimary}`}>Total Clicks</span>
+                          <span className="text-sm font-bold text-blue-500">0</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-slate-800">
+                          <span className={`text-sm font-medium ${textPrimary}`}>Sign Ups</span>
+                          <span className="text-sm font-bold text-blue-500">0</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm font-medium ${textPrimary}`}>Converted (Paid)</span>
+                          <span className="text-sm font-bold text-blue-500">0</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`col-span-1 lg:col-span-2 p-6 sm:p-8 rounded-2xl border ${cardCls} animate-in slide-in-from-bottom-6 fade-in duration-700 fill-mode-both`} style={{ animationDelay: '300ms' }}>
+                       <h3 className={`text-sm font-bold uppercase tracking-widest mb-6 ${textSecondary}`}>How it works</h3>
+                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
+                          <div className="hidden sm:block absolute top-6 left-12 right-12 h-0.5 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-transparent" />
+                          {[
+                            { step: '1', title: 'Share Code', desc: 'Send your unique code to friends.', icon: <Users className="w-5 h-5 text-blue-500" /> },
+                            { step: '2', title: 'They Subscribe', desc: 'Friend signs up for a premium plan.', icon: <CheckCircle2 className="w-5 h-5 text-indigo-500" /> },
+                            { step: '3', title: 'You Earn', desc: 'Both get 1 free month of Pro access.', icon: <Crown className="w-5 h-5 text-purple-500" /> }
+                          ].map((s) => (
+                             <div key={s.step} className="relative z-10 flex flex-col items-center text-center">
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-lg bg-white dark:bg-[#0d1117] border ${dm ? 'border-slate-700' : 'border-slate-200'}`}>
+                                  {s.icon}
+                                </div>
+                                <h4 className={`text-base font-bold mb-1.5 ${textPrimary}`}>{s.title}</h4>
+                                <p className={`text-xs leading-relaxed ${textMuted}`}>{s.desc}</p>
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              {/* ═══ SUPPORT ═══ */}
+              {activeTab === 'support' && (
+                <motion.div key="support" className="w-full animate-in fade-in duration-500">
+                  <div className="mb-8">
+                    <h1 className={`text-2xl font-bold tracking-tight ${textPrimary}`}>Help &amp; Support</h1>
+                    <p className={`text-sm mt-1 ${textSecondary}`}>Raise a query, or talk to our intelligent AI Assistant for instant answers.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Raise a Query Form */}
+                    <div className={`p-6 sm:p-8 rounded-[2rem] border ${dm ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'}`}>
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${dm ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                          <LifeBuoy className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className={`text-lg font-bold ${textPrimary}`}>Raise a Query</h3>
+                          <p className={`text-xs ${textSecondary}`}>We typically reply within 24 hours.</p>
+                        </div>
+                      </div>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        const target = e.target as typeof e.target & {
+                          subject: { value: string };
+                          description: { value: string };
+                        };
+                        try {
+                          const res = await fetch('/api/support/ticket', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                              userId: currentUser.id, 
+                              userName: currentUser.name, 
+                              userEmail: currentUser.email, 
+                              subject: target.subject.value, 
+                              description: target.description.value 
+                            })
+                          });
+                          if(res.ok) {
+                            onToast('Your query has been raised successfully!', 'success');
+                            target.subject.value = '';
+                            target.description.value = '';
+                          } else {
+                            onToast('Failed to raise query. Please try again later.', 'ref');
+                          }
+                        } catch(err) {
+                          onToast('Network error.', 'ref');
+                        }
+                      }} className="space-y-4">
+                        <div>
+                          <label className={`block text-xs font-bold uppercase tracking-widest mb-1.5 ${textSecondary}`}>Subject</label>
+                          <input required name="subject" type="text" placeholder="e.g., Certificate Not Generating" className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputCls}`} />
+                        </div>
+                        <div>
+                          <label className={`block text-xs font-bold uppercase tracking-widest mb-1.5 ${textSecondary}`}>Description</label>
+                          <textarea required name="description" rows={5} placeholder="Explain your issue in detail..." className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputCls}`}></textarea>
+                        </div>
+                        <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-500/30">
+                          Submit Ticket
+                        </button>
+                      </form>
+                    </div>
+
+                    {/* AI Support Info -> Embedded Chat */}
+                    <div className={`p-6 sm:p-8 rounded-[2rem] border overflow-hidden relative group flex flex-col ${dm ? 'bg-gradient-to-br from-[#0d1117] to-[#161b22] border-[#30363d]' : 'bg-gradient-to-br from-white to-blue-50/50 border-slate-200'}`} style={{ height: '550px' }}>
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-500/20 transition-all duration-700 pointer-events-none" />
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex items-center gap-4 mb-4 shrink-0">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-sky-400 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                            <Bot className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h3 className={`text-lg font-bold ${textPrimary}`}>Support AI Chat</h3>
+                            <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Dedicated Support</span>
+                          </div>
+                        </div>
+                        
+                        <div ref={supportChatRef} className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2 custom-scrollbar">
+                          {supportChatHistory.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center px-4 opacity-70">
+                              <Headset className={`w-12 h-12 mb-3 ${dm ? 'text-slate-600' : 'text-blue-200'}`} />
+                              <p className={`text-sm font-semibold ${textPrimary}`}>How can we help you today?</p>
+                              <p className={`text-xs mt-1 ${textSecondary}`}>Ask me about platform access, billing, certificates, or bugs.</p>
+                            </div>
+                          ) : (
+                            supportChatHistory.map((msg, i) => (
+                              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[85%] p-3 text-sm rounded-2xl shadow-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : (dm ? 'bg-slate-800 text-slate-200 rounded-tl-sm border border-slate-700' : 'bg-white text-slate-800 rounded-tl-sm border border-slate-200')}`}>
+                                  {msg.text}
+                                </div>
+                              </div>
+                            ))
+                          )}
+                          {supportChatLoading && (
+                            <div className="flex justify-start">
+                              <div className={`p-4 rounded-2xl rounded-tl-sm border shadow-sm ${dm ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                <div className="flex gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <form onSubmit={async (e) => {
+                          e.preventDefault();
+                          if(!supportChatMsg.trim()) return;
+                          const message = supportChatMsg;
+                          setSupportChatMsg('');
+                          const newHistory = [...supportChatHistory, { role: 'user' as const, text: message }];
+                          setSupportChatHistory(newHistory);
+                          setSupportChatLoading(true);
+                          try {
+                            const res = await fetch('/api/support/chat', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ message, history: supportChatHistory })
+                            });
+                            const data = await res.json();
+                            setSupportChatHistory([...newHistory, { role: 'ai', text: data.response || "No response." }]);
+                          } catch(err) {
+                            setSupportChatHistory([...newHistory, { role: 'ai', text: "Connection error." }]);
+                          } finally {
+                            setSupportChatLoading(false);
+                          }
+                        }} className="relative shrink-0">
+                          <input 
+                            type="text" 
+                            value={supportChatMsg}
+                            onChange={(e) => setSupportChatMsg(e.target.value)}
+                            placeholder="Type your support request..." 
+                            className={`w-full p-4 pr-14 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputCls}`}
+                          />
+                          <button type="submit" disabled={!supportChatMsg.trim() || supportChatLoading} className="absolute right-2 top-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+            </AnimatePresence>
           </div>
         </main>
       </div>
@@ -1174,47 +1534,136 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
                       </div>
                     </motion.div>
 
-                    {/* ▸ Curriculum */}
+                    {/* ▸ Interactive Digital Roadmap */}
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-                      <div className={bentoTile}>
-                        <div className="flex justify-between items-center mb-6">
-                          <h2 className={`text-2xl font-semibold ${textPrimary}`} style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>Curriculum</h2>
-                          <div className="flex items-center gap-4 w-1/3">
-                            <span className={`text-[11px] font-medium whitespace-nowrap ${dm ? 'text-slate-500' : 'text-slate-400'}`} style={{ fontFamily: 'Inter, sans-serif' }}>{scProg}% Complete</span>
-                            <div className={`h-2 w-full rounded-full overflow-hidden ${dm ? 'bg-slate-800' : 'bg-blue-100'}`}>
-                              <div className={`h-full rounded-full transition-all duration-500 ${scProg === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${scProg}%` }} />
+                      <div className={`${bentoTile} relative overflow-hidden`}>
+                        {/* Decorative background glow */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+                        
+                        <div className="flex justify-between items-center mb-8 relative z-10">
+                          <div>
+                            <h2 className={`text-2xl font-semibold flex items-center gap-3 ${textPrimary}`} style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>
+                              <TrendingUp className="w-6 h-6 text-blue-500" /> Course Roadmap
+                            </h2>
+                            <p className={`text-[11px] mt-1 tracking-wide ${dm ? 'text-slate-400' : 'text-slate-500'}`} style={{ fontFamily: 'Inter, sans-serif' }}>Your learning journey for {sc.title}</p>
+                          </div>
+                          <div className="flex items-center gap-4 w-1/3 max-w-[150px]">
+                            <span className={`text-[11px] font-bold whitespace-nowrap text-blue-500`} style={{ fontFamily: 'Inter, sans-serif' }}>{scProg}% Complete</span>
+                            <div className={`h-2 w-full rounded-full overflow-hidden ${dm ? 'bg-slate-800' : 'bg-blue-100'} shadow-inner`}>
+                              <div className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${scProg === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-600 to-indigo-500'}`} style={{ width: `${scProg}%` }}>
+                                <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 animate-[shimmer_2s_infinite]" />
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                          {sc.lectures.map((l, qi) => {
-                            const isDone = scCompleted.includes(l.title);
-                            return (
-                              <div key={qi} className={`flex items-center justify-between p-4 rounded-lg transition-all group/row cursor-pointer border border-transparent ${dm ? 'hover:bg-white/[0.03] hover:border-slate-700/50' : 'hover:bg-blue-50/30 hover:border-blue-100'}`}>
-                                <div className="flex items-center gap-4">
-                                  <button
-                                    onClick={() => setWatchingLecture({ courseId: sc.id, courseTitle: sc.title, title: l.title, videoId: l.videoId })}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                      isDone
-                                        ? (dm ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
-                                        : (dm ? 'bg-slate-800 text-slate-400 group-hover/row:bg-blue-600/20 group-hover/row:text-blue-400' : 'bg-slate-100 text-slate-400 group-hover/row:bg-blue-100 group-hover/row:text-blue-600')
+
+                        <div className="relative pl-2 sm:pl-6 pt-4 pb-8 z-10">
+                          {/* Vertical Track Line */}
+                          <div className={`absolute left-[1.375rem] sm:left-[2.875rem] top-8 bottom-12 w-1 rounded-full ${dm ? 'bg-slate-800/80' : 'bg-slate-100'} shadow-inner`} />
+                          
+                          {/* Active Progress Line */}
+                          <div 
+                            className="absolute left-[1.375rem] sm:left-[2.875rem] top-8 w-1 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-1000 ease-out" 
+                            style={{ height: sc.lectures.length > 0 ? `calc(${Math.min(scProg, 100)}% - 2rem)` : '0%' }}
+                          />
+
+                          <div className="space-y-12">
+                            {sc.lectures.map((l, qi) => {
+                              const isDone = scCompleted.includes(l.title);
+                              
+                              // Determine if this is the "next up" lecture
+                              let isNextUp = false;
+                              if (!isDone) {
+                                // It's next up if it's the first one, or if the previous one is done
+                                if (qi === 0) isNextUp = true;
+                                else {
+                                  const prevDone = scCompleted.includes(sc.lectures[qi-1].title);
+                                  if (prevDone) isNextUp = true;
+                                }
+                              }
+
+                              const isLocked = !isDone && !isNextUp;
+
+                              return (
+                                <div 
+                                  key={qi} 
+                                  className={`relative flex items-start gap-6 group cursor-pointer transition-all duration-300 animate-in slide-in-from-bottom-4 fade-in fill-mode-both ${isLocked ? 'opacity-50 hover:opacity-100' : ''}`}
+                                  style={{ animationDelay: `${qi * 100}ms` }}
+                                >
+                                  {/* Milestone Node */}
+                                  <div className="relative z-10 shrink-0 mt-1">
+                                    {isDone ? (
+                                      <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.4)] ring-4 ring-emerald-500/20">
+                                        <Check className="w-5 h-5 text-white" />
+                                      </div>
+                                    ) : isNextUp ? (
+                                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.6)] ring-4 ring-blue-500/30 animate-pulse">
+                                        <Play className="w-4 h-4 text-white ml-0.5" />
+                                      </div>
+                                    ) : (
+                                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 border-dashed ${dm ? 'bg-[#0d1117] border-slate-700 text-slate-500' : 'bg-white border-slate-300 text-slate-400'}`}>
+                                        <Lock className="w-4 h-4" />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Content Card */}
+                                  <div 
+                                    className={`flex-1 flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl border transition-all duration-300 transform group-hover:-translate-y-1 ${
+                                      isNextUp 
+                                        ? (dm ? 'bg-blue-900/10 border-blue-500/30 shadow-[0_4px_20px_-5px_rgba(37,99,235,0.15)]' : 'bg-blue-50/50 border-blue-200 shadow-lg shadow-blue-100') 
+                                        : (dm ? 'bg-[#0d1117]/50 border-[#30363d] group-hover:border-slate-600' : 'bg-slate-50 border-slate-200 group-hover:bg-white group-hover:shadow-md')
                                     }`}
+                                    onClick={() => setWatchingLecture({ courseId: sc.id, courseTitle: sc.title, title: l.title, videoId: l.videoId })}
                                   >
-                                    {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                                  </button>
-                                  <div>
-                                    <h3 className={`text-sm font-semibold transition-colors ${isDone ? (dm ? 'text-slate-500 line-through' : 'text-slate-400 line-through') : textPrimary} group-hover/row:text-blue-500`} style={{ fontFamily: 'Inter, sans-serif' }}>
-                                      {qi + 1}. {l.title}
-                                    </h3>
-                                    <p className={`text-[11px] mt-0.5 ${dm ? 'text-slate-600' : 'text-slate-400'}`} style={{ fontFamily: 'Inter, sans-serif' }}>Video Lecture</p>
+                                    <div className="mb-4 sm:mb-0">
+                                      <div className="flex items-center gap-2 mb-1.5">
+                                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                                          isDone ? 'bg-emerald-500/10 text-emerald-500' : isNextUp ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500'
+                                        }`}>
+                                          Module {qi + 1}
+                                        </span>
+                                        {isNextUp && <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span></span>}
+                                      </div>
+                                      <h3 className={`text-base font-bold transition-colors ${isDone ? (dm ? 'text-slate-400' : 'text-slate-500') : textPrimary} group-hover:text-blue-500`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                                        {l.title}
+                                      </h3>
+                                      <p className={`text-xs mt-1 max-w-sm ${dm ? 'text-slate-500' : 'text-slate-500'}`}>Interactive video lecture with practical examples and code walkthroughs.</p>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-4">
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); toggleLectureCompleted(sc.id, l.title); }} 
+                                        className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                                          isDone 
+                                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white' 
+                                            : isNextUp 
+                                              ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20'
+                                              : (dm ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')
+                                        }`}
+                                      >
+                                        {isDone ? 'Completed' : isNextUp ? 'Start Learning' : 'Mark Done'}
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                                <button onClick={() => toggleLectureCompleted(sc.id, l.title)} className={isDone ? 'text-emerald-500' : (dm ? 'text-slate-600' : 'text-slate-300')}>
-                                  {isDone ? <CheckCircle2 className="w-5 h-5" /> : <div className={`w-5 h-5 rounded-full border-2 ${dm ? 'border-slate-600' : 'border-slate-300'}`} />}
-                                </button>
+                              );
+                            })}
+                            
+                            {/* Final Goal Node */}
+                            <div className="relative flex items-center gap-6 opacity-80 pt-4">
+                              <div className="relative z-10 shrink-0 ml-1">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-4 ${scProg === 100 ? 'bg-yellow-400 border-yellow-200 text-white shadow-[0_0_20px_rgba(250,204,21,0.6)]' : (dm ? 'bg-[#161b22] border-[#30363d] text-slate-600' : 'bg-white border-slate-200 text-slate-300')}`}>
+                                  <Award className="w-4 h-4" />
+                                </div>
                               </div>
-                            );
-                          })}
+                              <div>
+                                <h3 className={`text-sm font-bold ${scProg === 100 ? 'text-yellow-500' : (dm ? 'text-slate-600' : 'text-slate-400')}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                                  Course Certification
+                                </h3>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -1449,6 +1898,8 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
             </motion.div>
           </motion.div>
         )}
+
+
       </AnimatePresence>
 
       {/* ═══ AVATAR CUSTOMIZER MODAL ═══ */}
@@ -1636,6 +2087,39 @@ const [activeTab, setActiveTabState] = useState<'home' | 'resources' | 'exams' |
                   className="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
                 >
                   Save Avatar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══ LOGOUT CONFIRMATION MODAL ═══ */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className={`relative w-full max-w-sm rounded-[2rem] p-8 shadow-2xl border ${dm ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'} text-center`}>
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 animate-pulse">
+                <LogOut className="w-8 h-8 -ml-1" />
+              </div>
+              <h3 className={`text-xl font-bold mb-2 ${textPrimary}`}>Ready to leave?</h3>
+              <p className={`text-sm mb-8 ${textSecondary}`}>Are you sure you want to log out of your session?</p>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${dm ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowLogoutConfirm(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm shadow-lg shadow-red-500/25 transition-all active:scale-95"
+                >
+                  Yes, Log Out
                 </button>
               </div>
             </motion.div>

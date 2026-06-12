@@ -418,6 +418,8 @@ function loadDatabase() {
       payments: defaultPayments,
       attempts: defaultAttempts,
       adminLogs: defaultAdminLogs,
+      supportTickets: [],
+      chatMessages: [],
       settings: defaultPlatformSettings
     };
     try {
@@ -443,6 +445,8 @@ function loadDatabase() {
       payments: defaultPayments,
       attempts: defaultAttempts,
       adminLogs: defaultAdminLogs,
+      supportTickets: [],
+      chatMessages: [],
       settings: defaultPlatformSettings
     };
     try {
@@ -472,6 +476,36 @@ async function startServer() {
   // Root path endpoint for API test
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
+  });
+
+  // --- STAFF CHAT ENDPOINTS ---
+  app.get('/api/chat', (req, res) => {
+    const db = loadDatabase();
+    res.json(db.chatMessages || []);
+  });
+
+  app.post('/api/chat', (req, res) => {
+    const db = loadDatabase();
+    const { senderId, senderName, senderRole, content } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({ error: 'Message content is required.' });
+    }
+
+    const newMessage = {
+      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      senderId,
+      senderName,
+      senderRole,
+      content,
+      timestamp: new Date().toISOString()
+    };
+
+    if (!db.chatMessages) db.chatMessages = [];
+    db.chatMessages.push(newMessage);
+    saveDatabase(db);
+    
+    res.json(newMessage);
   });
 
   // --- AUTH ENDPOINTS ---
@@ -1645,6 +1679,90 @@ async function startServer() {
   app.get('/api/superadmin/audit-logs', (req, res) => {
     const db = loadDatabase();
     res.json(db.adminLogs || []);
+  });
+
+  // --- SUPPORT TICKETS ENDPOINTS ---
+  app.get('/api/support/tickets', (req, res) => {
+    const db = loadDatabase();
+    res.json(db.supportTickets || []);
+  });
+
+  app.post('/api/support/ticket', (req, res) => {
+    const { userId, subject, description, userEmail, userName } = req.body;
+    if (!subject || !description) return res.status(400).json({ message: 'Subject and description are required' });
+    
+    const db = loadDatabase();
+    if (!db.supportTickets) db.supportTickets = [];
+    
+    const newTicket = {
+      id: `ticket-${Date.now()}`,
+      userId,
+      userName,
+      userEmail,
+      subject,
+      description,
+      status: 'open',
+      createdAt: new Date().toISOString()
+    };
+    
+    db.supportTickets.push(newTicket);
+    saveDatabase(db);
+    res.status(201).json({ message: 'Query raised successfully', ticket: newTicket });
+  });
+
+  app.put('/api/support/ticket/:id', (req, res) => {
+    const { status } = req.body;
+    const db = loadDatabase();
+    if (!db.supportTickets) db.supportTickets = [];
+    
+    const ticketIdx = db.supportTickets.findIndex((t: any) => t.id === req.params.id);
+    if (ticketIdx === -1) return res.status(404).json({ message: 'Ticket not found' });
+    
+    db.supportTickets[ticketIdx].status = status;
+    saveDatabase(db);
+    res.json({ message: 'Ticket updated', ticket: db.supportTickets[ticketIdx] });
+  });
+
+  // --- SUPPORT AI CHATBOT ROUTE ---
+  app.post('/api/support/chat', async (req, res) => {
+    const { message, history } = req.body;
+    if (!message) return res.status(400).json({ message: 'Message prompt required.' });
+
+    let responseText = '';
+    const hasKey = !!process.env.GEMINI_API_KEY;
+
+    if (!hasKey) {
+      responseText = "I'm the SkillVerse Technical Support AI. I can assist you with billing, platform access, certificate generation errors, or help you raise a query to our human team. Since my LLM key isn't active, I'm providing this simulated support response! If you have a complex issue, please use the 'Raise a Query' form to the left.";
+      return res.json({ response: responseText });
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const systemInstruction = `You are the SkillVerse Support AI. Your role is purely technical and customer support. 
+Address issues like login problems, billing disputes, missing certificates, or platform bugs. 
+If the user asks about course material or subjects, politely direct them to use the floating Student Question AI Chat.
+Be highly professional, empathetic, and concise.`;
+
+      const contentsParts: any[] = [];
+      if (history && Array.isArray(history)) {
+        history.slice(-6).forEach((h: any) => {
+          contentsParts.push({ role: h.role === 'ai' ? 'model' : 'user', parts: [{ text: h.text }] });
+        });
+      }
+      contentsParts.push({ role: 'user', parts: [{ text: message }] });
+
+      const geminiResponse = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: contentsParts,
+        config: { systemInstruction, temperature: 0.5 }
+      });
+
+      responseText = geminiResponse.text || "I was unable to process your support request.";
+      res.json({ response: responseText });
+    } catch (err: any) {
+      console.error('Error querying raw Gemini via SDK:', err);
+      res.status(500).json({ response: `Support AI connection error: ${err.message}` });
+    }
   });
 
   // --- AI CHATBOT ROUTE ---

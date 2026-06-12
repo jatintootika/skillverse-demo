@@ -1599,7 +1599,7 @@
       "name": "Student Profile",
       "email": "student@skillverse.in",
       "role": "student",
-      "plan": "popular",
+      "plan": "free",
       "billingCycle": "monthly",
       "joinedDate": "2026-05-01",
       "phone": "+919123456789"
@@ -1893,6 +1893,102 @@
         "skillLevel": "Absolute Beginner",
         "interest": "Software Engineering"
       }
+    },
+    {
+      "id": "usr-1781052358076",
+      "name": "LM .,",
+      "email": "jmkkm@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-10",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1781165777923",
+      "name": "TFUYJHJJ",
+      "email": "ghhhjk2@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-11",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1781167240867",
+      "name": "TFUYJHJJ",
+      "email": "hhyhhjk2@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-11",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1781263868065",
+      "name": "BIU",
+      "email": "jik@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-12",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1781266541078",
+      "name": "KVFVMDFVM",
+      "email": "vfdf2@gmail.com",
+      "phone": "+918420886522",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-12",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
+    },
+    {
+      "id": "usr-1781267236793",
+      "name": "JNKJ",
+      "email": "nnj2@gmail.com",
+      "phone": "",
+      "role": "student",
+      "plan": "free",
+      "billingCycle": "monthly",
+      "joinedDate": "2026-06-12",
+      "hasCompletedOnboarding": true,
+      "profileData": {
+        "goal": "Get a Job",
+        "skillLevel": "Absolute Beginner",
+        "interest": "Software Engineering"
+      }
     }
   ],
   "coupons": [
@@ -1928,17 +2024,6 @@
     }
   ],
   "certificates": [
-    {
-      "id": "cert-1",
-      "certificateId": "SV-2026-AI-01438",
-      "userId": "usr-3",
-      "userName": "Student Profile",
-      "courseId": "course-1",
-      "courseName": "AI & Machine Learning",
-      "score": 92,
-      "issuedAt": "2026-05-18T14:30:00Z",
-      "valid": true
-    },
     {
       "id": "cert-2",
       "certificateId": "SV-2026-FSD-00210",
@@ -2081,6 +2166,17 @@
       "score": 100,
       "issuedAt": "2026-06-09T07:37:05.744Z",
       "valid": true
+    },
+    {
+      "id": "cert-1781052454914",
+      "certificateId": "SV-2026-A&M-82765",
+      "userId": "usr-1781052358076",
+      "userName": "LM .,",
+      "courseId": "course-1",
+      "courseName": "AI & Machine Learning",
+      "score": 100,
+      "issuedAt": "2026-06-10T00:47:34.914Z",
+      "valid": true
     }
   ],
   "payments": [
@@ -2153,6 +2249,16 @@
       "status": "success",
       "gatewayRef": "pay_rzr_9532488",
       "createdAt": "2026-06-08T19:42:44.220Z"
+    },
+    {
+      "id": "pay-1781052409339",
+      "userId": "usr-1781052358076",
+      "type": "exam",
+      "details": "AI & Machine Learning Certificate Exam Access",
+      "amount": 299,
+      "status": "success",
+      "gatewayRef": "pay_rzr_6708658",
+      "createdAt": "2026-06-10T00:46:49.339Z"
     }
   ],
   "attempts": [
@@ -2437,6 +2543,23 @@
         "q-1-4": 2,
         "q-1-5": 1
       }
+    },
+    {
+      "id": "att-1781052454914",
+      "userId": "usr-1781052358076",
+      "courseId": "course-1",
+      "score": 5,
+      "totalQuestions": 5,
+      "status": "passed",
+      "startedAt": "2026-06-10T00:17:34.914Z",
+      "completedAt": "2026-06-10T00:47:34.914Z",
+      "answers": {
+        "q-1-1": 0,
+        "q-1-2": 2,
+        "q-1-3": 1,
+        "q-1-4": 2,
+        "q-1-5": 1
+      }
     }
   ],
   "adminLogs": [
@@ -2457,6 +2580,15 @@
       "details": "Added IITMADRAS 40% discount coupon",
       "ipAddress": "109.12.5.42",
       "timestamp": "2026-05-10T11:22:00Z"
+    },
+    {
+      "id": "log-1781159285916",
+      "adminId": "super-admin-root",
+      "adminName": "Super Admin Root",
+      "action": "Deleted Certificate Record",
+      "details": "Permanently deleted certificate record ID: cert-1",
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-06-11T06:28:05.916Z"
     }
   ],
   "settings": {

@@ -1,11 +1,15 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar, TrendingUp, Sparkles, Activity, AlertTriangle, CheckCircle, Info, BookOpen, Upload, BarChart3, UserCog } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar, TrendingUp, Sparkles, Activity, AlertTriangle, CheckCircle, Info, BookOpen, Upload, BarChart3, UserCog, LogOut, Bell, ChevronDown } from 'lucide-react';
 import { Course, User, Certificate, Coupon } from '../../types';
+import { clearAuth } from '../../lib/auth';
+import { StaffChatWidget } from '../chat/StaffChatWidget';
 
 interface AdminPortalProps {
   currentUser: User;
@@ -13,8 +17,8 @@ interface AdminPortalProps {
   darkMode: boolean;
   onRefreshCourses: () => void;
   onToast: (msg: string, type: 'success' | 'ref') => void;
-  initialTab?: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile';
-  onTabChange?: (tab: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile') => void;
+  initialTab?: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile' | 'support';
+  onTabChange?: (tab: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile' | 'support') => void;
 }
 
 export function AdminPortal({
@@ -26,9 +30,10 @@ export function AdminPortal({
   initialTab,
   onTabChange
 }: AdminPortalProps) {
-  const [activeTab, setActiveTabState] = useState<'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile'>(initialTab || 'overview');
-  
-  const setActiveTab = (tab: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile') => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile' | 'support'>(initialTab || 'overview');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const setActiveTab = (tab: 'overview' | 'courses' | 'students' | 'exams' | 'certificates' | 'coupons' | 'notifications' | 'profile' | 'support') => {
     setActiveTabState(tab);
     if (onTabChange) onTabChange(tab);
   };
@@ -38,17 +43,18 @@ export function AdminPortal({
       setActiveTabState(initialTab);
     }
   }, [initialTab]);
-  
+
   const hasPermission = (permission: string) => {
     if (currentUser.role === 'super_admin') return true;
     return currentUser.role === 'admin' && (currentUser.permissions || []).includes(permission);
   };
-  
+
   // Simulated server states
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<User[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
   // Search filter hooks
   const [studentsQuery, setStudentsQuery] = useState('');
@@ -82,6 +88,7 @@ export function AdminPortal({
   const [profileName, setProfileName] = useState(currentUser.name);
   const [profilePhone, setProfilePhone] = useState(currentUser.phone || '');
   const [profilePassword, setProfilePassword] = useState('');
+  const [profileAvatar, setProfileAvatar] = useState<string | null>(null);
 
   // Notifications system state
   const [notifyTitle, setNotifyTitle] = useState('');
@@ -97,16 +104,20 @@ export function AdminPortal({
   const [courseQuestions, setCourseQuestions] = useState<any[]>([]);
   const [newQ, setNewQ] = useState({ question: '', optA: '', optB: '', optC: '', optD: '', correctIdx: 0 });
 
+  const [headerMenuOpen, setHeaderMenuOpen] = useState<'none' | 'notifications' | 'profile'>('none');
+
   const fetchAdminData = async () => {
     setLoading(true);
     try {
       const statsRes = await fetch('/api/admin/stats');
       const usersRes = await fetch('/api/admin/users');
       const cpnsRes = await fetch('/api/admin/coupons');
+      const tcktsRes = await fetch('/api/support/tickets');
 
       if (statsRes.ok) setStats(await statsRes.json());
       if (usersRes.ok) setStudents(await usersRes.json());
       if (cpnsRes.ok) setCoupons(await cpnsRes.json());
+      if (tcktsRes.ok) setSupportTickets(await tcktsRes.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -317,17 +328,17 @@ export function AdminPortal({
 
     try {
       let lcts = [];
-      try { lcts = JSON.parse(newCourse.lecturesText || '[]'); } catch(e) {
+      try { lcts = JSON.parse(newCourse.lecturesText || '[]'); } catch (e) {
         onToast('Lectures list must be valid JSON format!', 'ref');
         return;
       }
       let asts = [];
-      try { asts = JSON.parse(newCourse.assignmentsText || '[]'); } catch(e) {
+      try { asts = JSON.parse(newCourse.assignmentsText || '[]'); } catch (e) {
         onToast('Assignments list must be valid JSON format!', 'ref');
         return;
       }
       let qzs = [];
-      try { qzs = JSON.parse(newCourse.quizzesText || '[]'); } catch(e) {
+      try { qzs = JSON.parse(newCourse.quizzesText || '[]'); } catch (e) {
         onToast('Quizzes list must be valid JSON format!', 'ref');
         return;
       }
@@ -367,7 +378,7 @@ export function AdminPortal({
       } else {
         onToast('Server error while saving newly proposed course.', 'ref');
       }
-    } catch(err) {
+    } catch (err) {
       console.error(err);
     }
   };
@@ -378,17 +389,17 @@ export function AdminPortal({
 
     try {
       let lcts = [];
-      try { lcts = JSON.parse(editingCourseLecturesText || '[]'); } catch(e) {
+      try { lcts = JSON.parse(editingCourseLecturesText || '[]'); } catch (e) {
         onToast('Lectures array must be valid JSON format!', 'ref');
         return;
       }
       let asts = [];
-      try { asts = JSON.parse(editingCourseAssignmentsText || '[]'); } catch(e) {
+      try { asts = JSON.parse(editingCourseAssignmentsText || '[]'); } catch (e) {
         onToast('Assignments array must be valid JSON format!', 'ref');
         return;
       }
       let qzs = [];
-      try { qzs = JSON.parse(editingCourseQuizzesText || '[]'); } catch(e) {
+      try { qzs = JSON.parse(editingCourseQuizzesText || '[]'); } catch (e) {
         onToast('Quizzes array must be valid JSON format!', 'ref');
         return;
       }
@@ -434,21 +445,37 @@ export function AdminPortal({
   );
 
   return (
-    <div className={`w-full px-4 sm:px-6 lg:px-10 py-10 flex flex-col md:flex-row gap-8 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
-      
+    <div className={`h-screen overflow-hidden flex ${darkMode ? 'bg-[#0d1117] text-white' : 'bg-gray-50 text-slate-800'}`}>
+
       {/* 1. ADMIN PANEL MENU */}
-      <div className="w-full md:w-[260px] shrink-0 space-y-6">
+      <aside className={`w-[260px] shrink-0 h-screen sticky top-0 flex flex-col border-r overflow-y-auto no-scrollbar ${darkMode ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'}`}>
+        <div className="p-6 space-y-6 pb-10">
         {/* Brand/User Card */}
-        <div className={`p-5 rounded-3xl border backdrop-blur-xl flex flex-col items-center justify-center relative overflow-hidden transition-colors ${
-          darkMode 
-            ? 'bg-white/[0.03] border-white/[0.08]' 
-            : 'bg-white/90 border-slate-200 shadow-xl'
-        }`}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className={`p-5 mt-2 rounded-[1.5rem] border flex flex-col items-start justify-center relative overflow-hidden transition-all duration-500 group ${darkMode
+          ? 'bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 border-slate-700/50 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]'
+          : 'bg-gradient-to-br from-white via-slate-50 to-purple-50/50 border-slate-200/80 shadow-[0_8px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_25px_rgb(0,0,0,0.08)] hover:border-purple-200'
+          }`}>
+          {/* Animated Glows */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all duration-700 pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700 pointer-events-none" />
+
+          {/* Status Badge */}
+          <div className={`inline-flex items-center gap-2 px-2.5 py-1 mb-3 rounded-lg text-[9px] uppercase font-extrabold tracking-widest border transition-colors relative z-10 ${
+            darkMode 
+              ? 'bg-purple-500/10 text-purple-300 border-purple-500/20 group-hover:bg-purple-500/20' 
+              : 'bg-purple-50 text-purple-700 border-purple-200/60 group-hover:bg-purple-100'
+          }`}>
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+            </span>
+            Admin Console
+          </div>
           
-          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-purple-500 mb-2 relative z-10">Administrative Console</span>
-          <h4 className="font-extrabold text-sm truncate bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent relative z-10" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          {/* User Name/Role */}
+          <h4 className={`font-black text-[17px] tracking-tight relative z-10 leading-snug transition-colors ${
+            darkMode ? 'text-white group-hover:text-purple-100' : 'text-slate-800 group-hover:text-slate-900'
+          }`}>
             {currentUser.name}
           </h4>
         </div>
@@ -471,14 +498,123 @@ export function AdminPortal({
           {hasPermission('coupons') && (
             <MenuBtn darkMode={darkMode} active={activeTab === 'coupons'} icon={<Tag />} label="Discounts & Coupons" onClick={() => setActiveTab('coupons')} />
           )}
-          <MenuBtn darkMode={darkMode} active={activeTab === 'notifications'} icon={<AlertOctagon />} label="Notifications" onClick={() => setActiveTab('notifications')} />
+          <MenuBtn darkMode={darkMode} active={activeTab === 'support'} icon={<AlertOctagon />} label="Support Tickets" onClick={() => setActiveTab('support')} />
+          <MenuBtn darkMode={darkMode} active={activeTab === 'notifications'} icon={<Bell />} label="Notifications" onClick={() => setActiveTab('notifications')} />
           <MenuBtn darkMode={darkMode} active={activeTab === 'profile'} icon={<Lock />} label="Profile Settings" onClick={() => setActiveTab('profile')} />
+          
+          <div className="pt-4 mt-2 border-t border-slate-200 dark:border-white/10">
+            <button 
+              onClick={() => setShowLogoutConfirm(true)} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all shadow-sm
+                bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 hover:shadow-md
+                hover:-translate-y-0.5
+              `}
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              <LogOut className="w-5 h-5" />
+              Secure Log Out
+            </button>
+          </div>
         </div>
-      </div>
+        </div>
+      </aside>
 
       {/* 2. ADMIN PORTALS WORKSPACE */}
-      <div className="flex-grow min-w-0">
-        
+      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+        {/* Top Header Bar */}
+        <header className={`shrink-0 z-50 flex items-center justify-end px-8 py-4 border-b relative ${darkMode ? 'bg-[#0d1117] border-[#30363d]' : 'bg-white border-slate-200 shadow-sm'}`}>
+          <div className="flex items-center gap-6 relative z-50">
+            
+            {/* Notification Bell */}
+            <div className="relative">
+              <button 
+                onClick={() => setHeaderMenuOpen(prev => prev === 'notifications' ? 'none' : 'notifications')}
+                className={`relative p-2.5 rounded-full transition-all focus:outline-none ${darkMode ? 'text-slate-400 hover:text-white hover:bg-[#161b22]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'} ${headerMenuOpen === 'notifications' ? (darkMode ? 'bg-[#161b22] text-white' : 'bg-slate-100 text-slate-900') : ''}`}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-[#0d1117]"></span>
+              </button>
+              
+              {/* Notifications Floating UI */}
+              <div className={`absolute top-full right-0 mt-4 w-80 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-5 transition-all duration-300 origin-top-right z-50 ${darkMode ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'notifications' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className={`font-extrabold text-sm tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Notifications</h4>
+                  <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-md">2 New</span>
+                </div>
+                <div className="space-y-3">
+                  {systemAlerts.slice(0, 2).map((alert, i) => (
+                    <div key={alert.id} className={`p-3.5 rounded-2xl border transition-all hover:-translate-y-0.5 cursor-pointer ${darkMode ? 'bg-[#0d1117]/80 border-[#30363d] hover:border-blue-500/30' : 'bg-slate-50/50 border-slate-100 hover:border-blue-200 hover:shadow-sm'}`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                        <p className={`text-xs font-bold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{alert.title}</p>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2">{alert.message}</p>
+                      <p className="text-[9px] text-slate-400 font-mono mt-2">{alert.timestamp}</p>
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => { setHeaderMenuOpen('none'); setActiveTab('notifications'); }}
+                  className="w-full mt-4 py-2.5 text-xs font-bold text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                >
+                  View Activity Logs →
+                </button>
+              </div>
+            </div>
+            
+            {/* Profile Element */}
+            <div className="relative">
+              <div 
+                onClick={() => setHeaderMenuOpen(prev => prev === 'profile' ? 'none' : 'profile')}
+                className={`flex items-center gap-3 pl-6 border-l cursor-pointer group transition-all ${darkMode ? 'border-[#30363d]' : 'border-slate-200'} ${headerMenuOpen === 'profile' ? 'opacity-80' : ''}`}
+              >
+                <div className="text-right hidden sm:block">
+                  <p className={`text-sm font-bold leading-none transition-colors ${darkMode ? 'text-white' : 'text-slate-900'} group-hover:text-purple-500 dark:group-hover:text-purple-400`}>{currentUser.name}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-purple-500 mt-1">Administrator</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-transparent group-hover:ring-purple-400/50 transition-all">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${headerMenuOpen === 'profile' ? 'rotate-180 text-purple-500' : (darkMode ? 'text-slate-500 group-hover:translate-y-0.5' : 'text-slate-400 group-hover:translate-y-0.5')}`} />
+              </div>
+              
+              {/* Profile Floating UI */}
+              <div className={`absolute top-full right-0 mt-4 w-64 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-2 transition-all duration-300 origin-top-right z-50 ${darkMode ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'profile' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                <div className={`px-4 py-3 border-b mb-2 ${darkMode ? 'border-white/5' : 'border-slate-100'}`}>
+                  <p className={`text-sm font-extrabold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{currentUser.name}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email || 'admin@skillverse.com'}</p>
+                </div>
+                
+                <div className="space-y-1">
+                  <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('profile'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${darkMode ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <UserCog className="w-4 h-4 text-purple-500" /> My Profile
+                  </button>
+                  <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('overview'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${darkMode ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <LayoutDashboard className="w-4 h-4 text-blue-500" /> View Dashboard
+                  </button>
+                  <button onClick={() => { setHeaderMenuOpen('none'); document.documentElement.classList.toggle('dark'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${darkMode ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                    <Sparkles className="w-4 h-4 text-yellow-500" /> Toggle Theme
+                  </button>
+                </div>
+                
+                <div className={`mt-2 pt-2 border-t ${darkMode ? 'border-white/5' : 'border-slate-100'}`}>
+                  <button onClick={() => window.location.href = '/'} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${darkMode ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}>
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+          
+          {/* Invisible overlay to click-outside and close menu */}
+          {headerMenuOpen !== 'none' && (
+            <div className="fixed inset-0 z-40 cursor-default" onClick={() => setHeaderMenuOpen('none')} />
+          )}
+        </header>
+
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10 pb-20">
+
         {/* VIEW 1: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
@@ -541,11 +677,10 @@ export function AdminPortal({
             {/* ─── Revenue Chart + AI Insights ─── */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Revenue Growth */}
-              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
-                darkMode 
-                  ? 'bg-white/[0.03] border-white/[0.08]' 
-                  : 'bg-white/90 border-slate-200 shadow-xl'
-              }`}>
+              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${darkMode
+                ? 'bg-white/[0.03] border-white/[0.08]'
+                : 'bg-white/90 border-slate-200 shadow-xl'
+                }`}>
                 <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
                   <h2 className="text-xl font-bold tracking-tight flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
                     <TrendingUp className="w-5 h-5 text-purple-400" />
@@ -555,11 +690,11 @@ export function AdminPortal({
                     +12.5% Growth
                   </span>
                 </div>
-                
+
                 <div className="relative min-h-[280px] flex items-end justify-around gap-3 pt-4">
                   {/* Grid Lines */}
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                    {[0,1,2,3].map(i => (
+                    {[0, 1, 2, 3].map(i => (
                       <div key={i} className={`w-full h-0 border-t ${darkMode ? 'border-white/[0.04]' : 'border-slate-100'}`} />
                     ))}
                   </div>
@@ -579,25 +714,23 @@ export function AdminPortal({
                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl z-20">
                           ₹{bar.value.toLocaleString()}
                         </div>
-                        <div 
+                        <div
                           style={{ height: `${bar.height * 2.8}px` }}
-                          className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer ${
-                            i === 4 
-                              ? 'bg-gradient-to-t from-pink-600/30 to-pink-500 shadow-[0_8px_24px_rgba(236,72,153,0.3)]' 
-                              : 'bg-gradient-to-t from-purple-600/20 to-purple-500/80 hover:from-purple-500/40 hover:to-purple-400'
-                          }`}
+                          className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer ${i === 4
+                            ? 'bg-gradient-to-t from-pink-600/30 to-pink-500 shadow-[0_8px_24px_rgba(236,72,153,0.3)]'
+                            : 'bg-gradient-to-t from-purple-600/20 to-purple-500/80 hover:from-purple-500/40 hover:to-purple-400'
+                            }`}
                         />
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 {/* X-axis labels */}
                 <div className="flex justify-around mt-4">
                   {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, i) => (
-                    <span key={i} className={`text-xs font-semibold ${
-                      i === 4 ? 'text-pink-400' : darkMode ? 'text-slate-500' : 'text-slate-400'
-                    }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    <span key={i} className={`text-xs font-semibold ${i === 4 ? 'text-pink-400' : darkMode ? 'text-slate-500' : 'text-slate-400'
+                      }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
                       {month}
                     </span>
                   ))}
@@ -605,11 +738,10 @@ export function AdminPortal({
               </div>
 
               {/* AI Insights */}
-              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors flex flex-col justify-between ${
-                darkMode 
-                  ? 'bg-white/[0.03] border-white/[0.08]' 
-                  : 'bg-white/90 border-slate-200 shadow-xl'
-              }`}>
+              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors flex flex-col justify-between ${darkMode
+                ? 'bg-white/[0.03] border-white/[0.08]'
+                : 'bg-white/90 border-slate-200 shadow-xl'
+                }`}>
                 <div>
                   <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/5">
                     <Sparkles className="w-5 h-5 text-purple-400" />
@@ -653,20 +785,18 @@ export function AdminPortal({
             {/* ─── Recent Activity + Quick Actions ─── */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Student Activity */}
-              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
-                darkMode 
-                  ? 'bg-white/[0.03] border-white/[0.08]' 
-                  : 'bg-white/90 border-slate-200 shadow-xl'
-              }`}>
+              <div className={`lg:col-span-2 p-6 rounded-3xl border backdrop-blur-xl transition-colors ${darkMode
+                ? 'bg-white/[0.03] border-white/[0.08]'
+                : 'bg-white/90 border-slate-200 shadow-xl'
+                }`}>
                 <h2 className="text-xl font-bold tracking-tight mb-6 pb-4 border-b border-white/5 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
                   <Activity className="w-5 h-5 text-purple-400" />
                   Recent Signups
                 </h2>
-                
+
                 {/* Table Header */}
-                <div className={`grid grid-cols-4 gap-4 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
-                  darkMode ? 'bg-white/[0.03] text-slate-500' : 'bg-slate-50 text-slate-400'
-                }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                <div className={`grid grid-cols-4 gap-4 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider ${darkMode ? 'bg-white/[0.03] text-slate-500' : 'bg-slate-50 text-slate-400'
+                  }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
                   <span>Student</span>
                   <span>Email</span>
                   <span>Plan</span>
@@ -676,13 +806,12 @@ export function AdminPortal({
                 {/* Table Rows */}
                 <div className="mt-2 space-y-1">
                   {stats.recentSignups.map((usr: any, idx: number) => (
-                    <div 
-                      key={idx} 
-                      className={`grid grid-cols-4 gap-4 px-4 py-3.5 rounded-xl text-sm transition-colors cursor-pointer ${
-                        darkMode 
-                          ? 'hover:bg-white/[0.03] text-slate-300' 
-                          : 'hover:bg-slate-50 text-slate-700'
-                      }`}
+                    <div
+                      key={idx}
+                      className={`grid grid-cols-4 gap-4 px-4 py-3.5 rounded-xl text-sm transition-colors cursor-pointer ${darkMode
+                        ? 'hover:bg-white/[0.03] text-slate-300'
+                        : 'hover:bg-slate-50 text-slate-700'
+                        }`}
                       style={{ fontFamily: 'Outfit, sans-serif' }}
                     >
                       <span className="font-semibold truncate">{usr.name}</span>
@@ -695,11 +824,10 @@ export function AdminPortal({
               </div>
 
               {/* Quick Actions */}
-              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors ${
-                darkMode 
-                  ? 'bg-white/[0.03] border-white/[0.08]' 
-                  : 'bg-white/90 border-slate-200 shadow-xl'
-              }`}>
+              <div className={`p-6 rounded-3xl border backdrop-blur-xl transition-colors ${darkMode
+                ? 'bg-white/[0.03] border-white/[0.08]'
+                : 'bg-white/90 border-slate-200 shadow-xl'
+                }`}>
                 <h2 className="text-xl font-bold tracking-tight mb-6 pb-4 border-b border-white/5" style={{ fontFamily: 'Outfit, sans-serif' }}>
                   Quick Actions
                 </h2>
@@ -754,40 +882,52 @@ export function AdminPortal({
                 value={studentsQuery}
                 onChange={(e) => setStudentsQuery(e.target.value)}
                 placeholder="Search students by name or email..."
-                className={`w-full text-xs pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
-                }`}
+                className={`w-full text-xs pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
+                  }`}
               />
             </div>
 
-            <div className={`rounded-3xl border overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-              <div className="overflow-x-auto text-xs">
+            <div className={`rounded-2xl border overflow-hidden transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <div className="overflow-x-auto text-sm">
                 <table className="w-full text-left font-sans">
-                  <thead className={darkMode ? 'bg-slate-950 text-slate-400' : 'bg-slate-100 text-slate-500'}>
-                    <tr className="border-b border-inherit">
-                      <th className="p-4 font-bold">Student Identity</th>
-                      <th className="p-4 font-bold">Current Plan Hierarchy</th>
-                      <th className="p-4 font-bold">Joined Date</th>
-                      <th className="p-4 font-bold">Administration Control</th>
+                  <thead className={darkMode ? 'bg-slate-950/50 text-slate-400 text-xs' : 'bg-slate-50 text-slate-500 text-xs'}>
+                    <tr className={`border-b ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                      <th className="p-4 font-bold uppercase tracking-wider">Student Identity</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Current Plan Hierarchy</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Joined Date</th>
+                      <th className="p-4 font-bold uppercase tracking-wider text-right">Administration Control</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-inherit font-medium">
+                  <tbody className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-slate-100'} font-medium`}>
                     {filteredStudents.map((stud) => (
-                      <tr key={stud.id} className={darkMode ? 'hover:bg-slate-950/40' : 'hover:bg-slate-50/50'}>
+                      <tr key={stud.id} className={`transition-colors ${darkMode ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}`}>
                         <td className="p-4">
-                          <span className="font-extrabold block text-slate-100 dark:text-white">{stud.name}</span>
-                          <span className="text-[10px] text-slate-400 font-mono select-all block">{stud.email}</span>
+                          <span className={`font-bold block ${darkMode ? 'text-white' : 'text-slate-800'}`}>{stud.name}</span>
+                          <span className={`text-[11px] font-mono select-all block mt-0.5 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{stud.email}</span>
                         </td>
-                        <td className="p-4 text-xs">
-                          <span className="p-1 px-2.5 rounded-lg font-mono font-bold capitalize bg-blue-500/10 text-blue-500">
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold capitalize border ${
+                            stud.plan === 'pro' 
+                              ? (darkMode ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-600 border-purple-100')
+                              : (darkMode ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-blue-600 border-blue-100')
+                          }`}>
                             {stud.plan}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-400 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {stud.joinedDate}</td>
                         <td className="p-4">
+                          <div className={`flex items-center gap-1.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <Calendar className="w-4 h-4" /> 
+                            {stud.joinedDate}
+                          </div>
+                        </td>
+                        <td className="p-4 text-right">
                           <button
                             onClick={() => handleToggleUserPlan(stud.id, stud.plan)}
-                            className="px-2.5 py-1 text-[10px] font-bold text-white bg-blue-600 rounded"
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all shadow-sm ${
+                              stud.plan === 'pro'
+                                ? (darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50')
+                                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-400 hover:shadow-md'
+                            }`}
                           >
                             {stud.plan === 'pro' ? 'Downgrade to Free' : 'Grant PRO Upgrade'}
                           </button>
@@ -810,17 +950,15 @@ export function AdminPortal({
             </div>
 
             {/* Course Selector box */}
-            <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
-              darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
-            }`}>
+            <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
+              }`}>
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Select Exam Assessment</label>
                 <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className={`text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold ${
-                    darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 >
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>{c.title}</option>
@@ -837,7 +975,7 @@ export function AdminPortal({
               <h3 className="font-extrabold text-sm flex items-center gap-1.5 border-b pb-2">
                 <Plus className="w-4 h-4 text-blue-500" /> Create Custom exam MCQ
               </h3>
-              
+
               <form onSubmit={handleCreateQuestion} className="space-y-3 text-xs font-medium">
                 <div className="space-y-1">
                   <label className="text-slate-400">MCQ Query Statement</label>
@@ -846,9 +984,8 @@ export function AdminPortal({
                     value={newQ.question}
                     onChange={(e) => setNewQ({ ...newQ, question: e.target.value })}
                     placeholder="e.g. In React, what represents a Virtual DOM?"
-                    className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                      darkMode ? 'bg-slate-950 border-slate-850' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-850' : 'bg-slate-50 border-slate-200'
+                      }`}
                     required
                   />
                 </div>
@@ -861,9 +998,8 @@ export function AdminPortal({
                       value={newQ.optA}
                       onChange={(e) => setNewQ({ ...newQ, optA: e.target.value })}
                       placeholder="Choice A"
-                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                        darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
+                        }`}
                       required
                     />
                   </div>
@@ -874,9 +1010,8 @@ export function AdminPortal({
                       value={newQ.optB}
                       onChange={(e) => setNewQ({ ...newQ, optB: e.target.value })}
                       placeholder="Choice B"
-                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                        darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
+                        }`}
                       required
                     />
                   </div>
@@ -887,9 +1022,8 @@ export function AdminPortal({
                       value={newQ.optC}
                       onChange={(e) => setNewQ({ ...newQ, optC: e.target.value })}
                       placeholder="Choice C"
-                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                        darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
+                        }`}
                     />
                   </div>
                   <div className="space-y-1">
@@ -899,9 +1033,8 @@ export function AdminPortal({
                       value={newQ.optD}
                       onChange={(e) => setNewQ({ ...newQ, optD: e.target.value })}
                       placeholder="Choice D"
-                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                        darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
+                        }`}
                     />
                   </div>
                 </div>
@@ -911,9 +1044,8 @@ export function AdminPortal({
                   <select
                     value={newQ.correctIdx}
                     onChange={(e) => setNewQ({ ...newQ, correctIdx: Number(e.target.value) })}
-                    className={`px-3 py-2 text-xs rounded-lg border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                      darkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`px-3 py-2 text-xs rounded-lg border focus:outline-none focus:ring-1 focus:ring-blue-500 ${darkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
+                      }`}
                   >
                     <option value="0">Choice A (Index 0)</option>
                     <option value="1">Choice B (Index 1)</option>
@@ -935,9 +1067,8 @@ export function AdminPortal({
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Curriculum audit</h4>
               {courseQuestions.map((q, idx) => (
-                <div key={q.id} className={`p-4 rounded-xl border text-xs leading-relaxed flex justify-between gap-4 items-start ${
-                  darkMode ? 'bg-slate-905 border-slate-800' : 'bg-slate-100 border-slate-200'
-                }`}>
+                <div key={q.id} className={`p-4 rounded-xl border text-xs leading-relaxed flex justify-between gap-4 items-start ${darkMode ? 'bg-slate-905 border-slate-800' : 'bg-slate-100 border-slate-200'
+                  }`}>
                   <div>
                     <strong className="text-slate-100 dark:text-white block font-bold">Q{idx + 1}. {q.question}</strong>
                     <div className="mt-1 flex flex-wrap gap-2 pt-1 font-medium text-[10px]">
@@ -970,48 +1101,50 @@ export function AdminPortal({
               <p className="text-xs text-slate-400 mt-1">Audit active credentials issued. Disable or renew status parameters on the system.</p>
             </div>
 
-            <div className={`rounded-3xl border overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-              <div className="overflow-x-auto text-xs font-medium">
+            <div className={`rounded-2xl border overflow-hidden transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <div className="overflow-x-auto text-sm">
                 <table className="w-full text-left font-sans">
-                  <thead className={darkMode ? 'bg-slate-950 text-slate-400' : 'bg-slate-100 text-slate-500'}>
-                    <tr className="border-b border-inherit">
-                      <th className="p-4 font-bold">Student Name</th>
-                      <th className="p-4 font-bold">Credential Details</th>
-                      <th className="p-4 font-bold">Ledger Status</th>
-                      <th className="p-4 font-bold">Compliance Control</th>
+                  <thead className={darkMode ? 'bg-slate-950/50 text-slate-400 text-xs' : 'bg-slate-50 text-slate-500 text-xs'}>
+                    <tr className={`border-b ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                      <th className="p-4 font-bold uppercase tracking-wider">Student Name</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Credential Details</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Ledger Status</th>
+                      <th className="p-4 font-bold uppercase tracking-wider text-right">Compliance Control</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-inherit">
+                  <tbody className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-slate-100'} font-medium`}>
                     {stats.recentCertificates.map((cert: any) => (
-                      <tr key={cert.id} className={darkMode ? 'hover:bg-slate-950/40' : 'hover:bg-slate-50/50'}>
-                        <td className="p-4 font-bold text-slate-100 dark:text-white">{cert.userName}</td>
+                      <tr key={cert.id} className={`transition-colors ${darkMode ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}`}>
+                        <td className={`p-4 font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+                          {cert.userName}
+                        </td>
                         <td className="p-4 leading-relaxed">
-                          <span className="font-bold text-slate-300 block">{cert.courseName}</span>
-                          <span className="text-[10px] text-slate-400 font-mono tracking-wider">{cert.certificateId}</span>
+                          <span className={`font-bold block ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{cert.courseName}</span>
+                          <span className={`text-[11px] font-mono select-all tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{cert.certificateId}</span>
                         </td>
                         <td className="p-4">
                           {cert.valid ? (
-                            <span className="p-1 px-2.5 rounded-lg text-[9px] font-bold bg-green-500/10 text-green-500">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${darkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                               Valid Ledger Certified
                             </span>
                           ) : (
-                            <span className="p-1 px-2.5 rounded-lg text-[9px] font-bold bg-red-500/15 text-red-500">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${darkMode ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-red-50 text-red-600 border-red-100'}`}>
                               Revoked/Suspended
                             </span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 text-right">
                           {cert.valid ? (
                             <button
                               onClick={() => handleRevokeCertificate(cert.certificateId)}
-                              className="px-2.5 py-1 text-[9px] font-bold rounded bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"
+                              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all shadow-sm ${darkMode ? 'bg-slate-800 text-red-400 hover:bg-slate-700 hover:text-red-300' : 'bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200'}`}
                             >
                               Revoke validation
                             </button>
                           ) : (
                             <button
                               onClick={() => handleReissueCertificate(cert.certificateId)}
-                              className="px-2 py-1 text-[9px] font-bold rounded bg-green-600 text-white"
+                              className="px-3 py-1.5 text-xs font-bold rounded-lg transition-all shadow-sm bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 hover:shadow-md"
                             >
                               Re-issue valid
                             </button>
@@ -1035,47 +1168,47 @@ export function AdminPortal({
             </div>
 
             {/* Create Coupon box */}
-            <div className={`p-6 rounded-3xl border space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-              <h3 className="font-extrabold text-sm flex items-center gap-1.5 border-b pb-2">
-                <Tag className="w-4 h-4 text-blue-500" /> Formulate Promotional Coupon
+            <div className={`p-6 rounded-3xl border space-y-5 transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-3 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                  <Tag className="w-4 h-4 text-blue-500" /> 
+                </div>
+                Formulate Promotional Coupon
               </h3>
-              
-              <form onSubmit={handleCreateCoupon} className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs font-semibold">
-                <div className="space-y-1">
-                  <label className="text-slate-400">Coupon Code</label>
+
+              <form onSubmit={handleCreateCoupon} className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-semibold">
+                <div className="space-y-1.5">
+                  <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Coupon Code</label>
                   <input
                     type="text"
                     value={newCoupon.code}
                     onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
                     placeholder="WELCOME50"
-                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono tracking-wider ${
-                      darkMode ? 'bg-slate-950 border-slate-850' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-mono tracking-wider transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                      }`}
                     required
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400">Discount Amount</label>
+                <div className="space-y-1.5">
+                  <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Discount Amount</label>
                   <input
                     type="number"
                     value={newCoupon.discount}
                     onChange={(e) => setNewCoupon({ ...newCoupon, discount: Number(e.target.value) })}
-                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                      darkMode ? 'bg-slate-950 border-slate-855' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      }`}
                     required
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400">Rate Type</label>
+                <div className="space-y-1.5">
+                  <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Rate Type</label>
                   <select
                     value={newCoupon.type}
                     onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value })}
-                    className={`px-3 py-2.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                      darkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors cursor-pointer appearance-none ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      }`}
                   >
                     <option value="percentage">Percentage (%)</option>
                     <option value="flat">Flat Price (₹)</option>
@@ -1085,7 +1218,7 @@ export function AdminPortal({
                 <div className="flex items-end">
                   <button
                     type="submit"
-                    className="w-full py-2.5 text-white text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 hover:scale-[1.03] active:scale-95 transition-all shadow-md"
+                    className="w-full py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all shadow-md shadow-blue-500/20"
                   >
                     Create Coupon
                   </button>
@@ -1094,36 +1227,39 @@ export function AdminPortal({
             </div>
 
             {/* Inactive Coupon checklists */}
-            <div className={`rounded-3xl border overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-              <div className="overflow-x-auto text-xs font-medium">
+            <div className={`rounded-2xl border overflow-hidden transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <div className="overflow-x-auto text-sm">
                 <table className="w-full text-left font-sans">
-                  <thead className={darkMode ? 'bg-slate-950 text-slate-400' : 'bg-slate-100 text-slate-500'}>
-                    <tr className="border-b border-inherit">
-                      <th className="p-4 font-bold">Promo Code</th>
-                      <th className="p-4 font-bold col-span-1">Rate Offset</th>
-                      <th className="p-4 font-bold">Expiration</th>
-                      <th className="p-4 font-bold">System Status</th>
+                  <thead className={darkMode ? 'bg-slate-950/50 text-slate-400 text-xs' : 'bg-slate-50 text-slate-500 text-xs'}>
+                    <tr className={`border-b ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                      <th className="p-4 font-bold uppercase tracking-wider">Promo Code</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Rate Offset</th>
+                      <th className="p-4 font-bold uppercase tracking-wider">Expiration</th>
+                      <th className="p-4 font-bold uppercase tracking-wider text-right">System Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-inherit">
+                  <tbody className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-slate-100'} font-medium`}>
                     {coupons.map((c) => (
-                      <tr key={c.id} className={darkMode ? 'hover:bg-slate-950/40' : 'hover:bg-slate-50/50'}>
+                      <tr key={c.id} className={`transition-colors ${darkMode ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}`}>
                         <td className="p-4">
-                          <strong className="font-mono text-blue-500 tracking-wider text-[11px] block">{c.code}</strong>
-                          <span className="text-[9px] text-slate-400">{c.usedCount} times used</span>
+                          <strong className="font-mono text-blue-500 tracking-wider text-xs block bg-blue-500/10 px-2 py-1 rounded w-fit">{c.code}</strong>
+                          <span className={`text-[11px] mt-1.5 block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{c.usedCount} total usages</span>
                         </td>
-                        <td className="p-4 font-bold text-slate-200">
-                          {c.type === 'percentage' ? `${c.discount}% Discount` : `₹${c.discount} off`}
+                        <td className={`p-4 font-bold ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                          <span className={`px-2 py-1 text-xs rounded border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
+                            {c.type === 'percentage' ? `${c.discount}% Discount` : `₹${c.discount} Flat Off`}
+                          </span>
                         </td>
-                        <td className="p-4 text-slate-400">{c.expiry}</td>
-                        <td className="p-4">
+                        <td className={`p-4 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{c.expiry}</td>
+                        <td className="p-4 text-right">
                           <button
                             onClick={() => handleToggleCoupon(c.id, c.active)}
-                            className={`px-2 py-1 text-[9px] font-bold rounded ${
-                              c.active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/15 text-red-500'
-                            }`}
+                            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all shadow-sm border ${c.active 
+                                ? (darkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100') 
+                                : (darkMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')
+                              }`}
                           >
-                            {c.active ? 'Active (Click to Toggle)' : 'Inactive (Click to Active)'}
+                            {c.active ? 'Active' : 'Enable Promo'}
                           </button>
                         </td>
                       </tr>
@@ -1176,9 +1312,8 @@ export function AdminPortal({
                         value={newCourse.title}
                         onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                         placeholder="e.g. FullStack Modern Web Apps"
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1189,9 +1324,8 @@ export function AdminPortal({
                         value={newCourse.instructorName}
                         onChange={(e) => setNewCourse({ ...newCourse, instructorName: e.target.value })}
                         placeholder="IIT Madras Graduates Council"
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1203,12 +1337,13 @@ export function AdminPortal({
                       <select
                         value={newCourse.category}
                         onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value as any })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       >
                         <option value="Tech">Tech Section</option>
                         <option value="Business">Business Section</option>
+                        <option value="Content Creator">Content Creator</option>
+                        <option value="Crash Course">Crash Course</option>
                       </select>
                     </div>
                     <div className="space-y-1">
@@ -1217,9 +1352,8 @@ export function AdminPortal({
                         type="number"
                         value={newCourse.examPrice}
                         onChange={(e) => setNewCourse({ ...newCourse, examPrice: Number(e.target.value) })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1229,9 +1363,8 @@ export function AdminPortal({
                         type="number"
                         value={newCourse.discountPrice}
                         onChange={(e) => setNewCourse({ ...newCourse, discountPrice: Number(e.target.value) })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1244,9 +1377,8 @@ export function AdminPortal({
                       value={newCourse.description}
                       onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
                       placeholder="Enter detailed prospectus guidelines..."
-                      className={`w-full px-3.5 py-2 rounded-xl border focus:outline-none ${
-                        darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                        }`}
                       required
                     />
                   </div>
@@ -1259,9 +1391,8 @@ export function AdminPortal({
                         value={newCourse.thumbnailUrl}
                         onChange={(e) => setNewCourse({ ...newCourse, thumbnailUrl: e.target.value })}
                         placeholder="https://images.unsplash.com/..."
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       />
                     </div>
                     <div className="space-y-1">
@@ -1271,9 +1402,8 @@ export function AdminPortal({
                         value={newCourse.bannerUrl}
                         onChange={(e) => setNewCourse({ ...newCourse, bannerUrl: e.target.value })}
                         placeholder="https://images.unsplash.com/..."
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       />
                     </div>
                   </div>
@@ -1346,9 +1476,8 @@ export function AdminPortal({
                         type="text"
                         value={editingCourse.title}
                         onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1358,9 +1487,8 @@ export function AdminPortal({
                         type="text"
                         value={editingCourse.instructorName}
                         onChange={(e) => setEditingCourse({ ...editingCourse, instructorName: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1372,12 +1500,13 @@ export function AdminPortal({
                       <select
                         value={editingCourse.category}
                         onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value as any })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       >
                         <option value="Tech">Tech</option>
                         <option value="Business">Business</option>
+                        <option value="Content Creator">Content Creator</option>
+                        <option value="Crash Course">Crash Course</option>
                       </select>
                     </div>
                     <div className="space-y-1">
@@ -1386,9 +1515,8 @@ export function AdminPortal({
                         type="number"
                         value={editingCourse.examPrice}
                         onChange={(e) => setEditingCourse({ ...editingCourse, examPrice: Number(e.target.value) })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                         required
                       />
                     </div>
@@ -1398,9 +1526,8 @@ export function AdminPortal({
                         type="number"
                         value={editingCourse.discountPrice || ''}
                         onChange={(e) => setEditingCourse({ ...editingCourse, discountPrice: Number(e.target.value) })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       />
                     </div>
                   </div>
@@ -1411,9 +1538,8 @@ export function AdminPortal({
                       rows={3}
                       value={editingCourse.description}
                       onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
-                      className={`w-full px-3.5 py-2 rounded-xl border focus:outline-none ${
-                        darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`w-full px-3.5 py-2 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                        }`}
                       required
                     />
                   </div>
@@ -1425,9 +1551,8 @@ export function AdminPortal({
                         type="text"
                         value={editingCourse.thumbnailUrl}
                         onChange={(e) => setEditingCourse({ ...editingCourse, thumbnailUrl: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       />
                     </div>
                     <div className="space-y-1">
@@ -1436,9 +1561,8 @@ export function AdminPortal({
                         type="text"
                         value={editingCourse.bannerUrl}
                         onChange={(e) => setEditingCourse({ ...editingCourse, bannerUrl: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                          darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
                       />
                     </div>
                   </div>
@@ -1496,117 +1620,111 @@ export function AdminPortal({
 
             {/* CASE C: LIST ALL COURSES */}
             {!editingCourse && !showAddCourse && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {courses.map((c) => (
-                  <div key={c.id} className={`group p-6 rounded-[2rem] border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between relative overflow-hidden ${
-                    darkMode 
-                      ? 'bg-slate-900/40 border-slate-800/60 hover:bg-slate-900/80 hover:border-blue-500/30' 
-                      : 'bg-white/60 backdrop-blur-md border-slate-200/60 hover:bg-white hover:border-blue-500/20 hover:shadow-blue-500/5'
-                  }`}>
-                    {/* Decorative Background Blob */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-500 pointer-events-none" />
+              <div className="space-y-10">
+                {[
+                  { id: 'Tech', title: 'Tech Courses', color: 'bg-blue-500' }, 
+                  { id: 'Business', title: 'Business Courses', color: 'bg-purple-500' },
+                  { id: 'Content Creator', title: 'Content Creator Courses', color: 'bg-pink-500' },
+                  { id: 'Crash Course', title: 'Crash Courses', color: 'bg-orange-500' }
+                ].map(section => {
+                  const sectionCourses = courses.filter(c => c.category === section.id);
+                  if (sectionCourses.length === 0) return null;
+                  
+                  return (
+                    <div key={section.id}>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                        <div className={`w-1.5 h-6 rounded-full ${section.color}`}></div>
+                        {section.title}
+                        <span className="text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-500 px-2.5 py-0.5 rounded-full">{sectionCourses.length}</span>
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sectionCourses.map((c) => (
+                          <div key={c.id} className={`group relative p-6 rounded-[2rem] border transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col justify-between ${darkMode ? 'bg-[#1e232b]/80 border-[#30363d] hover:border-purple-500/50 hover:shadow-[0_8px_30px_rgba(168,85,247,0.15)]' : 'bg-white border-slate-200 hover:border-purple-300 hover:shadow-[0_8px_30px_rgba(168,85,247,0.1)]'}`}>
+                            {/* Background Glow */}
+                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-all duration-500 pointer-events-none" />
+                            
+                            <div className="relative z-10">
+                              <div className="flex justify-between items-start mb-4">
+                                <span className="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-1 px-3 rounded-full shadow-sm">
+                                  {c.category}
+                                </span>
+                                <span className={`text-[10px] font-bold tracking-wider uppercase py-1 px-3 rounded-full flex items-center gap-1.5 shadow-sm ${c.active ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
+                                  <div className={`w-1.5 h-1.5 rounded-full ${c.active ? 'bg-emerald-500' : 'bg-rose-500'} animate-pulse`} />
+                                  {c.active ? 'Active' : 'Draft'}
+                                </span>
+                              </div>
+                              
+                              <h3 className={`font-extrabold text-xl mb-2 tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>{c.title}</h3>
+                              <p className={`text-xs leading-relaxed line-clamp-3 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{c.description}</p>
+                              
+                              <div className={`mt-5 p-4 rounded-2xl space-y-3 ${darkMode ? 'bg-slate-900/50 border border-slate-800/50' : 'bg-slate-50 border border-slate-100'}`}>
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className={`flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Users className="w-3.5 h-3.5 text-purple-400" /> Instructor
+                                  </span>
+                                  <span className={`font-bold ${darkMode ? 'text-slate-200' : 'text-slate-700'} truncate ml-2`}>{c.instructorName}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className={`flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Tag className="w-3.5 h-3.5 text-emerald-400" /> Pricing
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-emerald-500">₹{c.discountPrice || c.examPrice}</span>
+                                    {c.discountPrice && <span className="text-[10px] line-through text-slate-400">₹{c.examPrice}</span>}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className={`flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <BookOpen className="w-3.5 h-3.5 text-sky-400" /> Curriculum
+                                  </span>
+                                  <span className={`font-bold ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                                    {(c.lectures || []).length} lectures
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
 
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-4">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl flex items-center gap-1.5 ${
-                          darkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
-                        }`}>
-                          <BookOpen className="w-3 h-3" /> {c.category}
-                        </span>
-                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold ${
-                          c.active 
-                            ? (darkMode ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
-                            : (darkMode ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-600')
-                        }`}>
-                          {c.active ? <><CheckCircle2 className="w-3 h-3" /> ACTIVE</> : <><AlertOctagon className="w-3 h-3" /> DRAFT</>}
-                        </div>
-                      </div>
-                      
-                      <h3 className="font-extrabold text-lg tracking-tight mb-2 group-hover:text-blue-500 transition-colors" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                        {c.title}
-                      </h3>
-                      <p className={`text-xs leading-relaxed line-clamp-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                        {c.description}
-                      </p>
-
-                      <div className={`mt-5 pt-4 pb-2 border-t flex flex-col gap-3 ${darkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                            <Users className="w-3.5 h-3.5" /> Instructor
-                          </span>
-                          <span className={`font-bold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{c.instructorName}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                            <CreditCard className="w-3.5 h-3.5" /> Pricing
-                          </span>
-                          <div className="flex items-center gap-2 font-mono">
-                            {c.discountPrice ? (
-                              <>
-                                <span className="line-through opacity-50 text-[10px]">₹{c.examPrice}</span>
-                                <span className="text-emerald-500 font-extrabold">₹{c.discountPrice}</span>
-                              </>
-                            ) : (
-                              <span className={`font-extrabold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>₹{c.examPrice}</span>
-                            )}
+                            <div className="flex gap-3 mt-6 relative z-10">
+                              <button
+                                onClick={() => {
+                                  setEditingCourse(c);
+                                  setEditingCourseLecturesText(JSON.stringify(c.lectures, null, 2));
+                                  setEditingCourseAssignmentsText(JSON.stringify(c.assignments || [], null, 2));
+                                  setEditingCourseQuizzesText(JSON.stringify(c.quizzes || [], null, 2));
+                                }}
+                                className={`flex-grow py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm'}`}
+                              >
+                                <UserCog className="w-3.5 h-3.5" /> Configure
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    const res = await fetch(`/api/courses/${c.id}`, {
+                                      method: 'PUT',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ active: !c.active })
+                                    });
+                                    if (res.ok) {
+                                      onToast(`Course status updated dynamically!`, 'success');
+                                      onRefreshCourses();
+                                    }
+                                  } catch (err) {
+                                    console.error(err);
+                                  }
+                                }}
+                                className={`px-4 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${c.active ? 'bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white'}`}
+                              >
+                                {c.active ? <Trash2 className="w-3.5 h-3.5" /> : <Upload className="w-3.5 h-3.5" />}
+                                {c.active ? 'Unpublish' : 'Publish'}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className={`flex items-center gap-1.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                            <BookOpen className="w-3.5 h-3.5" /> Curriculum
-                          </span>
-                          <span className="font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-md">
-                            {(c.lectures || []).length} L • {(c.assignments || []).length} A
-                          </span>
-                        </div>
+                        ))}
                       </div>
                     </div>
-
-                    <div className="flex gap-3 mt-5 relative z-10">
-                      <button
-                        onClick={() => {
-                          setEditingCourse(c);
-                          setEditingCourseLecturesText(JSON.stringify(c.lectures, null, 2));
-                          setEditingCourseAssignmentsText(JSON.stringify(c.assignments || [], null, 2));
-                          setEditingCourseQuizzesText(JSON.stringify(c.quizzes || [], null, 2));
-                        }}
-                        className={`flex-1 py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${
-                          darkMode 
-                            ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' 
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        <UserCog className="w-4 h-4" /> Config Details
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(`/api/courses/${c.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ active: !c.active })
-                            });
-                            if (res.ok) {
-                              onToast(`Course status updated dynamically!`, 'success');
-                              onRefreshCourses();
-                            }
-                          } catch (err) {
-                            console.error(err);
-                          }
-                        }}
-                        className={`py-2.5 px-4 text-xs font-bold rounded-xl flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95 shadow-md ${
-                          c.active 
-                            ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20' 
-                            : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
-                        }`}
-                        title={c.active ? "Unpublish Course" : "Publish Course"}
-                      >
-                        {c.active ? <ShieldCheck className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1620,144 +1738,414 @@ export function AdminPortal({
               <p className="text-xs text-slate-400 mt-1">Send global service briefs, maintenance alerts, or placement announcements to all students.</p>
             </div>
 
-            <div className={`p-6 rounded-3xl border space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-150'}`}>
-              <h3 className="font-extrabold text-sm text-blue-500">Draft Broadcast Message</h3>
+            <div className={`p-6 rounded-3xl border space-y-5 transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-3 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                  <AlertOctagon className="w-4 h-4 text-blue-500" /> 
+                </div>
+                Draft Broadcast Message
+              </h3>
+              
               <form onSubmit={handleSendNotification} className="space-y-4 text-xs font-semibold">
-                <div className="space-y-1">
-                  <label className="text-slate-400">Broadcast Priority / Title</label>
+                <div className="space-y-1.5">
+                  <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Broadcast Priority / Title</label>
                   <input
                     type="text"
                     value={notifyTitle}
                     onChange={(e) => setNotifyTitle(e.target.value)}
                     placeholder="e.g. Server Hash Synced, Razorpay Outage Solved"
-                    className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                      darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                      }`}
                     required
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-slate-400">Message Body</label>
+                <div className="space-y-1.5">
+                  <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Message Body</label>
                   <textarea
                     rows={3}
                     value={notifyMsg}
                     onChange={(e) => setNotifyMsg(e.target.value)}
                     placeholder="Write details for the live broadcast dashboard feed..."
-                    className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                      darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors resize-none ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                      }`}
                     required
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-2.5 text-xs text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-xl transition-all shadow-md"
-                >
-                  Publish and Send Message to Students
-                </button>
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all shadow-md shadow-blue-500/20"
+                  >
+                    Publish and Send Message to Students
+                  </button>
+                </div>
               </form>
             </div>
 
-            <div className="space-y-3 col-span-1">
-              <h3 className="font-bold text-xs uppercase tracking-widest text-slate-400 text-slate-500">Active broadcasts stream history</h3>
-              {systemAlerts.map((sa) => (
-                <div key={sa.id} className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900/50 border-slate-800/80': 'bg-white border-slate-100 shadow-sm'} flex justify-between gap-4 items-start`}>
-                  <div className="space-y-1 col-span-1">
-                    <strong className="text-slate-100 dark:text-white font-extrabold text-xs block">{sa.title}</strong>
-                    <p className="text-[11px] text-slate-450 leading-relaxed font-light">{sa.message}</p>
-                    <span className="text-[9px] font-mono tracking-wider text-slate-400 block pt-1">{sa.timestamp}</span>
+            <div className="space-y-4 pt-4">
+              <h3 className={`font-bold text-xs uppercase tracking-widest ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Active Broadcasts Stream History</h3>
+              <div className="space-y-3">
+                {systemAlerts.map((sa) => (
+                  <div key={sa.id} className={`p-4 rounded-2xl border transition-all ${darkMode ? 'bg-slate-900/50 border-slate-800/80 hover:bg-slate-800/50' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'} flex justify-between gap-4 items-start`}>
+                    <div className="space-y-1.5">
+                      <strong className={`font-extrabold text-sm block ${darkMode ? 'text-white' : 'text-slate-800'}`}>{sa.title}</strong>
+                      <p className={`text-[13px] leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{sa.message}</p>
+                      <span className={`text-[10px] font-mono tracking-wider block pt-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{sa.timestamp}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSystemAlerts(systemAlerts.filter(x => x.id !== sa.id));
+                        onToast('Broadcast alert dismissed from view.', 'success');
+                      }}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors border shadow-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20' : 'bg-white border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-100'}`}
+                      title="Dismiss Notification"
+                    >
+                      Dismiss
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSystemAlerts(systemAlerts.filter(x => x.id !== sa.id));
-                      onToast('Broadcast alert dismissed from view.', 'success');
-                    }}
-                    className="p-1 text-slate-400 hover:text-red-500 font-bold text-xs"
-                    title="Dismiss Notification"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* VIEW 8: ADMIN PROFILE SETTINGS */}
         {activeTab === 'profile' && (
-          <div className="space-y-6 col-span-1">
+          <div className="space-y-8 col-span-1">
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Profile & Security Credentials</h1>
-              <p className="text-xs text-slate-400 mt-1">Configure your administrative screen name and change security passwords.</p>
+              <p className="text-xs text-slate-400 mt-1">Configure your administrative screen name, security passwords, and preferences.</p>
             </div>
 
-            <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
-              <form onSubmit={handleUpdateAdminProfile} className="space-y-4 text-xs font-semibold">
-                <div className="space-y-1">
-                  <label className="text-slate-400">Full Name</label>
-                  <input
-                    type="text"
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                      darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                    }`}
-                    required
-                  />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Left Column: Personal Info & Avatar */}
+              <div className="lg:col-span-2 space-y-6">
+                
+                {/* Personal Information */}
+                <div className={`p-6 rounded-3xl border transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-4 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                      <UserCog className="w-4 h-4 text-blue-500" /> 
+                    </div>
+                    Personal Information
+                  </h3>
+
+                  <form onSubmit={handleUpdateAdminProfile} className="mt-5 space-y-5 text-xs font-semibold">
+                    
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-4">
+                      <div className="relative group cursor-pointer">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                          title="Click to upload new profile photo"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setProfileAvatar(URL.createObjectURL(e.target.files[0]));
+                              onToast('Profile picture updated locally. (Mock)', 'success');
+                            }
+                          }}
+                        />
+                        <div className={`w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-extrabold shadow-xl shadow-blue-500/10 overflow-hidden relative ${!profileAvatar ? 'bg-gradient-to-br from-blue-600 to-purple-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                          {profileAvatar ? (
+                            <img src={profileAvatar} alt="Profile Avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            profileName.charAt(0).toUpperCase()
+                          )}
+                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <Upload className="w-6 h-6 text-white mb-1" />
+                            <span className="text-[9px] font-bold tracking-wider text-white">UPDATE</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 text-center sm:text-left space-y-3 pt-2">
+                        <h4 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-slate-800'}`}>Profile Photo</h4>
+                        <p className={`text-xs leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                          We support high-resolution images. For best results, use an image at least 256x256px in .jpg or .png format.
+                        </p>
+                        <div className="flex items-center justify-center sm:justify-start gap-3">
+                          <button type="button" className={`relative px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-blue-500 text-white hover:bg-blue-600'}`}>
+                            Upload New Photo
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setProfileAvatar(URL.createObjectURL(e.target.files[0]));
+                                  onToast('Profile picture updated.', 'success');
+                                }
+                              }}
+                            />
+                          </button>
+                          {profileAvatar && (
+                            <button 
+                              type="button" 
+                              onClick={() => { setProfileAvatar(null); onToast('Avatar removed.', 'success'); }} 
+                              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all border ${darkMode ? 'border-slate-700 text-slate-300 hover:bg-red-500/10 hover:text-red-400' : 'border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600'}`}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Full Name</label>
+                        <input
+                          type="text"
+                          value={profileName}
+                          onChange={(e) => setProfileName(e.target.value)}
+                          className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Contact Phone Number</label>
+                        <input
+                          type="text"
+                          value={profilePhone}
+                          onChange={(e) => setProfilePhone(e.target.value)}
+                          placeholder="+91 XXXXX XXXXX"
+                          className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Registered Email Address <span className="text-red-400">*</span></label>
+                      <input
+                        type="email"
+                        value={currentUser.email}
+                        disabled
+                        className={`w-full px-4 py-3 text-sm rounded-xl border cursor-not-allowed ${darkMode ? 'bg-slate-800/50 border-slate-800 text-slate-500' : 'bg-slate-100 border-slate-200 text-slate-400'}`}
+                        title="Emails cannot be modified once seeded in systems."
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className={`block text-[11px] uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Change Password</label>
+                      <input
+                        type="password"
+                        value={profilePassword}
+                        onChange={(e) => setProfilePassword(e.target.value)}
+                        placeholder="Leave empty to keep current password"
+                        className={`w-full px-4 py-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors ${darkMode ? 'bg-slate-950/50 border-slate-800 text-white placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="submit"
+                        className="w-full sm:w-auto px-8 py-3 text-white text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all shadow-md shadow-blue-500/20"
+                      >
+                        Save Administrative Settings
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400">Registered Email Address</label>
-                  <input
-                    type="email"
-                    value={currentUser.email}
-                    disabled
-                    className="w-full px-3.5 py-2.5 rounded-xl border bg-slate-500/10 border-slate-800 text-slate-400 cursor-not-allowed outline-none"
-                    title="Emails cannot be modified once seeded in systems."
-                  />
+              </div>
+
+              {/* Right Column: Security & Preferences */}
+              <div className="space-y-6">
+                
+                {/* Two-Factor Authentication */}
+                <div className={`p-6 rounded-3xl border transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-4 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" /> 
+                    </div>
+                    Two-Factor Auth
+                  </h3>
+                  <div className="mt-4 space-y-3">
+                    <p className={`text-xs leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      Add an extra layer of security to your admin account by enabling 2FA via an authenticator app.
+                    </p>
+                    <button type="button" className={`w-full py-2.5 rounded-xl text-xs font-bold border transition-colors ${darkMode ? 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10' : 'border-emerald-200 text-emerald-600 bg-emerald-50 hover:bg-emerald-100'}`}>
+                      Enable 2FA
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Contact Phone Number</label>
-                  <input
-                    type="text"
-                    value={profilePhone}
-                    onChange={(e) => setProfilePhone(e.target.value)}
-                    placeholder="+91 XXXXX XXXXX"
-                    className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                      darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                    }`}
-                  />
+                {/* Notification Preferences */}
+                <div className={`p-6 rounded-3xl border transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-4 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-pink-500/10' : 'bg-pink-50'}`}>
+                      <AlertOctagon className="w-4 h-4 text-pink-500" /> 
+                    </div>
+                    Alert Preferences
+                  </h3>
+                  <div className="mt-4 space-y-4">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                      <span className={`text-xs font-semibold transition-colors ${darkMode ? 'text-slate-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>Daily Revenue Summary</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                      <span className={`text-xs font-semibold transition-colors ${darkMode ? 'text-slate-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>New Enrollments</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                      <span className={`text-xs font-semibold transition-colors ${darkMode ? 'text-slate-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>System Error Alerts</span>
+                    </label>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Change Password</label>
-                  <input
-                    type="password"
-                    value={profilePassword}
-                    onChange={(e) => setProfilePassword(e.target.value)}
-                    placeholder="Leave completely empty to keep current password"
-                    className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${
-                      darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
-                    }`}
-                  />
+                {/* Active Sessions */}
+                <div className={`p-6 rounded-3xl border transition-colors ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <h3 className={`font-extrabold text-sm flex items-center gap-2 pb-4 border-b ${darkMode ? 'border-slate-800 text-white' : 'border-slate-100 text-slate-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-purple-500/10' : 'bg-purple-50'}`}>
+                      <Activity className="w-4 h-4 text-purple-500" /> 
+                    </div>
+                    Active Sessions
+                  </h3>
+                  <div className="mt-4 space-y-3">
+                    <div className={`p-3 rounded-xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <strong className={`text-xs block ${darkMode ? 'text-white' : 'text-slate-800'}`}>Windows 11 • Chrome</strong>
+                          <span className={`text-[10px] block mt-0.5 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>Current Session</span>
+                        </div>
+                        <span className={`text-[10px] font-mono ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>192.168.1.x</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 text-xs text-white bg-blue-600 font-bold rounded-xl"
-                >
-                  Save Administrative Settings
-                </button>
-              </form>
+              </div>
+
             </div>
           </div>
         )}
 
-      </div>
+        {/* VIEW 8: SUPPORT TICKETS */}
+        {activeTab === 'support' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  <span className={`bg-gradient-to-r from-blue-400 via-sky-500 to-blue-400 bg-clip-text text-transparent`}>
+                    Student Support Queries
+                  </span>
+                </h1>
+                <p className={`text-sm mt-2 font-bold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  View and resolve incoming queries from the student dashboards.
+                </p>
+              </div>
+            </section>
 
+            <div className={`rounded-[2rem] border overflow-hidden shadow-sm ${darkMode ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'}`}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className={`border-b ${darkMode ? 'border-[#30363d] bg-[#0d1117]' : 'border-slate-200 bg-slate-50/50'}`}>
+                      <th className="p-5 text-xs font-bold uppercase tracking-wider text-slate-500">Ticket Ref / Student</th>
+                      <th className="p-5 text-xs font-bold uppercase tracking-wider text-slate-500">Subject & Description</th>
+                      <th className="p-5 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
+                      <th className="p-5 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-inherit">
+                    {supportTickets.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="p-12 text-center">
+                          <span className={`text-sm font-bold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No active support tickets found.</span>
+                        </td>
+                      </tr>
+                    ) : (
+                      supportTickets.map((t: any) => (
+                        <tr key={t.id} className={`transition-all duration-200 ${darkMode ? 'hover:bg-[#0d1117]' : 'hover:bg-slate-50'}`}>
+                          <td className="p-5 align-top">
+                            <strong className={`block text-sm font-black ${darkMode ? 'text-white' : 'text-slate-900'}`}>{t.id}</strong>
+                            <span className="text-xs text-slate-500">{t.userName} ({t.userEmail})</span><br/>
+                            <span className="text-[10px] text-slate-400 mt-1">{new Date(t.createdAt).toLocaleString()}</span>
+                          </td>
+                          <td className="p-5 align-top">
+                            <strong className={`block text-sm font-bold mb-1 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{t.subject}</strong>
+                            <p className={`text-xs whitespace-pre-wrap ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{t.description}</p>
+                          </td>
+                          <td className="p-5 align-top">
+                            <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg border ${
+                              t.status === 'open' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            }`}>
+                              {t.status}
+                            </span>
+                          </td>
+                          <td className="p-5 align-top text-right">
+                            {t.status === 'open' ? (
+                              <button onClick={async () => {
+                                try {
+                                  const res = await fetch(`/api/support/ticket/${t.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ status: 'resolved' })
+                                  });
+                                  if(res.ok) fetchAdminData();
+                                } catch(err) {}
+                              }} className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm">
+                                Resolve
+                              </button>
+                            ) : (
+                              <span className="text-xs font-bold text-slate-400">Resolved</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        </div>
+      </main>
+
+      {/* ═══ LOGOUT CONFIRMATION MODAL ═══ */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className={`relative w-full max-w-sm rounded-[2rem] p-8 shadow-2xl border ${darkMode ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-slate-200'} text-center`}>
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 animate-pulse">
+                <LogOut className="w-8 h-8 -ml-1" />
+              </div>
+              <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-slate-900'}`}>Ready to leave?</h3>
+              <p className={`text-sm mb-8 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Are you sure you want to log out of your session?</p>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowLogoutConfirm(false);
+                    clearAuth();
+                    window.location.href = '/';
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm shadow-lg shadow-red-500/25 transition-all active:scale-95"
+                >
+                  Yes, Log Out
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Staff Chat Integration */}
+      <StaffChatWidget currentUser={currentUser} darkMode={darkMode} />
     </div>
   );
 }
@@ -1767,13 +2155,12 @@ function MenuBtn({ active, icon, label, onClick, darkMode }: { active: boolean; 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left py-3.5 px-4 rounded-2xl text-[13px] font-bold flex items-center gap-3.5 transition-all duration-300 relative overflow-hidden group ${
-        active
-          ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
-          : darkMode 
-            ? 'hover:bg-white/[0.04] text-slate-400 hover:text-white border border-transparent' 
-            : 'hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 border border-transparent'
-      }`}
+      className={`w-full text-left py-3.5 px-4 rounded-2xl text-[13px] font-bold flex items-center gap-3.5 transition-all duration-300 relative overflow-hidden group ${active
+        ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
+        : darkMode
+          ? 'hover:bg-white/[0.04] text-slate-400 hover:text-white border border-transparent'
+          : 'hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 border border-transparent'
+        }`}
       style={{ fontFamily: 'Outfit, sans-serif' }}
     >
       {active && <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />}
@@ -1809,19 +2196,17 @@ function GlassStatCard({ darkMode, title, value, icon, iconColor, glowColor, bad
   badgeColor: string;
 }) {
   return (
-    <div className={`relative overflow-hidden p-6 rounded-3xl border backdrop-blur-xl transition-all duration-300 group cursor-default ${
-      darkMode 
-        ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15]' 
-        : 'bg-white/90 border-slate-200 shadow-lg hover:shadow-xl'
-    }`}>
+    <div className={`relative overflow-hidden p-6 rounded-3xl border backdrop-blur-xl transition-all duration-300 group cursor-default ${darkMode
+      ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15]'
+      : 'bg-white/90 border-slate-200 shadow-lg hover:shadow-xl'
+      }`}>
       <div className={`absolute -right-4 -top-4 w-24 h-24 ${glowColor}/10 rounded-full blur-2xl group-hover:${glowColor}/25 transition-all duration-500 pointer-events-none`} />
       <div className="flex justify-between items-start relative z-10">
         <span className={`text-[11px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>
           {title}
         </span>
-        <div className={`w-10 h-10 rounded-full ${iconColor} flex items-center justify-center ${
-          darkMode ? 'bg-white/[0.06]' : 'bg-slate-100'
-        }`}>
+        <div className={`w-10 h-10 rounded-full ${iconColor} flex items-center justify-center ${darkMode ? 'bg-white/[0.06]' : 'bg-slate-100'
+          }`}>
           {icon}
         </div>
       </div>
@@ -1867,11 +2252,10 @@ function QuickActionBtn({ darkMode, icon, label, gradient, onClick }: {
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border transition-all duration-300 group cursor-pointer ${
-      darkMode 
-        ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.06]' 
-        : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'
-    }`}>
+    <button onClick={onClick} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border transition-all duration-300 group cursor-pointer ${darkMode
+      ? 'bg-white/[0.03] border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.06]'
+      : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'
+      }`}>
       <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
         {icon}
       </div>
