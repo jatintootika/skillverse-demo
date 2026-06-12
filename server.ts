@@ -15,7 +15,7 @@ import {
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const rpName = 'SkillVerse';
 const rpID = 'localhost';
 const origin = `http://${rpID}:${PORT}`;
