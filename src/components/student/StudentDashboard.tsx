@@ -46,6 +46,7 @@ export function StudentDashboard({
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [headerMenuOpen, setHeaderMenuOpen] = useState<'none' | 'notifications' | 'profile'>('none');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Support AI Chat State
   const [supportChatMsg, setSupportChatMsg] = useState('');
@@ -194,13 +195,25 @@ export function StudentDashboard({
     <div className={`h-screen overflow-hidden flex ${dm ? 'bg-[#0d1117] text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
 
       {/* ═══════════════════ SIDEBAR ═══════════════════ */}
-      <aside className={`w-60 shrink-0 h-screen sticky top-0 flex flex-col border-r ${dm ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-gray-200'}`}>
+      {/* Mobile Overlay Background */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      <aside className={`fixed md:relative top-0 left-0 z-50 w-64 md:w-60 h-screen shrink-0 flex flex-col border-r transform transition-transform duration-300 ease-in-out md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} ${dm ? 'bg-[#161b22] border-[#30363d]' : 'bg-white border-gray-200'}`}>
         {/* Brand */}
-        <div className={`h-14 flex items-center gap-2.5 px-5 border-b ${dm ? 'border-[#30363d]' : 'border-gray-200'}`}>
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-            <GraduationCap className="w-4 h-4 text-white" />
+        <div className={`h-14 flex items-center justify-between px-5 border-b ${dm ? 'border-[#30363d]' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
+              <GraduationCap className="w-4 h-4 text-white" />
+            </div>
+            <span className={`font-bold text-[15px] tracking-tight ${textPrimary}`}>SkillVerse</span>
           </div>
-          <span className={`font-bold text-[15px] tracking-tight ${textPrimary}`}>SkillVerse</span>
+          <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -211,7 +224,7 @@ export function StudentDashboard({
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   active
                     ? (dm ? 'bg-blue-600/15 text-blue-400' : 'bg-blue-50 text-blue-700')
@@ -270,10 +283,18 @@ export function StudentDashboard({
       <div className="flex-1 min-w-0 flex flex-col">
 
         {/* Top Bar (Advanced Header) */}
-        <header className={`shrink-0 z-50 flex items-center justify-between px-6 py-3 border-b relative backdrop-blur-sm sticky top-0 ${dm ? 'bg-[#161b22]/90 border-[#30363d]' : 'bg-white/90 border-gray-200'}`}>
-          <h2 className={`text-base font-bold tracking-tight ${textPrimary}`}>
-            {navItems.find(n => n.id === activeTab)?.label || 'Dashboard'}
-          </h2>
+        <header className={`shrink-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 border-b relative backdrop-blur-sm sticky top-0 ${dm ? 'bg-[#161b22]/90 border-[#30363d]' : 'bg-white/90 border-gray-200'}`}>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className={`md:hidden p-1.5 rounded-md transition-colors ${dm ? 'text-gray-400 hover:bg-white/5' : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className={`text-base font-bold tracking-tight ${textPrimary}`}>
+              {navItems.find(n => n.id === activeTab)?.label || 'Dashboard'}
+            </h2>
+          </div>
 
           <div className="flex items-center gap-4 sm:gap-6 relative z-50">
             {/* Notification Bell */}
@@ -363,7 +384,7 @@ export function StudentDashboard({
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <AnimatePresence>
 
               {/* ═══ OVERVIEW ═══ */}
