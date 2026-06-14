@@ -838,9 +838,40 @@ export function ExamEngine({
                       </ul>
 
                       <button
-                        onClick={() => {
-                          onToast('Payment Mock Successful! Certificate Unlocked.', 'success');
-                          setIsCertificateUnlocked(true);
+                        onClick={async () => {
+                          try {
+                            // 1. Create Order
+                            const orderRes = await fetch('/api/payments/order', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                userId: currentUser.id,
+                                amount: 499,
+                                type: 'certificate_unlock'
+                              })
+                            });
+                            const orderData = await orderRes.json();
+
+                            // 2. Verify Payment & Unlock
+                            const verifyRes = await fetch('/api/payments/verify', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                orderId: orderData.orderId,
+                                certificateId: pResult.certificate.id // We need to ensure the backend returns the DB 'id'
+                              })
+                            });
+                            
+                            if (verifyRes.ok) {
+                              onToast('Payment Successful! Certificate Unlocked.', 'success');
+                              setIsCertificateUnlocked(true);
+                            } else {
+                              onToast('Payment failed verification.', 'ref');
+                            }
+                          } catch (error) {
+                            console.error('Payment error', error);
+                            onToast('Payment Gateway Error. Please try again.', 'ref');
+                          }
                         }}
                         className="w-full relative group/btn overflow-hidden px-6 py-4 font-bold text-white rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.15em] text-xs z-10"
                         style={{ boxShadow: '0 10px 30px -10px rgba(245,158,11,0.6)' }}

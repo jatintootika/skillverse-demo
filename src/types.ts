@@ -84,8 +84,10 @@ export interface Certificate {
   courseId: string;
   courseName: string;
   score: number;
+  grade?: string;
   issuedAt: string;
   valid: boolean;
+  course?: { id: string };
 }
 
 export interface Payment {

@@ -3,17 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as express from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
-import * as QRCode from 'qrcode';
+import QRCode from 'qrcode';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
+
+import authRoutes from './src/backend/routes/auth.routes.js';
+import coursesRoutes from './src/backend/routes/courses.routes.js';
+import examsRoutes from './src/backend/routes/exams.routes.js';
+import usersRoutes from './src/backend/routes/users.routes.js';
+import certificatesRoutes from './src/backend/routes/certificates.routes.js';
+import aiRoutes from './src/backend/routes/ai.routes.js';
+import progressRoutes from './src/backend/routes/progress.routes.js';
+import paymentsRoutes from './src/backend/routes/payments.routes.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const rpName = 'SkillVerse';
@@ -472,10 +481,19 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
-  // Root path endpoint for API test
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
+
+  // --- MODULAR ROUTES ---
+  app.use('/api/auth', authRoutes);
+  app.use('/api/courses', coursesRoutes);
+  app.use('/api', examsRoutes);
+  app.use('/api/users', usersRoutes);
+  app.use('/api', certificatesRoutes);
+  app.use('/api/ai', aiRoutes);
+  app.use('/api', progressRoutes);
+  app.use('/api', paymentsRoutes);
 
   // --- STAFF CHAT ENDPOINTS ---
   app.get('/api/chat', (req, res) => {
@@ -505,183 +523,6 @@ async function startServer() {
     saveDatabase(db);
     
     res.json(newMessage);
-  });
-
-  // --- AUTH ENDPOINTS ---
-  app.post('/api/auth/login', (req, res) => {
-    const { email, password } = req.body;
-    const cleanEmail = (email || '').trim().toLowerCase();
-    const cleanPassword = (password || '').trim();
-
-    if (!cleanEmail) {
-      return res.status(400).json({ message: 'Email address is required.' });
-    }
-
-    const db = loadDatabase();
-    
-    // Inject or seed the requested test users dynamically if they are not in the db
-    const testUsers = [
-      { id: 'usr-sa-test', name: 'Master Super Admin', email: 'superadmin@edtech.com', role: 'super_admin', plan: 'pro', billingCycle: 'yearly', joinedDate: '2026-06-02', phone: '+918888888888', password: 'SuperAdmin@123' },
-      { id: 'usr-ad-test', name: 'Expert Admin Coordinator', email: 'admin@edtech.com', role: 'admin', plan: 'pro', billingCycle: 'yearly', joinedDate: '2026-06-02', phone: '+917777777777', password: 'Admin@123', permissions: ['courses', 'students', 'exams', 'certificates', 'coupons'] },
-      { id: 'usr-st-test', name: 'Elite Scholar Student', email: 'student@edtech.com', role: 'student', plan: 'popular', billingCycle: 'monthly', joinedDate: '2026-06-02', phone: '+919999999999', password: 'Student@123' }
-    ];
-
-    testUsers.forEach(tu => {
-      const exists = db.users.find((u: any) => u.email.toLowerCase() === tu.email.toLowerCase());
-      if (!exists) {
-        db.users.push(tu);
-      }
-    });
-
-    saveDatabase(db);
-
-    // Auto-create/seed missing accounts dynamically if not found
-    let user = db.users.find((u: any) => u.email.toLowerCase() === cleanEmail);
-    if (!user) {
-      if (cleanEmail.includes('superadmin') || cleanEmail.includes('super_admin') || cleanEmail === 'aarsh@skillverse.in') {
-        user = {
-          id: `usr-sa-auto-${Date.now()}`,
-          name: 'Master Super Admin',
-          email: cleanEmail,
-          role: 'super_admin',
-          plan: 'pro',
-          billingCycle: 'yearly',
-          joinedDate: new Date().toISOString().split('T')[0],
-          phone: '+918888888888',
-          password: 'SuperAdmin@123'
-        };
-        db.users.push(user);
-        saveDatabase(db);
-      } else if (cleanEmail.includes('admin') || cleanEmail === 'ankit@skillverse.in') {
-        user = {
-          id: `usr-ad-auto-${Date.now()}`,
-          name: 'Expert Admin Coordinator',
-          email: cleanEmail,
-          role: 'admin',
-          plan: 'pro',
-          billingCycle: 'yearly',
-          joinedDate: new Date().toISOString().split('T')[0],
-          phone: '+917777777777',
-          password: 'Admin@123',
-          permissions: ['courses', 'students', 'exams', 'certificates', 'coupons']
-        };
-        db.users.push(user);
-        saveDatabase(db);
-      } else if (cleanEmail.includes('student') || cleanEmail === 'student@skillverse.in') {
-        user = {
-          id: `usr-st-auto-${Date.now()}`,
-          name: 'Elite Scholar Student',
-          email: cleanEmail,
-          role: 'student',
-          plan: 'popular',
-          billingCycle: 'monthly',
-          joinedDate: new Date().toISOString().split('T')[0],
-          phone: '+919999999999',
-          password: 'Student@123'
-        };
-        db.users.push(user);
-        saveDatabase(db);
-      }
-    }
-
-    if (!user) {
-      return res.status(401).json({ message: 'User profile not found. Please check credentials or sign up.' });
-    }
-
-    if (user.suspended) {
-      return res.status(403).json({ message: 'This account has been suspended by the platform administration.' });
-    }
-    
-    // Check password securely and flexibly
-    let isCorrect = false;
-    const lowerPassword = cleanPassword.toLowerCase();
-    
-    if (user.password && cleanPassword === user.password.trim()) {
-      isCorrect = true;
-    } else if (user.password && lowerPassword === user.password.trim().toLowerCase()) {
-      isCorrect = true;
-    } else if (
-      lowerPassword === 'superadmin' ||
-      lowerPassword === 'admin' ||
-      lowerPassword === 'student' ||
-      lowerPassword === 'superadmin123' ||
-      lowerPassword === 'admin123' ||
-      lowerPassword === 'student123' ||
-      lowerPassword === 'superadmin@123' ||
-      lowerPassword === 'admin@123' ||
-      lowerPassword === 'student@123' ||
-      lowerPassword === '1234' ||
-      lowerPassword === '123456' ||
-      lowerPassword === 'password'
-    ) {
-      isCorrect = true;
-    } else {
-      // Fallback check depending on role keywords to prevent any lockout
-      const role = user.role || 'student';
-      if (role === 'super_admin' && (lowerPassword.includes('super') || lowerPassword.includes('sa'))) {
-        isCorrect = true;
-      } else if (role === 'admin' && (lowerPassword.includes('admin') || lowerPassword.includes('faculty'))) {
-        isCorrect = true;
-      } else if (role === 'student' && (lowerPassword.includes('student') || lowerPassword.includes('st'))) {
-        isCorrect = true;
-      }
-    }
-
-    if (!isCorrect) {
-      return res.status(401).json({ message: 'Incorrect password. Try Student@123, Admin@123, or SuperAdmin@123.' });
-    }
-
-    res.json({ message: 'Welcome to SkillVerse!', user });
-  });
-
-  app.post('/api/auth/register', (req, res) => {
-    const { name, email, password, phone } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Missing name, email or password fields.' });
-    }
-
-    const db = loadDatabase();
-    const existing = db.users.find((u: any) => u.email.toLowerCase() === email.trim().toLowerCase());
-    if (existing) {
-      return res.status(400).json({ message: 'An account with this email already exists.' });
-    }
-
-    const newUser = {
-      id: `usr-${Date.now()}`,
-      name,
-      email: email.trim().toLowerCase(),
-      phone: phone || '',
-      role: 'student' as const,
-      plan: 'free' as const,
-      billingCycle: 'monthly' as const,
-      joinedDate: new Date().toISOString().split('T')[0],
-      hasCompletedOnboarding: false,
-      profileData: {}
-    };
-
-    db.users.push(newUser);
-    saveDatabase(db);
-
-    res.status(201).json({ message: 'Account registered successfully!', user: newUser });
-  });
-
-  app.post('/api/auth/update-profile', (req, res) => {
-    const { userId, name, phone, plan, password } = req.body;
-    const db = loadDatabase();
-    const uIdx = db.users.findIndex((u: any) => u.id === userId);
-    if (uIdx === -1) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
-
-    if (name) db.users[uIdx].name = name;
-    if (phone !== undefined) db.users[uIdx].phone = phone;
-    if (plan !== undefined) db.users[uIdx].plan = plan;
-    if (password) db.users[uIdx].password = password;
-    if (req.body.hasCompletedOnboarding !== undefined) db.users[uIdx].hasCompletedOnboarding = req.body.hasCompletedOnboarding;
-    if (req.body.profileData) db.users[uIdx].profileData = req.body.profileData;
-
-    saveDatabase(db);
-    res.json({ message: 'Profile updated successfully!', user: db.users[uIdx] });
   });
 
   // --- WEBAUTHN (PASSKEYS) ENDPOINTS ---

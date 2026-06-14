@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?
+  phone     String?
+  role      String   @default("student")
+  plan      String   @default("free")
+  passkeys  Json[]   @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments     Payment[]
+  attempts     Attempt[]
+  certificates Certificate[]
+  progresses   Progress[]
+}
+
+model Course {
+  id             String   @id @default(cuid())
+  title          String
+  category       String
+  description    String
+  durationMins   Int
+  passPercentage Int      @default(70)
+  level          String   @default("Beginner")
+  skills         String[]
+  lectures       Json     // Array of { title, type, url, duration }
+  price          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  attempts     Attempt[]
+  certificates Certificate[]
+  questions    Question[]
+  progresses   Progress[]
+}
+
+model Question {
+  id                 String   @id @default(cuid())
+  courseId           String
+  question           String
+  options            String[] // Array of strings
+  correctOptionIndex Int
+  createdAt          DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id])
+}
+
+model Attempt {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  score     Float
+  status    String   // "passed" or "failed"
+  answers   Json     // Array of submitted answers
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Certificate {
+  id             String   @id @default(cuid())
+  courseId       String
+  userId         String
+  score          Float
+  grade          String
+  isPaid         Boolean  @default(false)
+  issueDate      DateTime @default(now())
+  expirationDate DateTime?
+  credentialId   String   @unique // Cryptographic ID like SV-2026-AI-...
+  qrCodeUrl      String?
+
+  course Course @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Progress {
+  id                String   @id @default(cuid())
+  userId            String
+  courseId          String
+  completedLectures String[] // Array of watched lecture IDs
+  progressPercent   Float    @default(0)
+  updatedAt         DateTime @updatedAt
+  
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+  
+  @@unique([userId, courseId])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Float
+  type      String   // e.g., "exam_fee", "subscription"
+  details   String
+  status    String   // "success", "failed", "pending"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
