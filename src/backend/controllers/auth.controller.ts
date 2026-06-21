@@ -383,16 +383,7 @@ export const sendOtp = async (req: Request, res: Response) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Staff allowed emails list
-    const allowedEmails = [
-      'superadmin.skillgenz@gmail.com',
-      'admin.skillgenz@gmail.com',
-      'falculty.skillgenz@gmail.com'
-    ];
-
-    if (!allowedEmails.includes(normalizedEmail)) {
-      return res.status(403).json({ error: 'Access Denied: Your email is not authorized for OTP login.' });
-    }
+    // Allowing all emails for OTP login so students can sign up/login
 
     let resolvedRole = 'student';
     let resolvedName = name;
