@@ -41,31 +41,37 @@ export function PolicyPage({ view, darkMode, onToast }: PolicyPageProps) {
         return {
           title: 'Terms and Conditions',
           icon: <Scale className="w-6 h-6 text-blue-500" />,
-          content: settings?.termsOfService || 'These are the Terms of Service of SkillVerse. All certification exams must be completed independently within the allocated 60 minutes. Sharing answers or utilizing external materials will count as academic dishonesty and result in immediate revocation of any credentials without refund.'
+          content: settings?.termsOfService || 'These are the Terms of Service of SkillGenz. All certification exams must be completed independently within the allocated 60 minutes. Sharing answers or utilizing external materials will count as academic dishonesty and result in immediate revocation of any credentials without refund.'
         };
       case 'privacy':
         return {
           title: 'Privacy Policy',
           icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
-          content: settings?.privacyPolicy || 'SkillVerse takes student privacy seriously. Your profile and exam response histories are safely locked under standard credentials and are only accessible by authorized platform administrators and verification audits when recruiters query your credentials.'
+          content: settings?.privacyPolicy || 'SkillGenz takes student privacy seriously. Your profile and exam response histories are safely locked under standard credentials and are only accessible by authorized platform administrators and verification audits when recruiters query your credentials.'
         };
       case 'refund':
         return {
-          title: 'Refund Policy',
+          title: 'Cancellation and Refund Policy',
           icon: <FileText className="w-6 h-6 text-blue-500" />,
           content: settings?.refundPolicy || 'If you do not pass an exam attempt, you may select a single retake or purchase additional attempts. Once an exam is launched, we cannot offer any refund for individual exam purchases or premium subscription packages.'
+        };
+      case 'shipping':
+        return {
+          title: 'Shipping and Delivery Policy',
+          icon: <FileText className="w-6 h-6 text-blue-500" />,
+          content: 'SkillGenz is an online educational and certification platform. All courses, exams, study materials, and certificates are digital products. Access is granted instantly via the student dashboard upon successful payment verification. No physical products are shipped, and no shipping fees or delivery timeframes apply.'
         };
       case 'disclaimer':
         return {
           title: 'Disclaimer',
           icon: <FileText className="w-6 h-6 text-blue-500" />,
-          content: settings?.disclaimer || 'SkillVerse is an independent skill verification vendor. While founded by graduates of IIT Madras, we are not an official academic department of the Indian Institute of Technology Madras. Passing certificates verify skills, but direct job placement is subject to partner interviews and placement procedures.'
+          content: settings?.disclaimer || 'SkillGenz is an independent skill verification vendor. While founded by graduates of IIT Madras, we are not an official academic department of the Indian Institute of Technology Madras. Passing certificates verify skills, but direct job placement is subject to partner interviews and placement procedures.'
         };
       case 'verification_policy':
         return {
           title: 'Certificate Verification Policy',
           icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
-          content: settings?.verificationPolicy || 'Credentials printed with verified unique SV IDs can be securely verified at verify.skillverse.in by authorized candidates, institutions, or prospective recruiters. Unofficial modifications or tampering with unique QR vectors renders the credentials invalid.'
+          content: settings?.verificationPolicy || 'Credentials printed with verified unique SV IDs can be securely verified at verify.skillgenz.com by authorized candidates, institutions, or prospective recruiters. Unofficial modifications or tampering with unique QR vectors renders the credentials invalid.'
         };
       default:
         return {
@@ -89,7 +95,7 @@ export function PolicyPage({ view, darkMode, onToast }: PolicyPageProps) {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">{config.title}</h1>
-            <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider font-mono">SkillVerse Legal and Compliance Document</p>
+            <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider font-mono">SkillGenz Legal and Compliance Document</p>
           </div>
         </div>
 

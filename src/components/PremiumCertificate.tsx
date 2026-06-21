@@ -9,19 +9,36 @@ import { Download, Share2, Clipboard, Printer, ExternalLink, Linkedin, Award, Sh
 interface PremiumCertificateProps {
   certificate: any; // Supports both legacy and rich Certificate schemas
   darkMode?: boolean;
+  currentUser?: any;
+  onRefreshUser?: (u: any) => void;
+  onToast?: (msg: string, type: 'success' | 'ref') => void;
+  onRefreshDashboard?: () => void;
+  isVerificationPage?: boolean;
 }
 
-export function PremiumCertificate({ certificate, darkMode = false }: PremiumCertificateProps) {
+export function PremiumCertificate({
+  certificate,
+  darkMode = false,
+  currentUser,
+  onRefreshUser,
+  onToast,
+  onRefreshDashboard,
+  isVerificationPage = false
+}: PremiumCertificateProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [logoFailedLeft, setLogoFailedLeft] = useState(false);
   const [logoFailedRight, setLogoFailedRight] = useState(false);
   const [signatureFailed, setSignatureFailed] = useState(false);
-  const [isCertificateUnlocked, setIsCertificateUnlocked] = useState(false);
+  const [isCertificateUnlocked, setIsCertificateUnlocked] = useState(isVerificationPage || !!certificate?.isPaid);
+
+  useEffect(() => {
+    setIsCertificateUnlocked(isVerificationPage || !!certificate?.isPaid);
+  }, [certificate?.isPaid, isVerificationPage]);
 
   // Safely extract parameters from either legacy or rich schema
   const certId = certificate?.certificateId || certificate?.id || '';
-  const studentName = certificate?.student?.name || certificate?.userName || 'Distinguished Student';
+  const studentName = currentUser?.name || certificate?.student?.name || certificate?.userName || 'Distinguished Student';
   const courseTitle = certificate?.course?.title || certificate?.courseName || 'Advanced Professional Program';
   const courseCategory = certificate?.course?.category || 'Professional Education';
   const courseLevel = certificate?.course?.level || 'Intermediate';
@@ -29,6 +46,16 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
   const score = certificate?.score || certificate?.completionDetails?.score || 100;
   const grade = certificate?.completionDetails?.grade || (score >= 90 ? 'Distinction' : score >= 75 ? 'Merit' : 'Pass');
   const issuedDateStr = certificate?.completionDetails?.completedDate || certificate?.issuedAt || certificate?.createdAt || new Date().toISOString();
+  
+  const getCertPrice = () => {
+    const combinedStr = `${courseTitle} ${courseCategory}`.toLowerCase();
+    if (combinedStr.includes('tech')) return 199;
+    if (combinedStr.includes('crash')) return 99;
+    if (combinedStr.includes('business') || combinedStr.includes('content')) return 149;
+    return 149;
+  };
+  const currentPrice = getCertPrice();
+  const originalPrice = currentPrice * 4;
   
   const formattedDate = new Date(issuedDateStr).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -47,8 +74,8 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
     if (!containerRef.current) return;
     const updateScale = () => {
       const parentWidth = containerRef.current?.parentElement?.getBoundingClientRect().width || 400;
-      // Target landscape width is exactly 1122px (297mm @ 96 DPI)
-      const targetWidth = 1122;
+      // Target portrait width is exactly 794px (210mm @ 96 DPI)
+      const targetWidth = 794;
       const calculatedScale = parentWidth / targetWidth;
       // Safeguard boundaries
       setScale(Math.max(0.2, Math.min(calculatedScale, 1)));
@@ -68,263 +95,194 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
 
   const styles = {
     wrapper: {
-      width: "1122px",
-      height: "794px",
-      backgroundColor: "#fffef9",
-      fontFamily: "Georgia, serif",
+      width: "794px",
+      height: "1122px",
+      backgroundColor: "#ffffff",
+      fontFamily: "'Times New Roman', Times, serif",
       position: "relative" as const,
       overflow: "hidden" as const,
-      border: "12px solid #c9a84c",
-      outline: "4px solid #1a3a5c",
-      outlineOffset: "-18px",
+      border: "2px solid #3b82f6",
+      outline: "4px solid #2563eb",
+      outlineOffset: "-12px",
       padding: "15mm",
       boxSizing: "border-box" as const,
-      color: "#1a3a5c"
+      color: "#0f172a"
     },
-
-    watermark: {
-      position: "absolute" as const,
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%) rotate(-30deg)",
-      fontSize: "80px",
-      color: "rgba(201, 168, 76, 0.06)",
-      fontWeight: "bold",
-      whiteSpace: "nowrap" as const,
-      zIndex: 0,
-      pointerEvents: "none" as const,
-      userSelect: "none" as const
-    },
-
-    cornerTL: {
-      position: "absolute" as const,
-      top: "8mm",
-      left: "8mm",
-      width: "30px",
-      height: "30px",
-      borderTop: "3px solid #c9a84c",
-      borderLeft: "3px solid #c9a84c"
-    },
-
-    cornerTR: {
-      position: "absolute" as const,
-      top: "8mm",
-      right: "8mm",
-      width: "30px",
-      height: "30px",
-      borderTop: "3px solid #c9a84c",
-      borderRight: "3px solid #c9a84c"
-    },
-
-    cornerBL: {
-      position: "absolute" as const,
-      bottom: "8mm",
-      left: "8mm",
-      width: "30px",
-      height: "30px",
-      borderBottom: "3px solid #c9a84c",
-      borderLeft: "3px solid #c9a84c"
-    },
-
-    cornerBR: {
-      position: "absolute" as const,
-      bottom: "8mm",
-      right: "8mm",
-      width: "30px",
-      height: "30px",
-      borderBottom: "3px solid #c9a84c",
-      borderRight: "3px solid #c9a84c"
-    },
-
+    cornerTL: { position: "absolute" as const, top: "12px", left: "12px", width: "24px", height: "24px", backgroundColor: "#2563eb", borderBottomRightRadius: "12px" },
+    cornerTR: { position: "absolute" as const, top: "12px", right: "12px", width: "24px", height: "24px", backgroundColor: "#2563eb", borderBottomLeftRadius: "12px" },
+    cornerBL: { position: "absolute" as const, bottom: "12px", left: "12px", width: "24px", height: "24px", backgroundColor: "#2563eb", borderTopRightRadius: "12px" },
+    cornerBR: { position: "absolute" as const, bottom: "12px", right: "12px", width: "24px", height: "24px", backgroundColor: "#2563eb", borderTopLeftRadius: "12px" },
     header: {
       display: "flex",
-      justifyContent: "space-between",
+      flexDirection: "column" as const,
       alignItems: "center",
+      marginTop: "10mm",
       marginBottom: "8mm",
       position: "relative" as const,
       zIndex: 1
     },
-
+    logoWrapper: {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      marginBottom: "20px"
+    },
     logo: {
-      width: "60px",
-      height: "60px",
+      height: "50px",
       objectFit: "contain" as const
     },
-
-    headerTitle: {
-      textAlign: "center" as const,
-      flex: 1
+    logoText: {
+      fontSize: "36px",
+      fontWeight: "bold",
+      color: "#1e3a8a",
+      fontFamily: "Arial, sans-serif",
+      letterSpacing: "-1px"
     },
-
-    headerH1: {
-      fontSize: "28px",
-      color: "#1a3a5c",
-      letterSpacing: "6px",
+    headerSubtitle: {
+      fontSize: "10px",
+      color: "#64748b",
+      letterSpacing: "2px",
+      marginTop: "5px",
       textTransform: "uppercase" as const,
-      fontWeight: "normal",
+      fontWeight: "bold"
+    },
+    headerH1: {
+      fontSize: "46px",
+      color: "#1e3a8a",
+      fontWeight: "bold",
+      margin: "0 0 5px 0",
+      fontFamily: "'Times New Roman', serif"
+    },
+    headerSubH1: {
+      fontSize: "20px",
+      color: "#1e3a8a",
+      letterSpacing: "4px",
+      textTransform: "uppercase" as const,
       margin: 0
     },
-
-    headerSubtitle: {
-      fontSize: "11px",
-      color: "#c9a84c",
-      letterSpacing: "3px",
-      marginTop: "4px",
-      textTransform: "uppercase" as const
-    },
-
-    goldDivider: {
-      width: "100%",
+    blueDivider: {
+      width: "60%",
       height: "2px",
-      background: "linear-gradient(to right, transparent, #c9a84c, #c9a84c, transparent)",
-      margin: "5mm 0",
-      position: "relative" as const,
-      zIndex: 1
+      backgroundColor: "#2563eb",
+      margin: "15px auto"
     },
-
     bodySection: {
       textAlign: "center" as const,
       position: "relative" as const,
-      zIndex: 1
+      zIndex: 1,
+      marginTop: "5mm"
     },
-
     certifyText: {
-      fontSize: "13px",
-      color: "#555",
-      letterSpacing: "2px",
-      marginBottom: "4mm",
-      fontStyle: "italic"
+      fontSize: "18px",
+      color: "#333",
+      marginBottom: "10mm",
+      fontWeight: "bold"
     },
-
     studentName: {
-      fontSize: "42px",
-      color: "#1a3a5c",
-      fontWeight: "bold",
-      letterSpacing: "2px",
-      marginBottom: "3mm",
-      textShadow: "1px 1px 2px rgba(0,0,0,0.1)"
+      fontFamily: "'Great Vibes', cursive",
+      fontSize: "68px",
+      color: "#1e3a8a",
+      margin: "0",
+      lineHeight: "1.2"
     },
-
     nameUnderline: {
-      width: "60%",
-      margin: "0 auto 4mm",
-      height: "3px",
-      background: "linear-gradient(to right, transparent, #c9a84c, transparent)"
+      width: "70%",
+      margin: "5px auto 10mm",
+      height: "1px",
+      backgroundColor: "#cbd5e1"
     },
-
     completedText: {
-      fontSize: "13px",
-      color: "#555",
-      letterSpacing: "1px",
-      marginBottom: "3mm",
-      fontStyle: "italic"
+      fontSize: "16px",
+      color: "#333",
+      marginBottom: "8mm",
+      fontWeight: "bold"
     },
-
     courseTitle: {
-      fontSize: "22px",
-      color: "#1a3a5c",
+      fontSize: "28px",
+      color: "#1e3a8a",
       fontWeight: "bold",
-      marginBottom: "4mm",
-      letterSpacing: "1px"
+      marginBottom: "10mm"
     },
-
-    courseDetails: {
-      display: "flex",
-      justifyContent: "center",
-      gap: "20px",
-      fontSize: "11px",
-      color: "#1a3a5c",
-      marginBottom: "5mm"
+    courseDescription: {
+      fontSize: "14px",
+      color: "#333",
+      lineHeight: "1.6",
+      maxWidth: "80%",
+      margin: "0 auto 15mm auto",
+      fontWeight: "bold"
     },
-
-    detailBadge: {
-      padding: "2px 10px",
-      border: "1px solid #c9a84c",
-      borderRadius: "2px",
-      color: "#1a3a5c"
-    },
-
     footerSection: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-end",
-      marginTop: "5mm",
+      marginTop: "20mm",
       position: "relative" as const,
-      zIndex: 1
+      zIndex: 1,
+      padding: "0 20px"
     },
-
     signatureArea: {
       textAlign: "center" as const,
-      width: "140px"
+      width: "160px"
     },
-
-    signatureImage: {
-      width: "120px",
-      height: "50px",
-      objectFit: "contain" as const,
-      marginBottom: "3px"
+    signatureNameCursive: {
+      fontFamily: "'Great Vibes', cursive",
+      fontSize: "36px",
+      color: "#0f172a",
+      marginBottom: "5px"
     },
-
     signatureLine: {
-      borderTop: "1.5px solid #1a3a5c",
-      paddingTop: "4px",
-      fontSize: "9px",
-      color: "#444",
-      letterSpacing: "1px"
-    },
-
-    centerInfo: {
-      textAlign: "center" as const,
-      flex: 1
-    },
-
-    certId: {
-      fontSize: "10px",
-      color: "#888",
-      letterSpacing: "1px",
-      marginBottom: "3px"
-    },
-
-    certIdStrong: {
-      color: "#1a3a5c",
-      fontSize: "11px",
-      fontWeight: "bold"
-    },
-
-    issuedBy: {
-      fontSize: "9px",
-      color: "#c9a84c",
-      letterSpacing: "2px",
-      textTransform: "uppercase" as const,
+      borderTop: "1px solid #cbd5e1",
+      paddingTop: "5px",
       marginTop: "5px"
     },
-
-    completionDate: {
-      fontSize: "10px",
-      color: "#666",
-      marginTop: "3px"
+    signatureNameBold: {
+      fontSize: "12px",
+      fontWeight: "bold",
+      color: "#1e3a8a",
+      marginBottom: "2px"
     },
-
-    qrSection: {
-      textAlign: "center" as const,
-      width: "100px"
+    signatureTitle: {
+      fontSize: "11px",
+      color: "#475569"
     },
-
+    sealBadge: {
+      width: "110px",
+      height: "110px",
+      borderRadius: "50%",
+      backgroundColor: "#1e3a8a",
+      color: "white",
+      display: "flex",
+      flexDirection: "column" as const,
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+      border: "6px solid white",
+      outline: "3px dashed #1e3a8a",
+      margin: "0 20px"
+    },
     qrCode: {
-      width: "80px",
-      height: "80px",
-      border: "2px solid #c9a84c",
-      padding: "4px",
+      width: "70px",
+      height: "70px",
+      border: "1px solid #e2e8f0",
+      padding: "2px",
       background: "white",
       display: "block",
       margin: "0 auto"
     },
-
     qrText: {
-      fontSize: "8px",
-      color: "#888",
+      fontSize: "9px",
+      color: "#000",
       marginTop: "4px",
-      letterSpacing: "1px"
+      marginBottom: "10px",
+      fontWeight: "bold"
+    },
+    dateText: {
+      fontSize: "11px",
+      color: "#0f172a",
+      fontWeight: "bold",
+      borderBottom: "1px solid #cbd5e1",
+      paddingBottom: "2px",
+      display: "inline-block"
     }
   };
 
@@ -340,60 +298,31 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
             <title>Certificate - ${certId}</title>
             <style>
               @page {
-                size: A4 landscape;
+                size: A4 portrait;
                 margin: 0;
               }
               body {
                 margin: 0;
                 padding: 0;
-                font-family: 'Georgia', serif;
-                background: #fffef9;
+                font-family: 'Times New Roman', serif;
+                background: #ffffff;
                 -webkit-print-color-adjust: exact;
               }
               .certificate-print-wrapper {
-                width: 297mm;
-                height: 210mm;
+                width: 210mm;
+                height: 297mm;
                 padding: 15mm;
-                border: 12px solid #c9a84c;
-                outline: 4px solid #1a3a5c;
-                outline-offset: -18px;
+                border: 2px solid #3b82f6;
+                outline: 4px solid #2563eb;
+                outline-offset: -12px;
                 position: relative;
                 box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
               }
-              .watermark {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-30deg);
-                font-size: 80px;
-                color: rgba(201, 168, 76, 0.06);
-                font-weight: bold;
-                white-space: nowrap;
-                z-index: 0;
-                pointer-events: none;
-                user-select: none;
-              }
               .corner {
                 position: absolute;
-                width: 30px;
-                height: 30px;
-                border-color: #c9a84c;
-                border-style: solid;
-              }
-              .corner-tl { top: 8mm; left: 8mm; border-width: 3px 0 0 3px; }
-              .corner-tr { top: 8mm; right: 8mm; border-width: 3px 3px 0 0; }
-              .corner-bl { bottom: 8mm; left: 8mm; border-width: 0 0 3px 3px; }
-              .corner-br { bottom: 8mm; right: 8mm; border-width: 0 3px 3px 0; }
-              
-              .header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 8mm;
-              }
               .logo {
                 width: 60px;
                 height: 60px;
@@ -607,6 +536,104 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`, '_blank');
   };
 
+  const handleUnlockCertificate = async () => {
+    if (!currentUser) {
+      alert("Please log in to unlock this certificate.");
+      return;
+    }
+
+    // 1. Check if user has free certificate credits
+    if (currentUser.freeCertCredits && currentUser.freeCertCredits > 0) {
+      const useCredit = window.confirm(`You have ${currentUser.freeCertCredits} Free Certificate Credit(s)!\n\nWould you like to unlock this certificate for FREE using 1 credit?`);
+      if (useCredit) {
+        try {
+          const r = await fetch('/api/referrals/redeem-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, certificateId: certId })
+          });
+          const data = await r.json();
+          if (r.ok) {
+            if (onToast) onToast('Success: Certificate unlocked using Free Credit!', 'success');
+            else alert('Success: Certificate unlocked using Free Credit!');
+            
+            setIsCertificateUnlocked(true);
+            if (onRefreshUser) onRefreshUser(data.user);
+            if (onRefreshDashboard) onRefreshDashboard();
+          } else {
+            alert(data.message || 'Failed to redeem credit.');
+          }
+        } catch {
+          alert('Connection failed.');
+        }
+        return;
+      }
+    }
+
+    // 2. Check if user has wallet balance
+    if (currentUser.walletBalance && currentUser.walletBalance >= currentPrice) {
+      const useWallet = window.confirm(`You have ₹${currentUser.walletBalance} in your SkillGenz wallet!\n\nWould you like to pay ₹${currentPrice} using your wallet balance?`);
+      if (useWallet) {
+        try {
+          const r = await fetch('/api/referrals/pay-with-wallet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: currentUser.id,
+              amount: currentPrice,
+              details: `Unlocked Certificate: ${courseTitle}`,
+              certificateId: certId
+            })
+          });
+          const data = await r.json();
+          if (r.ok) {
+            if (onToast) onToast(`Success: ₹${currentPrice} deducted from wallet. Certificate unlocked!`, 'success');
+            else alert('Success: Certificate unlocked!');
+
+            setIsCertificateUnlocked(true);
+            if (onRefreshUser) onRefreshUser(data.user);
+            if (onRefreshDashboard) onRefreshDashboard();
+          } else {
+            alert(data.message || 'Failed to process wallet payment.');
+          }
+        } catch {
+          alert('Connection failed.');
+        }
+        return;
+      }
+    }
+
+    // 3. Fallback to normal checkout
+    const proceed = window.confirm(`Confirm payment of ₹${currentPrice} to unlock this certificate?`);
+    if (!proceed) return;
+
+    try {
+      const r = await fetch('/api/payments/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          type: 'certificate_unlock',
+          details: `Unlocked Certificate: ${courseTitle}`,
+          amount: currentPrice,
+          certificateId: certId
+        })
+      });
+      const data = await r.json();
+      if (r.ok) {
+        if (onToast) onToast(`Payment of ₹${currentPrice} successful. Certificate unlocked!`, 'success');
+        else alert('Payment successful. Certificate unlocked!');
+
+        setIsCertificateUnlocked(true);
+        if (onRefreshDashboard) onRefreshDashboard();
+      } else {
+        alert(data.message || 'Checkout failed.');
+      }
+    } catch {
+      alert('Connection failed.');
+    }
+  };
+
   return (
     <div className="space-y-6 w-full relative">
       
@@ -630,30 +657,27 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
               <h4 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-md" style={{ fontFamily: 'Outfit, sans-serif' }}>Unlock Premium</h4>
               <p className="text-sm text-slate-300 leading-relaxed font-medium">Secure your officially verified credentials and showcase your expertise to top recruiters.</p>
             </div>
-
+ 
             <div className="relative z-10 p-5 rounded-2xl border border-white/10 flex items-center justify-center gap-4 bg-black/40 shadow-inner">
               <div className="flex flex-col items-end">
                 <span className="text-[10px] text-amber-500/70 font-bold tracking-widest uppercase mb-0.5">Original</span>
-                <span className="text-sm text-slate-500 line-through decoration-red-500/50 decoration-2 font-mono">₹1,999</span>
+                <span className="text-sm text-slate-500 line-through decoration-red-500/50 decoration-2 font-mono">₹{originalPrice}</span>
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div className="flex flex-col items-start">
                 <span className="text-[10px] text-emerald-400 font-bold tracking-widest uppercase mb-0.5">Special Offer</span>
-                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-lg">₹499</span>
+                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-lg">₹{currentPrice}</span>
               </div>
             </div>
-
+ 
             <ul className="text-xs text-left space-y-3.5 mb-6 font-medium text-slate-200 relative z-10">
               <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-emerald-500/20"><Shield className="w-3.5 h-3.5 text-emerald-400" /></div> Lifetime Validity & Verification</li>
               <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-blue-500/20"><Download className="w-3.5 h-3.5 text-blue-400" /></div> High-Resolution PDF Export</li>
               <li className="flex items-center gap-3"><div className="p-1 rounded-full bg-sky-500/20"><Linkedin className="w-3.5 h-3.5 text-sky-400" /></div> 1-Click LinkedIn Integration</li>
             </ul>
-
+ 
             <button
-              onClick={() => {
-                alert('Payment Mock Successful! Certificate Unlocked.');
-                setIsCertificateUnlocked(true);
-              }}
+              onClick={handleUnlockCertificate}
               className="w-full relative group/btn overflow-hidden px-6 py-4 font-bold text-white rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_10px_30px_-10px_rgba(245,158,11,0.6)] flex items-center justify-center gap-2 uppercase tracking-[0.15em] text-xs z-10"
             >
               <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover/btn:animate-[shimmer_1.5s_infinite]" />
@@ -686,7 +710,10 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
           }}
         >
           {/* Watermark in background */}
-          <div style={styles.watermark}>EDTECH PLATFORM</div>
+          {/* Google Font for the container */}
+          <style>
+            {`@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');`}
+          </style>
 
           {/* Aesthetic Corner Ornaments */}
           <div style={styles.cornerTL}></div>
@@ -696,118 +723,107 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
 
           {/* Header Section */}
           <div style={styles.header}>
-            {logoFailedLeft ? (
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#102a43" strokeWidth="1.5" style={styles.logo}>
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <img
-                src={logoUrl}
-                alt="Logo Left"
-                style={styles.logo}
-                onError={() => setLogoFailedLeft(true)}
-              />
-            )}
-
-            <div style={styles.headerTitle}>
-              <h1 style={styles.headerH1}>Certificate of Completion</h1>
-              <p style={styles.headerSubtitle}>
-                Developed and Managed by IIT Madras Graduates
-              </p>
+            <div style={styles.logoWrapper}>
+              {logoFailedLeft ? (
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" style={styles.logo}>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <img
+                  src={logoUrl}
+                  alt="SkillGenz Logo"
+                  style={styles.logo}
+                  onError={() => setLogoFailedLeft(true)}
+                />
+              )}
+              <span style={styles.logoText}>skillgenz</span>
             </div>
-
-            {logoFailedRight ? (
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#102a43" strokeWidth="1.5" style={styles.logo}>
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <img
-                src={logoUrl}
-                alt="Logo Right"
-                style={styles.logo}
-                onError={() => setLogoFailedRight(true)}
-              />
-            )}
+            <p style={styles.headerSubtitle}>
+              LEARN TODAY. LEAD TOMORROW.
+            </p>
           </div>
 
-          <div style={styles.goldDivider}></div>
+          {/* Title Section */}
+          <div style={styles.bodySection}>
+            <h1 style={styles.headerH1}>CERTIFICATE</h1>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '15px 0'}}>
+              <div style={{flex: 1, height: '1px', backgroundColor: '#3b82f6'}}></div>
+              <h2 style={styles.headerSubH1}>&nbsp;OF COMPLETION&nbsp;</h2>
+              <div style={{flex: 1, height: '1px', backgroundColor: '#3b82f6'}}></div>
+            </div>
+          </div>
 
           {/* Body Section */}
           <div style={styles.bodySection}>
-            <p style={styles.certifyText}>This is to proudly certify that</p>
+            <p style={styles.certifyText}>This is to certify that</p>
             <div style={styles.studentName}>{studentName}</div>
             <div style={styles.nameUnderline}></div>
             <p style={styles.completedText}>
               has successfully completed the course
             </p>
             <div style={styles.courseTitle}>{courseTitle}</div>
-            <div style={styles.courseDetails}>
-              <span style={styles.detailBadge}>
-                Category: <strong>{courseCategory}</strong>
-              </span>
-              <span style={styles.detailBadge}>
-                Level: <strong>{courseLevel}</strong>
-              </span>
-              <span style={styles.detailBadge}>
-                Duration: <strong>{courseDuration}</strong>
-              </span>
-              <span style={styles.detailBadge}>
-                Grade: <strong>{grade}</strong>
-              </span>
-            </div>
+            <p style={styles.courseDescription}>
+              and has demonstrated the required skills and knowledge to achieve this certification.
+            </p>
           </div>
-
-          <div style={styles.goldDivider}></div>
 
           {/* Footer Section */}
           <div style={styles.footerSection}>
             
-            {/* Signature Area */}
+            {/* Signature Left: Aarsh Mohan */}
             <div style={styles.signatureArea}>
-              <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {signatureFailed ? (
-                  <svg width="120" height="40" viewBox="0 0 100 35" fill="none" stroke="#1a3a5c" strokeWidth="1.5" style={{ marginBottom: '3px' }}>
-                    <path d="M10 25 C 25 8, 35 5, 45 22 C 55 35, 70 8, 90 18" strokeLinecap="round" />
-                    <circle cx="45" cy="22" r="1.5" fill="#c9a84c" />
-                  </svg>
-                ) : (
-                  <img
-                    src={signatureUrl}
-                    alt="Authorized Signature"
-                    style={styles.signatureImage}
-                    onError={() => setSignatureFailed(true)}
-                  />
-                )}
+              <div style={styles.signatureNameCursive}>Aarsh Mohan</div>
+              <div style={styles.signatureLine}>
+                <div style={styles.signatureNameBold}>Aarsh Mohan</div>
+                <div style={styles.signatureTitle}>Founder & CEO</div>
+                <div style={styles.signatureTitle}>IIT Madras</div>
               </div>
-              <div style={styles.signatureLine}>Authorized Signatory</div>
             </div>
 
-            {/* Verification details in center */}
-            <div style={styles.centerInfo}>
-              <div style={styles.certId}>
-                Certificate ID:{" "}
-                <strong style={styles.certIdStrong}>{certId}</strong>
+            {/* Verification Badge/Seal */}
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', margin: '0 20px'}}>
+              <div style={{...styles.sealBadge, margin: 0}}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <div style={{fontSize: '9px', marginTop: '4px', fontWeight: 'bold', letterSpacing: '1px'}}>SKILLGENZ</div>
               </div>
-              <div style={styles.completionDate}>
-                Completed On: {formattedDate}
-              </div>
-              <div style={styles.issuedBy}>EdTech Platform</div>
-            </div>
-
-            {/* Secure verification QR section */}
-            <div style={styles.qrSection}>
-              {qrCodeImage ? (
-                <img
-                  src={qrCodeImage}
-                  alt="QR Code vector"
-                  style={styles.qrCode}
-                />
-              ) : (
-                <div style={{...styles.qrCode, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', color: '#888'}}>
-                  QR Hash
+              <div style={{display: 'flex', gap: '6px', marginTop: '5px'}}>
+                <div style={{fontSize: '8px', border: '1px solid #1e3a8a', padding: '2px 5px', borderRadius: '3px', fontWeight: 'bold', color: '#1e3a8a', fontFamily: 'sans-serif', letterSpacing: '0.5px', textTransform: 'uppercase'}}>
+                  UDYAM Regd. (MSME)
                 </div>
-              )}
-              <div style={styles.qrText}>Scan to Verify</div>
+              </div>
+            </div>
+
+            {/* Signature Right & Details: Ankit + QR Code */}
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <div style={styles.signatureArea}>
+                <div style={styles.signatureNameCursive}>Ankit</div>
+                <div style={styles.signatureLine}>
+                  <div style={styles.signatureNameBold}>Ankit</div>
+                  <div style={styles.signatureTitle}>Co-founder & CFO</div>
+                </div>
+              </div>
+
+              <div style={{marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                {qrCodeImage ? (
+                  <img
+                    src={qrCodeImage}
+                    alt="QR Code"
+                    style={styles.qrCode}
+                  />
+                ) : (
+                  <div style={{...styles.qrCode, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', color: '#888'}}>
+                    {certId.substring(0, 8)}...
+                  </div>
+                )}
+                <div style={styles.qrText}>Scan to Verify</div>
+                
+                <div style={{textAlign: 'center', marginTop: '10px'}}>
+                  <div style={{fontSize: '10px', color: '#475569', marginBottom: '2px'}}>Date of Completion</div>
+                  <div style={styles.dateText}>{formattedDate}</div>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -829,7 +845,7 @@ export function PremiumCertificate({ certificate, darkMode = false }: PremiumCer
             onClick={handlePrint}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#fffef9] border border-slate-200 text-slate-800 hover:bg-slate-50 hover:scale-[1.01] active:scale-95 transition-all text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-blue-500" /> Landscape print / view
+            <Printer className="w-4 h-4 text-blue-500" /> Portrait print / view
           </button>
 
           <button

@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, Sparkles, User as UserIcon, Phone, AlertCircle
 import { User } from '../types';
 import { isLoggedIn, getUserRole, saveAuth } from '../lib/auth';
 import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+import { GoogleLogin } from '@react-oauth/google';
 
 interface LoginSectionProps {
   darkMode: boolean;
@@ -282,50 +283,7 @@ export function SuperAdminLoginSection({ darkMode, onToast, onSuccess }: LoginSe
               </button>
             </div>
 
-            <div className="mt-10 pt-8 border-t border-white/10 space-y-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('superadmin@edtech.com');
-                  setPassword('SuperAdmin@123');
-                  onToast('Credentials loaded successfully', 'success');
-                }}
-                className="w-full py-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-2xl border border-indigo-500/20 transition-all shadow-sm active:scale-95"
-              >
-                Auto-fill Credentials
-              </button>
-              
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  setErrorMsg('');
-                  try {
-                    const res = await fetch('/api/auth/login', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: 'superadmin@edtech.com', password: 'SuperAdmin@123' }),
-                    });
-                    const data = await res.json();
-                    if (res.ok && data.user && data.user.role === 'super_admin') {
-                      saveAuth(data.user);
-                      onToast('Bypass activated', 'success');
-                      onSuccess(data.user);
-                      window.location.href = '/super-admin/dashboard';
-                    } else {
-                      setErrorMsg('Failed to bypass');
-                    }
-                  } catch (e) {
-                    setErrorMsg('Network error.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="w-full py-3 text-xs font-bold rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-md border border-white/20 shadow-sm active:scale-95"
-              >
-                ⚡ Instant Demo Login
-              </button>
-            </div>
+            {/* Bypass controls removed */}
           </div>
         </motion.div>
       </div>
@@ -479,7 +437,7 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
             <div className={`p-2.5 rounded-xl ${darkMode ? 'bg-blue-600/20 text-blue-400' : 'bg-white/10 text-white'}`}>
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <span className={`text-xl font-black tracking-tight ${darkMode ? 'text-white' : 'text-white'}`}>SkillVerse</span>
+            <span className={`text-xl font-black tracking-tight ${darkMode ? 'text-white' : 'text-white'}`}>SkillGenz</span>
           </div>
           
           <motion.div
@@ -581,7 +539,7 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
                 <input
                   type="email"
                   required
-                  placeholder="admin@edtech.com"
+                  placeholder="admin@skillgenz.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`w-full pl-11 pr-4 py-3.5 text-sm rounded-2xl border-2 outline-none transition-all duration-300 ${
@@ -665,55 +623,7 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
             </motion.button>
           </motion.div>
 
-          <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800/50 text-center space-y-4">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@edtech.com');
-                setPassword('Admin@123');
-                onToast('Seeded Admin Coordinator credentials loaded!', 'success');
-              }}
-              className="text-[10px] font-bold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-widest underline decoration-slate-400/30 hover:decoration-blue-500 underline-offset-4"
-            >
-              Auto-fill Test Credentials
-            </button>
-
-            <motion.button
-              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-              type="button"
-              onClick={async () => {
-                setLoading(true);
-                setErrorMsg('');
-                try {
-                  const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'admin@edtech.com', password: 'Admin@123' }),
-                  });
-                  const data = await res.json();
-                  if (res.ok && data.user && data.user.role === 'admin') {
-                    saveAuth(data.user);
-                    onToast('Activated Admin One-Click Bypass!', 'success');
-                    onSuccess(data.user);
-                    window.location.href = '/admin/dashboard';
-                  } else {
-                    setErrorMsg('Failed to process. Check database file.');
-                  }
-                } catch (e) {
-                  setErrorMsg('Network error.');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              className={`w-full py-3.5 text-[10px] font-mono font-bold rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-inner ${
-                darkMode 
-                  ? 'bg-[#0d1117] text-blue-400 border border-blue-500/20 hover:bg-[#161b22] hover:border-blue-500/40' 
-                  : 'bg-slate-900 text-white shadow-xl shadow-slate-900/20 hover:bg-slate-800 hover:shadow-slate-900/30'
-              }`}
-            >
-              <span className="text-yellow-500">⚡</span> Demo Bypass: One-Click Entry
-            </motion.button>
-          </motion.div>
+          {/* Bypass controls removed */}
         </motion.div>
       </div>
     </div>
@@ -724,11 +634,13 @@ export function AdminLoginSection({ darkMode, onToast, onSuccess }: LoginSection
 // 3. STUDENT LOGIN (Route: /student/login)
 // ----------------------------------------------------------------------
 export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSectionProps) {
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'otp'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -749,17 +661,12 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
         if (data.user && data.user.role === 'student') {
           saveAuth(data.user);
           onToast(`Study lobby unlocked successfully. Enjoy learning!`, 'success');
-          
-          if (data.user.hasCompletedOnboarding === false) {
-             onSuccess(data.user);
-          } else {
-             onSuccess(data.user);
-          }
+          onSuccess(data.user);
         } else {
           setErrorMsg('Invalid student credentials or profile role mismatch.');
         }
       } else {
-        setErrorMsg(data.message || 'Verifications match rejected.');
+        setErrorMsg(data.error || data.message || 'Verifications match rejected.');
       }
     } catch (err) {
       console.error(err);
@@ -794,19 +701,94 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
       const data = await res.json();
       if (res.ok) {
         onToast(`Student account registered successfully!`, 'success');
-        
-        // Force onboarding flag for new signups if backend hasn't been reloaded
         data.user.hasCompletedOnboarding = false;
-        
         saveAuth(data.user);
         onSuccess(data.user);
-        // Do NOT navigate yet; OnboardingModal will handle it
       } else {
-        setErrorMsg(data.message || 'Failed to complete student registry registration.');
+        setErrorMsg(data.error || data.message || 'Failed to complete student registry registration.');
       }
     } catch (err) {
       console.error(err);
       setErrorMsg('Connection error during student account creation.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (!email) {
+      setErrorMsg('Please enter your email to receive an OTP.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onToast('OTP sent to your email. Check your inbox (or console if mocked).', 'success');
+        setOtpSent(true);
+      } else {
+        setErrorMsg(data.error || 'Failed to send OTP.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Network error.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otpCode }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        saveAuth(data.user);
+        onToast('OTP verified! Secure access granted.', 'success');
+        onSuccess(data.user);
+      } else {
+        setErrorMsg(data.error || 'Invalid or expired OTP.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Network error.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        saveAuth(data.user);
+        onToast('Google Authentication successful!', 'success');
+        onSuccess(data.user);
+      } else {
+        setErrorMsg(data.error || 'Google login failed.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Network error during Google login.');
     } finally {
       setLoading(false);
     }
@@ -831,32 +813,30 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
         </div>
 
         {/* Custom tabs */}
-        <div className="grid grid-cols-2 p-1 bg-slate-500/10 rounded-xl mb-6">
+        <div className="grid grid-cols-3 p-1 bg-slate-500/10 rounded-xl mb-6">
           <button
-            onClick={() => {
-              setActiveTab('login');
-              setErrorMsg('');
-            }}
+            onClick={() => { setActiveTab('login'); setErrorMsg(''); setOtpSent(false); }}
             className={`py-2 text-xs font-bold rounded-lg transition-all ${
-              activeTab === 'login'
-                ? 'bg-blue-600 text-white shadow'
-                : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'login' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Login Account
+            Password
           </button>
           <button
-            onClick={() => {
-              setActiveTab('register');
-              setErrorMsg('');
-            }}
+            onClick={() => { setActiveTab('otp'); setErrorMsg(''); }}
             className={`py-2 text-xs font-bold rounded-lg transition-all ${
-              activeTab === 'register'
-                ? 'bg-blue-600 text-white shadow'
-                : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'otp' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Create Pass
+            OTP Login
+          </button>
+          <button
+            onClick={() => { setActiveTab('register'); setErrorMsg(''); setOtpSent(false); }}
+            className={`py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === 'register' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Register
           </button>
         </div>
 
@@ -867,7 +847,7 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
           </div>
         )}
 
-        {activeTab === 'login' ? (
+        {activeTab === 'login' && (
           <form onSubmit={handleLogin} className="space-y-4 text-xs font-semibold">
             <div className="space-y-1">
               <label className="text-slate-400">Registered Email Address</label>
@@ -889,13 +869,6 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
             <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <label className="text-slate-400">Security Password</label>
-                <button
-                  type="button"
-                  onClick={() => onToast('Password reset link is locked under simulation constraints.', 'ref')}
-                  className="text-blue-500 font-bold hover:underline col-span-1 text-[10px] bg-transparent border-0"
-                >
-                  Forgot Password?
-                </button>
               </div>
               <div className="relative">
                 <input
@@ -928,7 +901,67 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
               {loading ? 'Entering Academic Lobby...' : 'Proceed Authentication'}
             </button>
           </form>
-        ) : (
+        )}
+
+        {activeTab === 'otp' && (
+          <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className="space-y-4 text-xs font-semibold">
+            <div className="space-y-1">
+              <label className="text-slate-400">Email Address for OTP</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  placeholder="student@gmail.com"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setOtpSent(false); }}
+                  className={`w-full pl-10 pr-3 py-2.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500/50 ${
+                    darkMode ? 'bg-slate-950 border-slate-850 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
+                  disabled={otpSent}
+                />
+                <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+
+            {otpSent && (
+              <div className="space-y-1">
+                <label className="text-slate-400">Enter 6-Digit OTP</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className={`w-full pl-10 pr-3 py-2.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-blue-500/50 tracking-widest ${
+                      darkMode ? 'bg-slate-950 border-slate-850 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                  />
+                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs hover:scale-[1.01] active:scale-95 transition-all shadow shadow-blue-500/20"
+            >
+              {loading ? 'Processing...' : otpSent ? 'Verify OTP & Login' : 'Send OTP via Email'}
+            </button>
+            {otpSent && (
+              <button
+                type="button"
+                onClick={() => setOtpSent(false)}
+                className="w-full text-center text-[10px] text-blue-500 mt-2 hover:underline bg-transparent"
+              >
+                Use a different email / Resend OTP
+              </button>
+            )}
+          </form>
+        )}
+
+        {activeTab === 'register' && (
           <form onSubmit={handleRegister} className="space-y-3 text-xs font-semibold">
             <div className="space-y-1">
               <label className="text-slate-400">Graduate Full Name</label>
@@ -1009,31 +1042,16 @@ export function StudentLoginSection({ darkMode, onToast, onSuccess }: LoginSecti
         )}
 
         <div className="mt-5 pt-4 border-t border-slate-800/10 text-center space-y-3">
-          <button
-            onClick={() => {
-              const mockUser: User = {
-                id: 'usr_oauth_seed',
-                name: 'Guest Scholar',
-                email: 'student@edtech.com',
-                password: 'xxxx',
-                joinedDate: '2026-06-02',
-                plan: 'free',
-                role: 'student',
-                billingCycle: 'monthly'
-              };
-              saveAuth(mockUser);
-              onToast('Google OAuth bypass simulation triggered!', 'success');
-              onSuccess(mockUser);
-            }}
-            className={`w-full py-2 text-[10px] font-bold rounded-xl border hover:bg-slate-100 flex items-center justify-center gap-2 cursor-pointer ${
-              darkMode ? 'border-slate-800 text-slate-300 hover:bg-slate-800' : 'border-slate-200 text-slate-700'
-            }`}
-          >
-            <span>Mock Google OAuth Account Auth</span>
-          </button>
-          <p className="text-[10px] text-slate-500">
-            For testing use: <strong className="text-blue-500 font-mono">student@edtech.com</strong> / <strong className="text-blue-500 font-mono">Student@123</strong>
-          </p>
+          {/* Continue with Google Button */}
+          <div className="flex justify-center mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setErrorMsg('Google login failed')}
+              theme={darkMode ? 'filled_black' : 'outline'}
+              shape="pill"
+              text="continue_with"
+            />
+          </div>
         </div>
       </div>
     </div>

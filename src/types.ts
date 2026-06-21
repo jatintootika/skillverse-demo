@@ -11,6 +11,7 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  age?: number;
   password?: string;
   role: UserRole;
   plan: SubscriptionPlan;
@@ -26,6 +27,11 @@ export interface User {
     skillLevel?: string;
     interest?: string;
   };
+  referralCode?: string;
+  walletBalance?: number;
+  referredCount?: number;
+  freeCourseCredits?: number;
+  freeCertCredits?: number;
 }
 
 export interface ResourceItem {
@@ -46,13 +52,15 @@ export interface Course {
   thumbnailUrl?: string;
   bannerUrl?: string;
   lectures: { title: string; videoId: string }[];
-  notesUrl: string;
-  questionsUrl: string;
+  notesUrl?: string;
+  practiceMcqsUrl?: string;
+  labManualUrl?: string;
+  questionsUrl?: string;
   active: boolean;
   questionsCount: number;
   durationMins: number;
   passPercentage: number;
-  assignments?: { id: string; title: string; fileUrl?: string }[];
+  assignments?: { id: string; title: string; description?: string; task?: string; expectedOutput?: string; solution?: string; fileUrl?: string }[];
   quizzes?: { id: string; question: string; options: string[]; answerIndex: number }[];
 }
 

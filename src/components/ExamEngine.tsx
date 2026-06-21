@@ -34,7 +34,7 @@ export function ExamEngine({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [visited, setVisited] = useState<Record<number, boolean>>({ 0: true });
-  const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(7200); // 120 minutes in seconds
   const [cheatingAttempts, setCheatingAttempts] = useState(0);
 
   // Result metrics
@@ -52,7 +52,7 @@ export function ExamEngine({
       if (document.hidden) {
         setCheatingAttempts((prev) => {
           const updated = prev + 1;
-          onToast(`Warning! Tab switch detected (${updated}/3). Swapping tabs is strictly monitored during the SkillVerse Exam!`, 'ref');
+          onToast(`Warning! Tab switch detected (${updated}/3). Swapping tabs is strictly monitored during the SkillGenz Exam!`, 'ref');
           if (updated >= 3) {
             handleCompleteExam(true); // force submit on heavy violations
           }
@@ -157,9 +157,9 @@ export function ExamEngine({
       
       // Mock pResult for the UI to render the certificate and paywall
       const mockResult = {
-        passed: localPct >= 70,
+        passed: localPct >= 80,
         scorePct: localPct,
-        certificate: localPct >= 70 ? {
+        certificate: localPct >= 80 ? {
           certificateId: `SV-MOCK-${Math.floor(Math.random() * 100000)}`,
           userName: currentUser.name,
           courseName: courseTitle,
@@ -169,7 +169,7 @@ export function ExamEngine({
       setPResult(mockResult);
       setStages('analysis');
       
-      if (localPct >= 70) {
+      if (localPct >= 80) {
         onToast('Congratulations! You cleared the certification exam!', 'success');
         triggerConfettiParticles();
       } else {
@@ -235,8 +235,8 @@ export function ExamEngine({
 
   const handleShareToLinkedIn = () => {
     if (!pResult ? undefined : !pResult.certificate) return;
-    const certUrl = `https://verify.skillverse.in/${pResult.certificate.certificateId}`;
-    const shareText = `I am proud to share that I passed the ${courseTitle} examination at SkillVerse verified with an expert passing score of ${scorePct}%! Check my credentials index: ${certUrl}`;
+    const certUrl = `https://verify.skillgenz.com/${pResult.certificate.certificateId}`;
+    const shareText = `I am proud to share that I passed the ${courseTitle} examination at SkillGenz verified with an expert passing score of ${scorePct}%! Check my credentials index: ${certUrl}`;
     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certUrl)}&text=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank');
   };
@@ -291,7 +291,7 @@ export function ExamEngine({
                   Certification Exam
                 </h1>
                 <p className={`text-base ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                  {courseTitle} &middot; SkillVerse Verify
+                  {courseTitle} &middot; SkillGenz Verify
                 </p>
               </div>
 
@@ -311,7 +311,7 @@ export function ExamEngine({
                     <h4 className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-slate-900'}`}>Time Limit</h4>
                   </div>
                   <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    You have exactly <strong className={darkMode ? 'text-white' : 'text-slate-900'}>60 minutes</strong> to complete all questions. The timer auto-submits when it expires.
+                    You have exactly <strong className={darkMode ? 'text-white' : 'text-slate-900'}>120 minutes</strong> to complete all questions. The timer auto-submits when it expires.
                   </p>
                 </div>
                 
@@ -329,7 +329,7 @@ export function ExamEngine({
                     <h4 className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-slate-900'}`}>Passing Grade</h4>
                   </div>
                   <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Score <strong className={darkMode ? 'text-white' : 'text-slate-900'}>70% or above</strong> to earn the verified credentials. 80%+ unlocks the premium certificate.
+                    Score <strong className={darkMode ? 'text-white' : 'text-slate-900'}>80% or above</strong> to earn the verified credentials.
                   </p>
                 </div>
                 
@@ -347,7 +347,7 @@ export function ExamEngine({
                     <h4 className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-slate-900'}`}>Evaluation Logic</h4>
                   </div>
                   <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    There is <strong className={darkMode ? 'text-white' : 'text-slate-900'}>no negative marking</strong>. Answer every question to maximize your score.
+                    The exam is out of <strong className={darkMode ? 'text-white' : 'text-slate-900'}>120 marks</strong> (4 marks per question). There is <strong className={darkMode ? 'text-white' : 'text-slate-900'}>no negative marking</strong>.
                   </p>
                 </div>
                 
@@ -692,7 +692,7 @@ export function ExamEngine({
           onViewCertificate={() => setStages('result')}
           onRetakeExam={() => {
             setAnswers({});
-            setTimeLeft(3600);
+            setTimeLeft(7200);
             setCurrentIdx(0);
             setVisited({ 0: true });
             setCheatingAttempts(0);
@@ -707,77 +707,99 @@ export function ExamEngine({
         <div className="w-full h-full animate-in zoom-in-95 duration-500 py-8 px-4 md:px-8 overflow-y-auto relative z-10">
           
           {/* Top Stats Banner */}
-          <div className="rounded-3xl p-8 sm:p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 mb-8"
+          <div className="rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10 mb-12 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)]"
             style={{
-              background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(24px)',
-              border: `1px solid ${darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-              boxShadow: darkMode ? '0 0 80px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 25px 60px -12px rgba(0,0,0,0.15)',
+              background: darkMode ? 'linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95))' : 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.95))',
+              backdropFilter: 'blur(32px)',
+              border: `1px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
             }}>
-            <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: 'linear-gradient(90deg, #3b82f6, #06b6d4, #10b981)' }} />
+            {/* Dynamic Animated Background Blobs */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] animate-[pulse_6s_ease-in-out_infinite]" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] animate-[pulse_8s_ease-in-out_infinite_alternate]" />
             
-            <div className="space-y-4 text-center md:text-left flex-1">
-              <span className="px-3 py-1.5 text-[10px] sm:text-xs rounded-xl font-bold uppercase tracking-widest"
+            {/* Gradient Top Border */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400" />
+            
+            <div className="space-y-6 text-center md:text-left flex-1 relative z-10">
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-[10px] sm:text-xs rounded-full font-bold uppercase tracking-widest shadow-inner"
                 style={{
-                  background: 'rgba(59,130,246,0.1)',
-                  color: '#60a5fa',
-                  border: '1px solid rgba(59,130,246,0.2)',
-                }}>Assessment report summary</span>
-              <h2 className="text-2xl sm:text-4xl font-bold flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                {scorePct >= 70 ? (
-                  <><div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', boxShadow: '0 0 20px rgba(16,185,129,0.2)' }}><CheckCircle className="w-7 h-7 text-emerald-400" /></div> <span style={{ color: '#4edea3' }}>CERTIFIED</span></>
+                  background: darkMode ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.8)',
+                  color: '#06b6d4',
+                  border: `1px solid ${darkMode ? 'rgba(6,182,212,0.3)' : 'rgba(6,182,212,0.2)'}`,
+                }}>
+                <BarChart3 className="w-4 h-4" /> Assessment Analytics
+              </span>
+              
+              <h2 className="text-4xl sm:text-5xl font-black flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {scorePct >= 80 ? (
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-16 h-16 rounded-3xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500" 
+                      style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05))', border: '1px solid rgba(16,185,129,0.4)', boxShadow: '0 0 30px rgba(16,185,129,0.2) inset' }}>
+                      <CheckCircle className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                    </div> 
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 drop-shadow-sm">CERTIFIED</span>
+                  </div>
                 ) : (
-                  <><div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 20px rgba(239,68,68,0.2)' }}><AlertCircle className="w-7 h-7 text-red-400" /></div> <span style={{ color: '#f87171' }}>NOT CLEARED</span></>
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-16 h-16 rounded-3xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500" 
+                      style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))', border: '1px solid rgba(239,68,68,0.4)', boxShadow: '0 0 30px rgba(239,68,68,0.2) inset' }}>
+                      <AlertCircle className="w-8 h-8 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                    </div> 
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 drop-shadow-sm">NOT CLEARED</span>
+                  </div>
                 )}
               </h2>
-              <p className="text-sm sm:text-base leading-relaxed max-w-md mx-auto md:mx-0" style={{ color: darkMode ? '#94a3b8' : '#64748b' }}>
-                {scorePct >= 70
-                  ? `You achieved an excellent score of ${scorePct}%. Your professional certification records were compiled in our verified system ledger.`
-                  : `You scored ${scorePct}%. You need a passing percentage of 70% to unlock credentials.`}
+              
+              <p className="text-base sm:text-lg leading-relaxed max-w-lg mx-auto md:mx-0 font-medium" style={{ color: darkMode ? '#cbd5e1' : '#475569' }}>
+                {scorePct >= 80
+                  ? `Exceptional performance! You achieved a top-tier score of ${scorePct}%. Your professional certification has been permanently etched into our verified ledger.`
+                  : `You scored ${scorePct}%. A minimum passing threshold of 80% is required to unlock your verified credentials. Review your performance below.`}
               </p>
             </div>
 
-            <div className="flex flex-col items-center shrink-0 relative">
-              {scorePct >= 70 && <div className="absolute inset-0 bg-emerald-500/20 blur-[50px] rounded-full" />}
-              <div className="w-48 h-48 rounded-full flex flex-col items-center justify-center relative"
+            <div className="flex flex-col items-center shrink-0 relative z-10 group">
+              {scorePct >= 80 && <div className="absolute inset-0 bg-emerald-500/30 blur-[60px] rounded-full mix-blend-screen animate-[pulse_4s_ease-in-out_infinite]" />}
+              <div className="w-56 h-56 rounded-full flex flex-col items-center justify-center relative transition-transform duration-700 group-hover:rotate-[360deg]"
                 style={{
-                  background: darkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,1)',
-                  border: `2px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
-                  boxShadow: 'inset 0 0 30px rgba(0,0,0,0.5)',
+                  background: darkMode ? 'linear-gradient(135deg, rgba(15,23,42,0.8), rgba(30,41,59,0.9))' : 'linear-gradient(135deg, rgba(255,255,255,1), rgba(241,245,249,1))',
+                  border: `2px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
+                  boxShadow: darkMode ? 'inset 0 0 50px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.4)' : 'inset 0 0 50px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.1)',
                 }}>
                 {/* SVG Circle highlight */}
-                <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                <svg className="absolute inset-0 w-full h-full transform -rotate-90 drop-shadow-xl">
                   <circle
                     cx="50%"
                     cy="50%"
-                    r="45%"
-                    className={`stroke-current ${scorePct >= 70 ? 'text-emerald-500' : 'text-blue-500'}`}
-                    strokeWidth="12"
+                    r="46%"
+                    className={`stroke-current ${scorePct >= 80 ? 'text-emerald-500' : 'text-blue-500'} transition-all duration-1000 ease-out`}
+                    strokeWidth="14"
                     fill="transparent"
-                    strokeDasharray={2 * Math.PI * 72}
-                    strokeDashoffset={2 * Math.PI * 72 * (1 - scorePct / 100)}
+                    strokeDasharray={2 * Math.PI * 90} // Approximate circumference for r=46% of w-56 (224px diameter => r=103)
+                    strokeDashoffset={2 * Math.PI * 90 * (1 - scorePct / 100)}
                     strokeLinecap="round"
-                    style={{ filter: scorePct >= 70 ? 'drop-shadow(0 0 8px rgba(16,185,129,0.8))' : 'drop-shadow(0 0 8px rgba(59,130,246,0.8))' }}
+                    style={{ filter: scorePct >= 80 ? 'drop-shadow(0 0 12px rgba(16,185,129,0.8))' : 'drop-shadow(0 0 12px rgba(59,130,246,0.8))' }}
                   />
                   <circle
                     cx="50%"
                     cy="50%"
-                    r="45%"
+                    r="46%"
                     className="stroke-current opacity-10"
-                    strokeWidth="12"
+                    strokeWidth="14"
                     fill="transparent"
                     style={{ color: darkMode ? '#ffffff' : '#000000' }}
                   />
                 </svg>
 
-                <span className={`text-5xl font-extrabold font-mono`} style={{ color: scorePct >= 70 ? '#4edea3' : '#60a5fa', textShadow: `0 0 20px ${scorePct >= 70 ? 'rgba(16,185,129,0.5)' : 'rgba(59,130,246,0.5)'}` }}>{scorePct}%</span>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] mt-2" style={{ color: darkMode ? '#8c909f' : '#94a3b8' }}>Score</span>
+                <div className="absolute inset-2 rounded-full border border-white/5 pointer-events-none" />
+                <span className={`text-5xl font-black font-mono mb-1 transition-all duration-300`} style={{ color: scorePct >= 80 ? '#4edea3' : '#60a5fa', textShadow: `0 0 30px ${scorePct >= 80 ? 'rgba(16,185,129,0.6)' : 'rgba(59,130,246,0.6)'}` }}>{scorePct}%</span>
+                <span className="text-base font-bold" style={{ color: darkMode ? '#cbd5e1' : '#475569' }}>{Math.round((scorePct / 100) * 120)} <span className="text-xs opacity-50">/ 120</span></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] mt-3" style={{ color: darkMode ? '#64748b' : '#94a3b8' }}>Total Score</span>
               </div>
             </div>
           </div>
 
           {/* If Pass: Issue Gorgeous Printable Certificate card widget */}
-          {scorePct >= 70 && pResult && pResult.certificate && (
+          {scorePct >= 80 && pResult && pResult.certificate && (
             <div className="space-y-6 mb-12">
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1" style={{ background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
@@ -883,106 +905,119 @@ export function ExamEngine({
                   </div>
                 )}
 
-                {/* Ultra Premium Certificate Design */}
-                <div id="print-area-certificate" className={`w-full aspect-[1.414/1] rounded-[1.8rem] relative overflow-hidden select-text text-center flex flex-col justify-center transition-all duration-1000 ${!isCertificateUnlocked ? 'filter blur-[12px] grayscale-[0.5] scale-[0.98] pointer-events-none select-none opacity-50' : 'scale-100 opacity-100'}`}>
+                {/* Ultra Premium Certificate Design - Modern Glassmorphic & Vibrant */}
+                <div id="print-area-certificate" className={`w-full aspect-[1.414/1] rounded-[2rem] relative overflow-hidden select-text text-center flex flex-col justify-center transition-all duration-1000 ${!isCertificateUnlocked ? 'filter blur-[12px] grayscale-[0.5] scale-[0.98] pointer-events-none select-none opacity-50' : 'scale-100 opacity-100'}`}
+                  style={{ boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)' }}>
                   
-                  {/* Outer Certificate Paper styling */}
-                  <div className="absolute inset-0 bg-[#fdfbf7] shadow-2xl" />
-                  
-                  {/* Intricate Borders */}
-                  <div className="absolute inset-4 sm:inset-6 border-[8px] sm:border-[12px] border-double border-[#c9a84c] opacity-80" />
-                  <div className="absolute inset-6 sm:inset-8 border border-[#1a3a5c] opacity-30" />
-                  
-                  {/* Subtle Background Pattern */}
-                  <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#c9a84c 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] pointer-events-none text-[200px] font-serif font-bold text-[#c9a84c] whitespace-nowrap rotate-[-30deg]">
-                    SKILLVERSE
+                  {/* Dynamic Vibrant Background Layer */}
+                  <div className="absolute inset-0 bg-[#0f172a] overflow-hidden">
+                    <div className="absolute -top-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-indigo-500/40 via-purple-500/20 to-transparent blur-[80px] animate-[pulse_8s_ease-in-out_infinite_alternate]" />
+                    <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tr from-cyan-500/40 via-blue-500/20 to-transparent blur-[80px] animate-[pulse_10s_ease-in-out_infinite_alternate-reverse]" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                   </div>
                   
-                  {/* Corner Ornaments */}
-                  <div className="absolute top-8 left-8 w-12 h-12 border-t-4 border-l-4 border-[#1a3a5c]" />
-                  <div className="absolute top-8 right-8 w-12 h-12 border-t-4 border-r-4 border-[#1a3a5c]" />
-                  <div className="absolute bottom-8 left-8 w-12 h-12 border-b-4 border-l-4 border-[#1a3a5c]" />
-                  <div className="absolute bottom-8 right-8 w-12 h-12 border-b-4 border-r-4 border-[#1a3a5c]" />
-
-                  <div className="relative z-10 flex flex-col items-center justify-between h-full py-12 sm:py-16 px-10 sm:px-20">
+                  {/* Glassmorphism Inner Card */}
+                  <div className="absolute inset-4 sm:inset-6 rounded-[1.5rem] border border-white/20 bg-white/5 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col"
+                    style={{ zIndex: 10 }}>
                     
-                    {/* Header Header */}
-                    <div className="flex flex-col items-center mb-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1a3a5c] to-blue-800 text-white flex items-center justify-center shadow-lg border-2 border-[#c9a84c] mb-4">
-                        <Award className="w-8 h-8 text-[#f8e5b0]" />
-                      </div>
-                      <h1 className="text-3xl sm:text-5xl font-serif font-medium text-[#1a3a5c] tracking-widest uppercase" style={{ textShadow: '1px 1px 0 rgba(255,255,255,1), 2px 2px 4px rgba(0,0,0,0.1)' }}>
-                        Certificate
-                      </h1>
-                      <div className="h-px w-48 bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent mt-4 mb-1" />
-                      <span className="text-[9px] sm:text-[11px] text-[#c9a84c] font-bold tracking-[0.4em] uppercase">Of Professional Achievement</span>
-                    </div>
+                    {/* Top Accent Bar */}
+                    <div className="h-2 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" />
 
-                    {/* Recipient Details */}
-                    <div className="flex flex-col items-center space-y-4 my-6">
-                      <p className="text-xs sm:text-sm text-slate-500 italic font-serif">This is to proudly certify that</p>
+                    <div className="flex-1 flex flex-col items-center justify-between py-10 sm:py-14 px-8 sm:px-16 relative">
                       
-                      <h2 className="text-4xl sm:text-6xl font-bold text-[#1a3a5c] leading-tight capitalize" style={{ fontFamily: '"Playfair Display", Georgia, serif' }}>
-                        {pResult.certificate.userName}
-                      </h2>
-                      
-                      <div className="w-3/4 h-0.5 bg-[#c9a84c] rounded-full opacity-50" />
-                      
-                      <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto leading-relaxed mt-2 font-serif">
-                        has successfully fulfilled all requirements, cleared the official assessment, and demonstrated exceptional proficiency in
-                      </p>
-                      
-                      <h3 className="text-xl sm:text-2xl font-bold text-[#1a3a5c] uppercase tracking-wider mt-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                        {pResult.certificate.courseName}
-                      </h3>
-                      
-                      <div className="inline-flex items-center gap-4 mt-4 px-6 py-2 border border-[#c9a84c]/40 rounded-full bg-white/50 shadow-sm backdrop-blur-sm">
-                        <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Grade Achieved:</span>
-                        <span className="text-sm sm:text-base font-extrabold text-[#1a3a5c]">{scorePct}%</span>
-                        <span className="text-slate-300">|</span>
-                        <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Date:</span>
-                        <span className="text-sm sm:text-base font-extrabold text-[#1a3a5c]">{new Date(pResult.certificate.issuedAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-
-                    {/* Footer Signatures & QR */}
-                    <div className="w-full flex justify-between items-end mt-auto pt-6 border-t-2 border-[#1a3a5c]/10">
-                      
-                      {/* Signature 1 */}
-                      <div className="text-center w-40">
-                        <div className="h-12 flex items-center justify-center mb-1 relative">
-                          <span className="text-2xl text-[#1a3a5c]/80" style={{ fontFamily: '"Brush Script MT", cursive' }}>SkillVerse Admin</span>
-                        </div>
-                        <div className="border-t border-[#1a3a5c] pt-1">
-                          <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Authorized Signatory</span>
-                        </div>
+                      {/* Watermark */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-white/[0.03] select-none pointer-events-none -rotate-12 whitespace-nowrap tracking-tighter">
+                        SKILLGENZ
                       </div>
 
-                      {/* Official Seal / QR */}
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#c9a84c] to-yellow-600 rounded-full flex items-center justify-center p-1 shadow-[0_4px_15px_rgba(201,168,76,0.4)] border-4 border-white">
-                          <div className="w-full h-full border border-dashed border-white/50 rounded-full flex items-center justify-center relative overflow-hidden bg-[#1a3a5c]">
-                            <Shield className="w-8 h-8 text-[#f8e5b0] opacity-90" />
-                            <div className="absolute inset-0 opacity-20" style={{ background: 'repeating-conic-gradient(from 0deg, transparent 0deg 15deg, white 15deg 30deg)' }} />
+                      {/* Header Section */}
+                      <div className="flex flex-col items-center z-10 w-full relative">
+                        <div className="flex items-center justify-between w-full mb-8">
+                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)] backdrop-blur-md">
+                            <Award className="w-8 h-8 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+                          </div>
+                          <div className="text-right">
+                            <span className="block text-[8px] sm:text-[10px] text-cyan-400 font-bold tracking-[0.3em] uppercase mb-1">Credential ID</span>
+                            <span className="block text-xs sm:text-sm text-slate-300 font-mono tracking-wider bg-black/30 px-3 py-1 rounded-lg border border-white/10">{pResult.certificate.certificateId}</span>
                           </div>
                         </div>
-                        <div className="mt-2 text-center">
-                          <span className="text-[8px] font-bold text-[#1a3a5c] uppercase tracking-[0.2em] block">ID: {pResult.certificate.certificateId}</span>
-                          <span className="text-[7px] text-slate-400 uppercase tracking-widest">Verify online</span>
+                        <h1 className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight uppercase" style={{ fontFamily: 'Outfit, sans-serif', textShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                          Certificate of Excellence
+                        </h1>
+                        <div className="mt-4 flex items-center gap-4">
+                          <div className="h-px w-12 bg-gradient-to-r from-transparent to-cyan-500" />
+                          <span className="text-[10px] sm:text-xs text-cyan-400 font-bold tracking-[0.4em] uppercase">Verified Achievement</span>
+                          <div className="h-px w-12 bg-gradient-to-l from-transparent to-cyan-500" />
                         </div>
                       </div>
 
-                      {/* Signature 2 */}
-                      <div className="text-center w-40">
-                        <div className="h-12 flex items-center justify-center mb-1">
-                          <span className="text-2xl text-[#1a3a5c]/80" style={{ fontFamily: '"Brush Script MT", cursive' }}>Academic Council</span>
+                      {/* Recipient Details */}
+                      <div className="flex flex-col items-center space-y-5 my-auto z-10 w-full relative">
+                        <p className="text-sm sm:text-base text-slate-400 font-medium tracking-wide">This credential is proudly presented to</p>
+                        
+                        <div className="relative group cursor-default">
+                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+                          <h2 className="relative text-5xl sm:text-7xl font-bold text-white leading-tight capitalize px-8 py-2 border-b border-white/20" style={{ fontFamily: '"Playfair Display", Georgia, serif', textShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                            {pResult.certificate.userName}
+                          </h2>
                         </div>
-                        <div className="border-t border-[#1a3a5c] pt-1">
-                          <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Board of Directors</span>
-                        </div>
+                        
+                        <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed mt-4 font-medium">
+                          for successfully completing the rigorous assessment and demonstrating exceptional mastery in the professional domain of
+                        </p>
+                        
+                        <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500 uppercase tracking-widest mt-2 drop-shadow-sm" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                          {pResult.certificate.courseName}
+                        </h3>
                       </div>
 
+                      {/* Footer & Badges */}
+                      <div className="w-full flex items-end justify-between mt-8 z-10 border-t border-white/10 pt-8">
+                        
+                        {/* Score Badge */}
+                        <div className="flex items-center gap-4 bg-black/20 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+                          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border-4 border-[#0f172a] shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+                            <span className="text-white font-black text-lg">{scorePct}%</span>
+                          </div>
+                          <div className="text-left pr-4">
+                            <span className="block text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Final Grade</span>
+                            <span className="block text-slate-200 font-medium text-sm">Passed with Honors</span>
+                          </div>
+                        </div>
+
+                        {/* Seal & Date / QR Code */}
+                        <div className="flex flex-col items-center">
+                          {pResult.certificate.qrCodeBase64 ? (
+                            <div className="w-20 h-20 bg-white p-1.5 rounded-xl border border-white/20 shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center">
+                              <img src={pResult.certificate.qrCodeBase64} alt="QR Verification" className="w-full h-full object-contain" />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 relative flex items-center justify-center">
+                              <div className="absolute inset-0 border-2 border-dashed border-cyan-500/50 rounded-full animate-[spin_20s_linear_infinite]" />
+                              <div className="absolute inset-2 bg-gradient-to-tr from-cyan-600 to-blue-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(8,145,178,0.5)]">
+                                <Shield className="w-8 h-8 text-white drop-shadow-md" />
+                              </div>
+                            </div>
+                          )}
+                          <span className="mt-3 text-[10px] text-cyan-400 font-bold uppercase tracking-wider">
+                            {pResult.certificate.qrCodeBase64 ? 'Scan to Verify' : 'SkillGenz verified'}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-medium uppercase mt-0.5">
+                            Issued: {new Date(pResult.certificate.issuedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        {/* Signatures */}
+                        <div className="flex gap-8">
+                          <div className="text-center">
+                            <div className="h-10 border-b border-white/20 mb-2 px-6 flex items-end justify-center">
+                              <span className="text-2xl text-slate-200 opacity-90" style={{ fontFamily: '"Brush Script MT", cursive' }}>SkillGenz Admin</span>
+                            </div>
+                            <span className="text-[9px] text-cyan-500 uppercase tracking-widest font-bold">Authorized Signatory</span>
+                          </div>
+                        </div>
+
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1033,11 +1068,11 @@ export function ExamEngine({
           {/* Correct answer reviews and retake CTA if Failed */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             
-            {scorePct < 70 && (
+            {scorePct < 80 && (
               <button
                 onClick={() => {
                   setAnswers({});
-                  setTimeLeft(3600);
+                  setTimeLeft(7200);
                   setCurrentIdx(0);
                   setStages('active');
                 }}

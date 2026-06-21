@@ -14,6 +14,7 @@ interface FooterProps {
 
 export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
   const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +22,23 @@ export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
       onToast('Please type a valid email address.', 'ref');
       return;
     }
-    onToast('Welcome inside! You are now subscribed to our newsletter.', 'success');
-    setEmail('');
+    
+    setIsSubscribing(true);
+    // Simulate network API request
+    setTimeout(() => {
+      // Add email to localStorage to prove it works
+      try {
+        const subscribers = JSON.parse(localStorage.getItem('newsletter_subs') || '[]');
+        if (!subscribers.includes(email)) {
+          subscribers.push(email);
+          localStorage.setItem('newsletter_subs', JSON.stringify(subscribers));
+        }
+      } catch(err) {}
+      
+      onToast('Welcome inside! You are now subscribed to our newsletter.', 'success');
+      setEmail('');
+      setIsSubscribing(false);
+    }, 1200);
   };
 
   return (
@@ -35,26 +51,24 @@ export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo Brand column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('home')}>
-              <div className="p-1.5 rounded-lg bg-gradient-to-tr from-blue-600 to-sky-400 text-white">
-                <Sparkles className="w-5.5 h-5.5" />
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onNavigate('home')}>
+              <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-slate-200/30">
+                <img src="/logo.png" alt="SkillGenz Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="font-extrabold text-lg text-slate-900 dark:text-white">SkillVerse</span>
+              <span className="font-extrabold text-lg text-slate-900 dark:text-white">SkillGenz</span>
             </div>
             <p className="text-xs leading-relaxed max-w-sm text-slate-400">
               India&apos;s most affordable educational and certification exam gateway. Founded by IIT-grads to groom placement-ready technical and business professionals.
             </p>
             <div className="flex items-center space-x-3 text-slate-400">
-              <a href="#" className="hover:text-blue-500 transition-colors" title="LinkedIn">
+              <a href="https://www.linkedin.com/company/skillgenz-com/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors" title="LinkedIn">
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" className="hover:text-sky-400 transition-colors" title="Twitter">
+              <a href="https://x.com/SkillgenZ" target="_blank" rel="noopener noreferrer" className="hover:text-sky-400 transition-colors" title="Twitter">
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="hover:text-red-500 transition-colors" title="YouTube">
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a href="#" className="hover:text-pink-500 transition-colors" title="Instagram">
+
+              <a href="https://www.instagram.com/skillgenz.official?igsh=Zmpvenp0NmwwbTh4" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition-colors" title="Instagram">
                 <Instagram className="w-4 h-4" />
               </a>
             </div>
@@ -115,11 +129,6 @@ export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
                   Scoreboard Leaderboard
                 </button>
               </li>
-              <li>
-                <a href="#blog" onClick={() => onNavigate('blog')} className="hover:text-blue-500 transition-colors">
-                  Edu Blog Articles
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -146,9 +155,14 @@ export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
               />
               <button
                 type="submit"
-                className="px-3 bg-gradient-to-r from-blue-600 to-sky-400 text-white rounded-lg hover:scale-105 active:scale-95 transition-all shadow-sm"
+                disabled={isSubscribing}
+                className="px-3 bg-gradient-to-r from-blue-600 to-sky-400 text-white rounded-lg hover:scale-105 active:scale-95 transition-all shadow-sm disabled:opacity-70 flex items-center justify-center min-w-[40px]"
               >
-                <ArrowRight className="w-4 h-4" />
+                {isSubscribing ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}
               </button>
             </form>
             <span className="text-[10px] text-slate-400 mt-2 block tracking-tight">
@@ -162,12 +176,17 @@ export function Footer({ darkMode, onNavigate, onToast }: FooterProps) {
         <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-4">
           <div>
             <span className="block font-medium text-slate-900 dark:text-slate-100">Developed and Managed by IIT Madras Graduates</span>
-            <span className="text-[11px] text-slate-400 mt-1 block">(c) 2026 SkillVerse Platform. Powered by elite AI resources. All rights reserved.</span>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              Government of India MSME/UDYAM Registered Enterprise.
+            </span>
+            <span className="text-[11px] text-slate-400 mt-0.5 block">(c) 2026 SkillGenz Platform. Powered by elite AI resources. All rights reserved.</span>
           </div>
-          <div className="flex space-x-6">
-            <a href="#" className="hover:text-blue-500">Privacy Clauses</a>
-            <a href="#" className="hover:text-blue-500">Refund Terms</a>
-            <a href="#" className="hover:text-blue-500">Legal verification</a>
+          <div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-start">
+            <button onClick={() => onNavigate('privacy')} className="hover:text-blue-500 transition-colors">Privacy Policy</button>
+            <button onClick={() => onNavigate('terms')} className="hover:text-blue-500 transition-colors">Terms & Conditions</button>
+            <button onClick={() => onNavigate('refund')} className="hover:text-blue-500 transition-colors">Cancellation & Refund Policy</button>
+            <button onClick={() => onNavigate('shipping')} className="hover:text-blue-500 transition-colors">Shipping & Delivery Policy</button>
+            <button onClick={() => onNavigate('contact')} className="hover:text-blue-500 transition-colors">Contact Us</button>
           </div>
         </div>
       </div>

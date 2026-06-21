@@ -32,6 +32,7 @@ export function Navbar({
     { name: 'Home', id: 'home' },
     { name: 'Courses', id: 'courses' },
     { name: 'Certificates', id: 'certificates_showcase' },
+    { name: 'Score Card', id: 'scorecard' },
     { name: 'Pricing', id: 'pricing' },
     { name: 'About Team', id: 'about' },
     { name: 'Contact', id: 'contact' }
@@ -44,7 +45,7 @@ export function Navbar({
 
   return (
     <nav
-      id="skillverse-navbar"
+      id="skillgenz-navbar"
       className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${
         darkMode
           ? 'bg-slate-900/65 border-slate-800/60 text-white backdrop-blur-md'
@@ -56,18 +57,18 @@ export function Navbar({
           {/* Logo */}
           <div
             id="logo-button"
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex items-center gap-2.5 cursor-pointer group"
             onClick={() => handleLinkClick('home')}
           >
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-              <Sparkles className="w-5 h-5 animate-pulse" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-blue-500/10 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-white border border-slate-200/50 dark:border-slate-800">
+              <img src="/logo.png" alt="SkillGenz Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-blue-600 to-sky-400 bg-clip-text text-transparent">
-                SkillVerse
+                SkillGenz
               </span>
-              <span className="hidden sm:inline-block text-[10px] font-mono block tracking-widest text-slate-400 pl-1 uppercase">
-                IIT FOUNDED
+              <span className="hidden sm:inline-block text-[10px] font-mono tracking-widest text-slate-600 dark:text-slate-300 font-bold pl-1 uppercase">
+                IITIANS FOUNDED
               </span>
             </div>
           </div>

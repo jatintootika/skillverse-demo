@@ -1,6 +1,14 @@
 import { Request, Response } from 'express';
 import { prisma } from '../prisma.js';
 
+import fs from 'fs';
+import path from 'path';
+
+function loadDatabaseFallback() {
+  const DB_FILE = path.join(process.cwd(), 'data-db.json');
+  return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+}
+
 export const getAllCourses = async (req: Request, res: Response) => {
   try {
     const courses = await prisma.course.findMany({
@@ -13,8 +21,13 @@ export const getAllCourses = async (req: Request, res: Response) => {
     }));
     res.json(formatted);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("PRISMA GET ALL COURSES ERROR:", error);
+    try {
+      const db = loadDatabaseFallback();
+      return res.json(db.courses);
+    } catch (fallbackError) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 
@@ -30,15 +43,22 @@ export const getCourseById = async (req: Request, res: Response) => {
       examPrice: course.price
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("PRISMA GET COURSE ERROR:", error);
+    try {
+      const db = loadDatabaseFallback();
+      const c = db.courses.find((x: any) => x.id === req.params.id);
+      if (c) return res.json(c);
+      res.status(404).json({ message: 'Course not found' });
+    } catch (fallbackError) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 
 export const updateCourse = async (req: Request, res: Response) => {
   try {
     const cId = req.params.id;
-    const { title, category, description, examPrice, discountPrice, instructorName, thumbnailUrl, bannerUrl, lectures, active } = req.body;
+    const { title, category, description, examPrice, discountPrice, instructorName, thumbnailUrl, bannerUrl, lectures, notesUrl, practiceMcqsUrl, labManualUrl, active } = req.body;
     
     // Map examPrice to price if provided
     const updateData: any = {
@@ -48,10 +68,17 @@ export const updateCourse = async (req: Request, res: Response) => {
       instructorName,
       thumbnailUrl,
       bannerUrl,
-      lectures: lectures as any,
+      notesUrl,
+      practiceMcqsUrl,
+      labManualUrl,
+      active: active === true || active === 'true',
+      lectures: lectures ? (lectures as any) : undefined,
     };
     if (examPrice !== undefined) updateData.price = Number(examPrice);
     
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
     const updated = await prisma.course.update({
       where: { id: cId },
       data: updateData
@@ -66,7 +93,7 @@ export const updateCourse = async (req: Request, res: Response) => {
 
 export const createCourse = async (req: Request, res: Response) => {
   try {
-    const { title, category, description, examPrice, instructorName, thumbnailUrl, bannerUrl, lectures } = req.body;
+    const { title, category, description, examPrice, instructorName, thumbnailUrl, bannerUrl, lectures, notesUrl, labManualUrl, practiceMcqsUrl, active } = req.body;
     
     const newCourse = await prisma.course.create({
       data: {
@@ -76,7 +103,14 @@ export const createCourse = async (req: Request, res: Response) => {
         price: Number(examPrice) || 0,
         lectures: (lectures as any) || [],
         durationMins: 60,
-        passPercentage: 70
+        passPercentage: 70,
+        instructorName,
+        thumbnailUrl,
+        bannerUrl,
+        notesUrl,
+        labManualUrl,
+        practiceMcqsUrl,
+        active: active === true || active === 'true'
       }
     });
     
@@ -84,5 +118,31 @@ export const createCourse = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating course' });
+  }
+};
+
+export const deleteCourse = async (req: Request, res: Response) => {
+  try {
+    await prisma.course.delete({
+      where: { id: req.params.id }
+    });
+    res.json({ success: true, message: 'Course deleted successfully' });
+  } catch (error) {
+    console.error("PRISMA DELETE COURSE ERROR:", error);
+    res.status(500).json({ success: false, message: 'Error deleting course' });
+  }
+};
+
+export const toggleCourseStatus = async (req: Request, res: Response) => {
+  try {
+    const { active } = req.body;
+    const updated = await prisma.course.update({
+      where: { id: req.params.id },
+      data: { active: active === true || active === 'true' }
+    });
+    res.json({ success: true, message: 'Course status updated', course: updated });
+  } catch (error) {
+    console.error("PRISMA TOGGLE COURSE STATUS ERROR:", error);
+    res.status(500).json({ success: false, message: 'Error updating course status' });
   }
 };

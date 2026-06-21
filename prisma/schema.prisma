@@ -9,51 +9,77 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String?
-  phone     String?
-  role      String   @default("student")
-  plan      String   @default("free")
-  passkeys  Json[]   @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String        @id @default(cuid())
+  studentId         String?       @unique
+  name              String
+  email             String        @unique
+  password          String?
+  googleId          String?       @unique
 
-  payments     Payment[]
-  attempts     Attempt[]
-  certificates Certificate[]
-  progresses   Progress[]
+  otpCode           String?
+  otpExpiresAt      DateTime?
+  phone             String?
+  age               Int?
+  role              String        @default("student")
+  plan              String        @default("free")
+  passkeys          Json[]        @default([])
+  referralCode      String        @unique @default(cuid())
+  referredById      String?
+  walletBalance     Float         @default(0.0)
+  referredCount     Int           @default(0)
+  freeCourseCredits Int           @default(0)
+  freeCertCredits   Int           @default(0)
+  
+  // Onboarding & details
+  hasCompletedOnboarding Boolean   @default(false)
+  dateOfBirth            String?
+  skills                 String?
+  currentlyStudying      String?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  attempts          Attempt[]
+  certificates      Certificate[]
+  payments          Payment[]
+  progresses        Progress[]
+  referredBy        User?         @relation("UserReferrals", fields: [referredById], references: [id])
+  referees          User[]        @relation("UserReferrals")
 }
 
 model Course {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   title          String
   category       String
   description    String
   durationMins   Int
-  passPercentage Int      @default(70)
-  level          String   @default("Beginner")
+  passPercentage Int           @default(70)
+  level          String        @default("Beginner")
   skills         String[]
-  lectures       Json     // Array of { title, type, url, duration }
-  price          Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  attempts     Attempt[]
-  certificates Certificate[]
-  questions    Question[]
-  progresses   Progress[]
+  lectures       Json
+  price          Int           @default(0)
+  active         Boolean       @default(false)
+  instructorName String?
+  thumbnailUrl   String?
+  bannerUrl      String?
+  notesUrl       String?
+  labManualUrl   String?
+  practiceMcqsUrl String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  attempts       Attempt[]
+  certificates   Certificate[]
+  progresses     Progress[]
+  questions      Question[]
 }
 
 model Question {
   id                 String   @id @default(cuid())
   courseId           String
   question           String
-  options            String[] // Array of strings
+  options            String[]
   correctOptionIndex Int
   createdAt          DateTime @default(now())
-
-  course Course @relation(fields: [courseId], references: [id])
+  course             Course   @relation(fields: [courseId], references: [id])
 }
 
 model Attempt {
@@ -61,41 +87,38 @@ model Attempt {
   courseId  String
   userId    String
   score     Float
-  status    String   // "passed" or "failed"
-  answers   Json     // Array of submitted answers
+  status    String
+  answers   Json
   createdAt DateTime @default(now())
-
-  course Course @relation(fields: [courseId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Certificate {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   courseId       String
   userId         String
   score          Float
   grade          String
-  isPaid         Boolean  @default(false)
-  issueDate      DateTime @default(now())
+  isPaid         Boolean   @default(false)
+  issueDate      DateTime  @default(now())
   expirationDate DateTime?
-  credentialId   String   @unique // Cryptographic ID like SV-2026-AI-...
+  credentialId   String    @unique
   qrCodeUrl      String?
-
-  course Course @relation(fields: [courseId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  course         Course    @relation(fields: [courseId], references: [id])
+  user           User      @relation(fields: [userId], references: [id])
 }
 
 model Progress {
   id                String   @id @default(cuid())
   userId            String
   courseId          String
-  completedLectures String[] // Array of watched lecture IDs
+  completedLectures String[]
   progressPercent   Float    @default(0)
   updatedAt         DateTime @updatedAt
-  
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
-  
+  course            Course   @relation(fields: [courseId], references: [id])
+  user              User     @relation(fields: [userId], references: [id])
+
   @@unique([userId, courseId])
 }
 
@@ -103,10 +126,9 @@ model Payment {
   id        String   @id @default(cuid())
   userId    String
   amount    Float
-  type      String   // e.g., "exam_fee", "subscription"
+  type      String
   details   String
-  status    String   // "success", "failed", "pending"
+  status    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }

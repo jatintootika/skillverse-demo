@@ -1,0 +1,29 @@
+User-agent: *
+
+# Allowed Public Routes
+Allow: /
+Allow: /courses
+Allow: /certificates_showcase
+Allow: /scorecard
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /leaderboard
+Allow: /blog
+Allow: /verify
+Allow: /verify/
+Allow: /terms
+Allow: /privacy
+Allow: /refund
+Allow: /shipping
+Allow: /disclaimer
+Allow: /verification_policy
+
+# Disallowed Private Panels & APIs
+Disallow: /student/
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /api/
+
+# Sitemap Link
+Sitemap: https://skillgenz.com/sitemap.xml

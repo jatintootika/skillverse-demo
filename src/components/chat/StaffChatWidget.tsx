@@ -46,7 +46,7 @@ export function StaffChatWidget({ currentUser, darkMode = true }: StaffChatWidge
 
   useEffect(() => {
     fetchMessages(true);
-    const interval = setInterval(() => fetchMessages(), 5000);
+    const interval = setInterval(() => fetchMessages(), 1500);
     return () => clearInterval(interval);
   }, [isOpen]);
 

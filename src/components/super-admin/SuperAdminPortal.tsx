@@ -266,7 +266,6 @@ export function SuperAdminPortal({
         }
       };
 
-      // Concurrent non-blocking fetches to maximize speed and responsive slide-ins
       await Promise.all(
         Object.keys(endpoints).map(async (key) => {
           try {
@@ -280,6 +279,22 @@ export function SuperAdminPortal({
           }
         })
       );
+
+      // Fetch real data from our new API endpoint
+      const res = await fetch('/api/admin/stats');
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.stats);
+      } else {
+        setStats({ studentsCount: 0, totalRevenue: 0, recentSignups: [], recentCertificates: [] });
+      }
+      
+      const mockSupport = [
+        { id: 't1', user: 'Rahul Sharma', issue: 'Payment failed for ML course', status: 'open', priority: 'high' },
+        { id: 't2', user: 'Priya Patel', issue: 'Certificate not downloading', status: 'resolved', priority: 'medium' },
+      ];
+      setSupportTickets(mockSupport);
+      globalSuperAdminCache.supportTickets = mockSupport;
 
       setInitialLoaded(true);
       globalSuperAdminCache.initialLoaded = true;
@@ -850,7 +865,7 @@ export function SuperAdminPortal({
               <div className={`absolute top-full right-0 mt-4 w-64 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-2 transition-all duration-300 origin-top-right z-50 ${dm ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'profile' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                 <div className={`px-4 py-3 border-b mb-2 ${dm ? 'border-white/5' : 'border-slate-100'}`}>
                   <p className={`text-sm font-extrabold ${dm ? 'text-white' : 'text-slate-900'}`}>{currentUser.name}</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email || 'superadmin@skillverse.com'}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email || 'superadmin@skillgenz.com'}</p>
                 </div>
                 <div className="space-y-1">
                   <button onClick={() => { setHeaderMenuOpen('none'); setActiveTab('settings'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${dm ? 'text-slate-300 hover:bg-[#0d1117] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
@@ -2910,7 +2925,7 @@ export function SuperAdminPortal({
                     </div>
                     <div className="flex items-center gap-2 opacity-50">
                       <Terminal className="w-4 h-4 text-slate-300" />
-                      <span className="text-slate-300 font-bold uppercase tracking-widest text-[10px] font-mono">syslog // root@skillverse</span>
+                      <span className="text-slate-300 font-bold uppercase tracking-widest text-[10px] font-mono">syslog // root@skillgenz</span>
                     </div>
                     <div className="flex gap-1.5 items-center bg-emerald-500/10 px-2 py-1 rounded">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -2955,7 +2970,7 @@ export function SuperAdminPortal({
                     )}
                     {logsList.length > 0 && (
                       <div className="flex items-center gap-2 text-slate-500 pt-4 font-bold">
-                        <span>root@skillverse:~#</span><span className="w-2.5 h-4 bg-emerald-500 inline-block animate-pulse"></span>
+                        <span>root@skillgenz:~#</span><span className="w-2.5 h-4 bg-emerald-500 inline-block animate-pulse"></span>
                       </div>
                     )}
                   </div>

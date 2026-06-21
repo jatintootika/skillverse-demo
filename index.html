@@ -3,11 +3,110 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SkillVerse – Get Certified. Get Placed.</title>
-    <meta name="description" content="India's premier IIT-backed certification platform. Get certified, get placed with SkillVerse." />
+    <title>SkillGenz – Get Certified. Get Placed.</title>
+    <meta name="description" content="SkillGenz is India's premier IIT-backed certification platform. Master coding, AI, and business skills with verify-on-demand credentials. Get certified, get placed." />
+    <meta name="keywords" content="SkillGenz, certification, IIT-backed, get certified, get placed, online courses, AI certification, full stack development, verify certificates" />
+    <meta name="author" content="SkillGenz Team" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://skillgenz.com/" />
+    <meta property="og:title" content="SkillGenz – Get Certified. Get Placed." />
+    <meta property="og:description" content="India's premier IIT-backed certification platform. Earn verifiable industry credentials in AI, coding, and business." />
+    <meta property="og:image" content="https://skillgenz.com/logo.png" />
+    <meta property="og:site_name" content="SkillGenz" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://skillgenz.com/" />
+    <meta property="twitter:title" content="SkillGenz – Get Certified. Get Placed." />
+    <meta property="twitter:description" content="India's premier IIT-backed certification platform. Earn verifiable industry credentials in AI, coding, and business." />
+    <meta property="twitter:image" content="https://skillgenz.com/logo.png" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://skillgenz.com/" />
+
+    <!-- Google Search Console Verification Meta Tag Placeholder -->
+    <!-- Jab aapko Google Search Console se code mile, toh niche content me 'YOUR_VERIFICATION_CODE' ko replace kar dena -->
+    <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" />
+
+    <!-- Structured Data (JSON-LD) for Google Rich Snippets -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "SkillGenz",
+        "url": "https://skillgenz.com",
+        "logo": "https://skillgenz.com/logo.png",
+        "description": "India's premier IIT-backed certification platform.",
+        "sameAs": [
+          "https://www.linkedin.com/company/skillgenz",
+          "https://twitter.com/skillgenz"
+        ],
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "INR",
+          "lowPrice": "79",
+          "highPrice": "299"
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+
+    <script>
+      // 1. Disable Right-Click Context Menu
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
+      // 2. Disable DevTools Hotkeys (F12, Ctrl+Shift+I/J/C, Ctrl+U)
+      document.addEventListener('keydown', function(e) {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+          (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // 3. Active DevTools Detection Loop (Debugger trap)
+      (function() {
+        var devtoolsOpen = false;
+        var threshold = 160;
+
+        var checkDevTools = function() {
+          // Check for dimension discrepancies
+          var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+          var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+          // Debugger statement will slow execution if developer console is active
+          var start = performance.now();
+          debugger;
+          var end = performance.now();
+
+          if (end - start > 100 || widthThreshold || heightThreshold) {
+            if (!devtoolsOpen) {
+              devtoolsOpen = true;
+              document.body.innerHTML = '<div style="font-family:sans-serif; text-align:center; padding:100px 20px; background:#0d1117; color:#f8fafc; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0;">' + 
+                '<h1 style="color:#ef4444; font-size:32px; font-weight:800; margin-bottom:16px;">🔒 DevTools Access Denied</h1>' + 
+                '<p style="color:#94a3b8; font-size:16px; max-width:420px; line-height:1.6; margin-bottom:24px;">' + 
+                  'Bhai, SkillGenz website code security reason ki vajah se browser devtools inspection allowed nahi hai.' + 
+                '</p>' + 
+                '<button onclick="window.location.reload()" style="background:#2563eb; color:#ffffff; font-weight:bold; border:none; padding:12px 24px; border-radius:12px; cursor:pointer; font-size:14px; transition:all 0.2s;">Reload Page</button>' +
+              '</div>';
+            }
+          }
+        };
+
+        setInterval(checkDevTools, 1000);
+      })();
+    </script>
+
   </head>
   <body>
     <div id="root"></div>

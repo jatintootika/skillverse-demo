@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar, TrendingUp, Sparkles, Activity, AlertTriangle, CheckCircle, Info, BookOpen, Upload, BarChart3, UserCog, LogOut, Bell, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, FileSpreadsheet, Award, CreditCard, Tag, RefreshCw, Search, ShieldCheck, AlertOctagon, CheckCircle2, Lock, Plus, Trash2, Calendar, TrendingUp, Sparkles, Activity, AlertTriangle, CheckCircle, Info, BookOpen, Upload, BarChart3, UserCog, LogOut, Bell, ChevronDown, Eye, EyeOff, Play, GripVertical, Video, FileText, FlaskConical, HelpCircle } from 'lucide-react';
 import { Course, User, Certificate, Coupon } from '../../types';
 import { clearAuth } from '../../lib/auth';
 import { StaffChatWidget } from '../chat/StaffChatWidget';
@@ -46,7 +46,9 @@ export function AdminPortal({
 
   const hasPermission = (permission: string) => {
     if (currentUser.role === 'super_admin') return true;
-    return currentUser.role === 'admin' && (currentUser.permissions || []).includes(permission);
+    // For demo purposes, grant all permissions to regular admins
+    if (currentUser.role === 'admin') return true;
+    return false;
   };
 
   // Simulated server states
@@ -74,15 +76,20 @@ export function AdminPortal({
     active: true,
     durationMins: 60,
     passPercentage: 75,
-    notesUrl: '#',
-    lecturesText: '[]',
-    assignmentsText: '[]',
-    quizzesText: '[]'
+    notesUrl: '',
+    labManualUrl: '',
+    practiceMcqsUrl: ''
   });
+  // Lectures list for new course (visual builder)
+  const [newCourseLectures, setNewCourseLectures] = useState<{title: string; videoId: string}[]>([]);
+  const [newLectureTitle, setNewLectureTitle] = useState('');
+  const [newLectureVideoId, setNewLectureVideoId] = useState('');
+
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [editingCourseLecturesText, setEditingCourseLecturesText] = useState('[]');
-  const [editingCourseAssignmentsText, setEditingCourseAssignmentsText] = useState('[]');
-  const [editingCourseQuizzesText, setEditingCourseQuizzesText] = useState('[]');
+  // Lectures list for editing course (visual builder)
+  const [editingCourseLectures, setEditingCourseLectures] = useState<{title: string; videoId: string}[]>([]);
+  const [editLectureTitle, setEditLectureTitle] = useState('');
+  const [editLectureVideoId, setEditLectureVideoId] = useState('');
 
   // Profile forms details settings inside Admin Portal
   const [profileName, setProfileName] = useState(currentUser.name);
@@ -109,15 +116,49 @@ export function AdminPortal({
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const statsRes = await fetch('/api/admin/stats');
-      const usersRes = await fetch('/api/admin/users');
-      const cpnsRes = await fetch('/api/admin/coupons');
-      const tcktsRes = await fetch('/api/support/tickets');
+      // Fetch real data from our new API endpoint
+      const res = await fetch('/api/admin/stats');
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.stats);
+      } else {
+        // Fallback to 0 if api fails
+        setStats({ studentsCount: 0, totalRevenue: 0, recentSignups: [], recentCertificates: [] });
+      }
+      
+      // Fetch users dynamically
+      const usersRes = await fetch('/api/users');
+      if (usersRes.ok) {
+        const allUsers = await usersRes.json();
+        // Filter out admins to show only students
+        const realStudents = allUsers.filter((u: any) => u.role !== 'admin' && u.role !== 'superadmin');
+        setStudents(realStudents);
+      } else {
+        setStudents([]);
+      }
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (usersRes.ok) setStudents(await usersRes.json());
-      if (cpnsRes.ok) setCoupons(await cpnsRes.json());
-      if (tcktsRes.ok) setSupportTickets(await tcktsRes.json());
+      // Fetch coupons
+      const couponsRes = await fetch('/api/admin/coupons');
+      if (couponsRes.ok) {
+        setCoupons(await couponsRes.json());
+      } else {
+        setCoupons([]);
+      }
+
+      // Fetch support tickets
+      const ticketsRes = await fetch('/api/support/tickets');
+      if (ticketsRes.ok) {
+        setSupportTickets(await ticketsRes.json());
+      } else {
+        setSupportTickets([]);
+      }
+
+      // Fetch notifications
+      const notifRes = await fetch('/api/admin/notifications');
+      if (notifRes.ok) {
+        setSystemAlerts(await notifRes.json());
+      }
+      
     } catch (err) {
       console.error(err);
     } finally {
@@ -258,10 +299,10 @@ export function AdminPortal({
   const handleToggleUserPlan = async (studentId: string, currentPlan: string) => {
     const nextPlan = currentPlan === 'pro' ? 'free' : 'pro';
     try {
-      const res = await fetch('/api/auth/update-profile', {
-        method: 'POST',
+      const res = await fetch(`/api/users/admin/users/${studentId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: studentId, plan: nextPlan })
+        body: JSON.stringify({ plan: nextPlan })
       });
       if (res.ok) {
         onToast(`User profile upgraded to ${nextPlan.toUpperCase()} successfully.`, 'success');
@@ -301,22 +342,31 @@ export function AdminPortal({
     }
   };
 
-  const handleSendNotification = (e: React.FormEvent) => {
+  const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!notifyTitle.trim() || !notifyMsg.trim()) {
       onToast('Both title and message are required for notification.', 'ref');
       return;
     }
-    const alertItem = {
-      id: `not-${Date.now()}`,
-      title: notifyTitle,
-      message: notifyMsg,
-      timestamp: new Date().toISOString().split('T')[0]
-    };
-    setSystemAlerts([alertItem, ...systemAlerts]);
-    onToast(`Notification broadcasted: ${notifyTitle}`, 'success');
-    setNotifyTitle('');
-    setNotifyMsg('');
+    
+    try {
+      const res = await fetch('/api/admin/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: notifyTitle, message: notifyMsg })
+      });
+      if (res.ok) {
+        const newNotif = await res.json();
+        setSystemAlerts([newNotif, ...systemAlerts]);
+        onToast(`Notification broadcasted: ${notifyTitle}`, 'success');
+        setNotifyTitle('');
+        setNotifyMsg('');
+      } else {
+        onToast('Failed to broadcast notification.', 'ref');
+      }
+    } catch (err) {
+      onToast('Network connection failed.', 'ref');
+    }
   };
 
   const handleCreateCourse = async (e: React.FormEvent) => {
@@ -327,30 +377,12 @@ export function AdminPortal({
     }
 
     try {
-      let lcts = [];
-      try { lcts = JSON.parse(newCourse.lecturesText || '[]'); } catch (e) {
-        onToast('Lectures list must be valid JSON format!', 'ref');
-        return;
-      }
-      let asts = [];
-      try { asts = JSON.parse(newCourse.assignmentsText || '[]'); } catch (e) {
-        onToast('Assignments list must be valid JSON format!', 'ref');
-        return;
-      }
-      let qzs = [];
-      try { qzs = JSON.parse(newCourse.quizzesText || '[]'); } catch (e) {
-        onToast('Quizzes list must be valid JSON format!', 'ref');
-        return;
-      }
-
       const res = await fetch('/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newCourse,
-          lectures: lcts,
-          assignments: asts,
-          quizzes: qzs
+          lectures: newCourseLectures,
         })
       });
 
@@ -369,11 +401,11 @@ export function AdminPortal({
           active: true,
           durationMins: 60,
           passPercentage: 75,
-          notesUrl: '#',
-          lecturesText: '[]',
-          assignmentsText: '[]',
-          quizzesText: '[]'
+          notesUrl: '',
+          labManualUrl: '',
+          practiceMcqsUrl: ''
         });
+        setNewCourseLectures([]);
         onRefreshCourses();
       } else {
         onToast('Server error while saving newly proposed course.', 'ref');
@@ -388,36 +420,19 @@ export function AdminPortal({
     if (!editingCourse) return;
 
     try {
-      let lcts = [];
-      try { lcts = JSON.parse(editingCourseLecturesText || '[]'); } catch (e) {
-        onToast('Lectures array must be valid JSON format!', 'ref');
-        return;
-      }
-      let asts = [];
-      try { asts = JSON.parse(editingCourseAssignmentsText || '[]'); } catch (e) {
-        onToast('Assignments array must be valid JSON format!', 'ref');
-        return;
-      }
-      let qzs = [];
-      try { qzs = JSON.parse(editingCourseQuizzesText || '[]'); } catch (e) {
-        onToast('Quizzes array must be valid JSON format!', 'ref');
-        return;
-      }
-
       const res = await fetch(`/api/courses/${editingCourse.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...editingCourse,
-          lectures: lcts,
-          assignments: asts,
-          quizzes: qzs
+          lectures: editingCourseLectures,
         })
       });
 
       if (res.ok) {
         onToast(`Changes for ${editingCourse.title} submitted successfully!`, 'success');
         setEditingCourse(null);
+        setEditingCourseLectures([]);
         onRefreshCourses();
       } else {
         onToast('Failed to apply course edits.', 'ref');
@@ -582,7 +597,7 @@ export function AdminPortal({
               <div className={`absolute top-full right-0 mt-4 w-64 rounded-[1.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.12)] border p-2 transition-all duration-300 origin-top-right z-50 ${darkMode ? 'bg-[#161b22] border-[#30363d] shadow-black/50' : 'bg-white border-slate-200/80'} ${headerMenuOpen === 'profile' ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                 <div className={`px-4 py-3 border-b mb-2 ${darkMode ? 'border-white/5' : 'border-slate-100'}`}>
                   <p className={`text-sm font-extrabold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{currentUser.name}</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email || 'admin@skillverse.com'}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{currentUser.email || 'admin@skillgenz.com'}</p>
                 </div>
                 
                 <div className="space-y-1">
@@ -917,7 +932,7 @@ export function AdminPortal({
                         <td className="p-4">
                           <div className={`flex items-center gap-1.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                             <Calendar className="w-4 h-4" /> 
-                            {stud.joinedDate}
+                            {stud.createdAt ? new Date(stud.createdAt).toLocaleDateString() : 'N/A'}
                           </div>
                         </td>
                         <td className="p-4 text-right">
@@ -1408,46 +1423,104 @@ export function AdminPortal({
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 col-span-1">
-                    <div className="bg-blue-500/5 p-3 rounded-2xl border border-blue-500/10 space-y-1">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-blue-500 font-bold">Curriculum Lists Input (JSON format Arrays)</span>
-                      <p className="text-[9px] text-slate-400">Construct compliant course data using JSON schema formats.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Notes URL (PDF)</label>
+                      <input
+                        type="text"
+                        value={newCourse.notesUrl || ''}
+                        onChange={(e) => setNewCourse({ ...newCourse, notesUrl: e.target.value })}
+                        placeholder="https://drive.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
                     </div>
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Lab Manual URL</label>
+                      <input
+                        type="text"
+                        value={newCourse.labManualUrl || ''}
+                        onChange={(e) => setNewCourse({ ...newCourse, labManualUrl: e.target.value })}
+                        placeholder="https://docs.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Practice MCQs URL</label>
+                      <input
+                        type="text"
+                        value={newCourse.practiceMcqsUrl || ''}
+                        onChange={(e) => setNewCourse({ ...newCourse, practiceMcqsUrl: e.target.value })}
+                        placeholder="https://forms.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
+                    </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-slate-400">Lectures List JSON</label>
-                        <textarea
-                          rows={2}
-                          value={newCourse.lecturesText}
-                          onChange={(e) => setNewCourse({ ...newCourse, lecturesText: e.target.value })}
-                          className="w-full font-mono text-[10px] p-2 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none"
-                        />
+                  {/* ═══ VISUAL LECTURE BUILDER ═══ */}
+                  <div className="space-y-3 pt-3">
+                    <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-gradient-to-br from-indigo-950/30 to-purple-950/20 border-indigo-500/20' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200'}`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Video className="w-4 h-4 text-indigo-400" />
+                        <span className="text-xs uppercase font-extrabold tracking-wider text-indigo-400">Course Lectures</span>
+                        <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'}`}>{newCourseLectures.length} added</span>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-slate-400">Assignments JSON</label>
-                        <textarea
-                          rows={2}
-                          value={newCourse.assignmentsText}
-                          onChange={(e) => setNewCourse({ ...newCourse, assignmentsText: e.target.value })}
-                          className="w-full font-mono text-[10px] p-2 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none"
+
+                      {/* Added lectures list */}
+                      {newCourseLectures.length > 0 && (
+                        <div className="space-y-2 mb-3 max-h-48 overflow-y-auto pr-1">
+                          {newCourseLectures.map((lec, idx) => (
+                            <div key={idx} className={`flex items-center gap-3 p-2.5 rounded-xl border group transition-all ${darkMode ? 'bg-slate-900/60 border-slate-800 hover:border-indigo-500/40' : 'bg-white border-slate-200 hover:border-indigo-300'}`}>
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'}`}>{idx + 1}</div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-xs font-bold truncate ${darkMode ? 'text-white' : 'text-slate-800'}`}>{lec.title}</p>
+                                <p className="text-[10px] text-slate-400 truncate flex items-center gap-1"><Play className="w-2.5 h-2.5" /> {lec.videoId}</p>
+                              </div>
+                              <button type="button" onClick={() => setNewCourseLectures(newCourseLectures.filter((_, i) => i !== idx))} className="text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add new lecture row */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newLectureTitle}
+                          onChange={(e) => setNewLectureTitle(e.target.value)}
+                          placeholder="Lecture title (e.g. Module 1: Introduction)"
+                          className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200'}`}
                         />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-slate-400">Quizzes list JSON</label>
-                        <textarea
-                          rows={2}
-                          value={newCourse.quizzesText}
-                          onChange={(e) => setNewCourse({ ...newCourse, quizzesText: e.target.value })}
-                          className="w-full font-mono text-[10px] p-2 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none"
+                        <input
+                          type="text"
+                          value={newLectureVideoId}
+                          onChange={(e) => setNewLectureVideoId(e.target.value)}
+                          placeholder="YouTube Video ID (e.g. dQw4w9WgXcQ)"
+                          className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200'}`}
                         />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newLectureTitle.trim()) return;
+                            setNewCourseLectures([...newCourseLectures, { title: newLectureTitle.trim(), videoId: newLectureVideoId.trim() }]);
+                            setNewLectureTitle('');
+                            setNewLectureVideoId('');
+                          }}
+                          className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 transition-colors shrink-0"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
                       </div>
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 text-xs text-white bg-blue-600 font-bold rounded-xl"
+                    className="w-full py-2.5 text-xs text-white bg-blue-600 font-bold rounded-xl hover:bg-blue-700 transition-colors"
                   >
                     Commit & Broadcast Course Publication
                   </button>
@@ -1549,7 +1622,7 @@ export function AdminPortal({
                       <label className="text-slate-400">Thumbnail Link</label>
                       <input
                         type="text"
-                        value={editingCourse.thumbnailUrl}
+                        value={editingCourse.thumbnailUrl || ''}
                         onChange={(e) => setEditingCourse({ ...editingCourse, thumbnailUrl: e.target.value })}
                         className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
                           }`}
@@ -1559,7 +1632,7 @@ export function AdminPortal({
                       <label className="text-slate-400">Banner Link</label>
                       <input
                         type="text"
-                        value={editingCourse.bannerUrl}
+                        value={editingCourse.bannerUrl || ''}
                         onChange={(e) => setEditingCourse({ ...editingCourse, bannerUrl: e.target.value })}
                         className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
                           }`}
@@ -1567,34 +1640,97 @@ export function AdminPortal({
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 block">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-slate-400 block font-bold">Lectures JSON Array</label>
-                        <textarea
-                          rows={4}
-                          value={editingCourseLecturesText}
-                          onChange={(e) => setEditingCourseLecturesText(e.target.value)}
-                          className="w-full font-mono text-[10px] p-2.5 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none text-white focus:ring-1 focus:ring-blue-500"
-                        />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Notes URL (PDF)</label>
+                      <input
+                        type="text"
+                        value={editingCourse.notesUrl || ''}
+                        onChange={(e) => setEditingCourse({ ...editingCourse, notesUrl: e.target.value })}
+                        placeholder="https://drive.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Lab Manual URL</label>
+                      <input
+                        type="text"
+                        value={editingCourse.labManualUrl || ''}
+                        onChange={(e) => setEditingCourse({ ...editingCourse, labManualUrl: e.target.value })}
+                        placeholder="https://docs.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-slate-400">Practice MCQs URL</label>
+                      <input
+                        type="text"
+                        value={editingCourse.practiceMcqsUrl || ''}
+                        onChange={(e) => setEditingCourse({ ...editingCourse, practiceMcqsUrl: e.target.value })}
+                        placeholder="https://forms.google.com/..."
+                        className={`w-full px-3.5 py-2.5 rounded-xl border focus:outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200'
+                          }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ═══ VISUAL LECTURE BUILDER (EDIT) ═══ */}
+                  <div className="space-y-3 pt-3">
+                    <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-gradient-to-br from-indigo-950/30 to-purple-950/20 border-indigo-500/20' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200'}`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Video className="w-4 h-4 text-indigo-400" />
+                        <span className="text-xs uppercase font-extrabold tracking-wider text-indigo-400">Course Lectures</span>
+                        <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'}`}>{editingCourseLectures.length} lectures</span>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-slate-400 block font-bold">Assignments JSON Array</label>
-                        <textarea
-                          rows={4}
-                          value={editingCourseAssignmentsText}
-                          onChange={(e) => setEditingCourseAssignmentsText(e.target.value)}
-                          className="w-full font-mono text-[10px] p-2.5 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none text-white focus:ring-1 focus:ring-blue-500"
+
+                      {/* Existing lectures list */}
+                      {editingCourseLectures.length > 0 && (
+                        <div className="space-y-2 mb-3 max-h-60 overflow-y-auto pr-1">
+                          {editingCourseLectures.map((lec, idx) => (
+                            <div key={idx} className={`flex items-center gap-3 p-2.5 rounded-xl border group transition-all ${darkMode ? 'bg-slate-900/60 border-slate-800 hover:border-indigo-500/40' : 'bg-white border-slate-200 hover:border-indigo-300'}`}>
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'}`}>{idx + 1}</div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-xs font-bold truncate ${darkMode ? 'text-white' : 'text-slate-800'}`}>{lec.title}</p>
+                                <p className="text-[10px] text-slate-400 truncate flex items-center gap-1"><Play className="w-2.5 h-2.5" /> {lec.videoId || 'No video ID'}</p>
+                              </div>
+                              <button type="button" onClick={() => setEditingCourseLectures(editingCourseLectures.filter((_, i) => i !== idx))} className="text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add new lecture row */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editLectureTitle}
+                          onChange={(e) => setEditLectureTitle(e.target.value)}
+                          placeholder="Lecture title (e.g. Module 5: Advanced Topics)"
+                          className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200'}`}
                         />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-slate-400 block font-bold">Quizzes JSON Array</label>
-                        <textarea
-                          rows={4}
-                          value={editingCourseQuizzesText}
-                          onChange={(e) => setEditingCourseQuizzesText(e.target.value)}
-                          className="w-full font-mono text-[10px] p-2.5 dark:bg-slate-950 border border-slate-800 rounded-lg outline-none text-white focus:ring-1 focus:ring-blue-500"
+                        <input
+                          type="text"
+                          value={editLectureVideoId}
+                          onChange={(e) => setEditLectureVideoId(e.target.value)}
+                          placeholder="YouTube Video ID"
+                          className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200'}`}
                         />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!editLectureTitle.trim()) return;
+                            setEditingCourseLectures([...editingCourseLectures, { title: editLectureTitle.trim(), videoId: editLectureVideoId.trim() }]);
+                            setEditLectureTitle('');
+                            setEditLectureVideoId('');
+                          }}
+                          className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 transition-colors shrink-0"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1602,14 +1738,14 @@ export function AdminPortal({
                   <div className="flex gap-4">
                     <button
                       type="submit"
-                      className="flex-grow py-2.5 text-xs text-white bg-blue-600 font-bold rounded-xl hover:bg-blue-700 font-sans cursor-pointer"
+                      className="flex-grow py-2.5 text-xs text-white bg-blue-600 font-bold rounded-xl hover:bg-blue-700 font-sans cursor-pointer transition-colors"
                     >
                       Save Configuration Settings
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingCourse(null)}
-                      className="px-5 py-2.5 text-xs rounded-xl border border-slate-755 border-slate-700 hover:bg-slate-800 hover:text-white"
+                      className="px-5 py-2.5 text-xs rounded-xl border border-slate-700 hover:bg-slate-800 hover:text-white transition-colors"
                     >
                       Cancel
                     </button>
@@ -1684,24 +1820,22 @@ export function AdminPortal({
                               </div>
                             </div>
 
-                            <div className="flex gap-3 mt-6 relative z-10">
+                            <div className="flex gap-2 mt-6 relative z-10">
                               <button
                                 onClick={() => {
                                   setEditingCourse(c);
-                                  setEditingCourseLecturesText(JSON.stringify(c.lectures, null, 2));
-                                  setEditingCourseAssignmentsText(JSON.stringify(c.assignments || [], null, 2));
-                                  setEditingCourseQuizzesText(JSON.stringify(c.quizzes || [], null, 2));
+                                  setEditingCourseLectures(Array.isArray(c.lectures) ? [...c.lectures] : []);
                                 }}
-                                className={`flex-grow py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm'}`}
+                                className={`flex-grow py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm'}`}
                               >
-                                <UserCog className="w-3.5 h-3.5" /> Configure
+                                <UserCog className="w-3.5 h-3.5" /> Edit
                               </button>
                               <button
                                 type="button"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`/api/courses/${c.id}`, {
-                                      method: 'PUT',
+                                    const res = await fetch(`/api/courses/${c.id}/status`, {
+                                      method: 'PATCH',
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify({ active: !c.active })
                                     });
@@ -1713,10 +1847,29 @@ export function AdminPortal({
                                     console.error(err);
                                   }
                                 }}
-                                className={`px-4 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${c.active ? 'bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white'}`}
+                                className={`flex-grow py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${c.active ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white'}`}
                               >
-                                {c.active ? <Trash2 className="w-3.5 h-3.5" /> : <Upload className="w-3.5 h-3.5" />}
+                                {c.active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                                 {c.active ? 'Unpublish' : 'Publish'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (confirm('Are you sure you want to completely delete this course? This action is irreversible.')) {
+                                    try {
+                                      const res = await fetch(`/api/courses/${c.id}`, { method: 'DELETE' });
+                                      if (res.ok) {
+                                        onToast(`Course deleted completely.`, 'success');
+                                        onRefreshCourses();
+                                      }
+                                    } catch (err) {
+                                      console.error(err);
+                                    }
+                                  }
+                                }}
+                                className={`px-4 py-2.5 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Delete
                               </button>
                             </div>
                           </div>

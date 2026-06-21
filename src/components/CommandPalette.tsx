@@ -41,9 +41,11 @@ export function CommandPalette({ darkMode }: { darkMode: boolean }) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle palette on Ctrl+K or Cmd+K
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      // Toggle palette on Ctrl+K, Cmd+K, or Alt+K
+      const isKeyK = e.key.toLowerCase() === 'k' || e.code === 'KeyK';
+      if (((e.ctrlKey || e.metaKey) && isKeyK) || (e.altKey && isKeyK)) {
         e.preventDefault();
+        e.stopPropagation();
         setIsOpen(prev => !prev);
       }
 
@@ -53,8 +55,8 @@ export function CommandPalette({ darkMode }: { darkMode: boolean }) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
   }, [isOpen]);
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export function CommandPalette({ darkMode }: { darkMode: boolean }) {
                 <span className="flex items-center gap-1.5"><kbd className={`px-1.5 py-0.5 rounded border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>Enter</kbd> to select</span>
               </div>
               <div className="flex items-center gap-1.5 font-bold">
-                <Command className="w-3.5 h-3.5" /> SkillVerse Command OS
+                <Command className="w-3.5 h-3.5" /> SkillGenz Command OS
               </div>
             </div>
           </motion.div>
