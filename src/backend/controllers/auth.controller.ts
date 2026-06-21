@@ -386,7 +386,7 @@ export const sendOtp = async (req: Request, res: Response) => {
     // Allowing all emails for OTP login so students can sign up/login
 
     let resolvedRole = 'student';
-    let resolvedName = name;
+    let resolvedName = name || normalizedEmail.split('@')[0];
     if (normalizedEmail === 'superadmin.skillgenz@gmail.com') {
       resolvedRole = 'super_admin';
       resolvedName = resolvedName || 'Super Admin';
