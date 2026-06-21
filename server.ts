@@ -2316,4 +2316,5 @@ Be highly clear, professional, motivating, concise, and structured. Use Markdown
   });
 }
 
+// --- SECURITY: Global error handler to block malicious bot URIError attacks ---
 startServer();
