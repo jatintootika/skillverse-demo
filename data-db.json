@@ -24639,6 +24639,42 @@
       "currentlyStudying": "College Student",
       "skills": "React, Node.js, Python",
       "joinedDate": "2026-06-21"
+    },
+    {
+      "id": "cmqz11d090000mjei46nb6oo9",
+      "email": "google_test_1782726007838@gmail.com",
+      "name": "Google Test User",
+      "password": null,
+      "googleId": "google-sub-1782726007838",
+      "role": "student",
+      "plan": "free",
+      "phone": null,
+      "age": null,
+      "studentId": "SV-2026-79770",
+      "referralCode": "SKILL-3I60XY",
+      "hasCompletedOnboarding": false,
+      "dateOfBirth": null,
+      "currentlyStudying": null,
+      "skills": null,
+      "joinedDate": "2026-06-29"
+    },
+    {
+      "id": "cmqz11do80001mjeiy5abmgef",
+      "email": "google_test_1782726010451@gmail.com",
+      "name": "Google Test User",
+      "password": null,
+      "googleId": "google-sub-1782726010451",
+      "role": "student",
+      "plan": "free",
+      "phone": "8420886522",
+      "age": 19,
+      "studentId": "SV-2026-60342",
+      "referralCode": "SKILL-P5W0XX",
+      "hasCompletedOnboarding": true,
+      "dateOfBirth": null,
+      "currentlyStudying": null,
+      "skills": null,
+      "joinedDate": "2026-06-29"
     }
   ],
   "coupons": [

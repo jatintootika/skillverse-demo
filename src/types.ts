@@ -8,6 +8,7 @@ export type SubscriptionPlan = 'free' | 'starter' | 'popular' | 'pro';
 
 export interface User {
   id: string;
+  studentId?: string;
   name: string;
   email: string;
   phone?: string;
